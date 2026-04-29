@@ -1,0 +1,113 @@
+# litellm-config.yaml
+# Agentic AI v3.3 — Rotating cloud pool + local fallback
+# IMPORTANT: Pin LiteLLM version, never use main-latest
+# Install: pip install "litellm[proxy]==1.57.4" "langfuse>=2.6.0,<3"
+# NOTE: langfuse 4.x breaks litellm 1.57.4 (removed version module) — keep langfuse pinned to 2.x
+# Run:     litellm --config litellm-config.yaml --port 4000
+#
+# API keys: set as environment variables, never hardcode
+#   $env:CEREBRAS_API_KEY = "..."
+#   $env:GROQ_API_KEY = "..."
+#   $env:NIM_API_KEY = "..."
+#   $env:OPENROUTER_API_KEY = "..."
+#   $env:GEMINI_API_KEY = "..."
+
+model_list:
+  # --- Cloud rotating pool (all free tiers, OpenAI-compatible) ---
+  - model_name: fast-pool
+    litellm_params:
+      model: cerebras/qwen-3-235b-a22b-instruct-2507
+      api_key: os.environ/CEREBRAS_API_KEY
+      rpm: 30
+      # Qwen3-235B on Cerebras wafer chip: ~1000 TPS, free tier 1M tok/day
+
+  - model_name: fast-pool
+    litellm_params:
+      model: groq/llama-3.3-70b-versatile
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+      # Free tier: 30 RPM, 6K TPM, 1K RPD
+
+  - model_name: fast-pool
+    litellm_params:
+      model: groq/meta-llama/llama-4-scout-17b-16e-instruct
+      api_key: os.environ/GROQ_API_KEY
+      rpm: 30
+      # Llama 4 Scout: 10M context, free tier
+
+  - model_name: fast-pool
+    litellm_params:
+      # Register as openai/... namespace to avoid mis-classification (issue #24366)
+      model: openai/meta/llama-3.3-70b-instruct
+      api_base: https://integrate.api.nvidia.com/v1
+      api_key: os.environ/NIM_API_KEY
+      rpm: 60
+      # Free tier: 40 RPM/model, no daily cap
+
+  - model_name: fast-pool
+    litellm_params:
+      model: openrouter/meta-llama/llama-3.3-70b-instruct:free
+      api_key: os.environ/OPENROUTER_API_KEY
+      rpm: 20
+      # $10 deposit for 1K RPD across 29 free models
+
+  # --- Hermes primary brain (Gemini 2.5 Flash via Google AI Studio free tier) ---
+  # model_name matches OpenRouter catalog ID so Hermes catalog validation passes
+  - model_name: google/gemini-3-flash-preview
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: os.environ/GEMINI_API_KEY
+      rpm: 15
+      # Routes to Google AI Studio: free tier 15 RPM, 1500 RPD, 1M context
+
+  # --- Local fallback (llama.cpp server) ---
+  - model_name: local-fallback
+    litellm_params:
+      model: openai/qwen3-coder
+      api_base: http://localhost:8080/v1
+      api_key: dummy
+      # llama-server running Qwen3-Coder-30B-A3B on port 8080
+
+  # --- Reasoning models (on-demand, not in rotation) ---
+  - model_name: reasoning
+    litellm_params:
+      model: groq/qwen/qwen3-32b
+      api_key: os.environ/GROQ_API_KEY
+      # Qwen3-32B: hybrid thinking mode, replaces decommissioned deepseek-r1
+
+  - model_name: reasoning-local
+    litellm_params:
+      model: openai/qwen3-coder
+      api_base: http://localhost:8080/v1
+      api_key: dummy
+
+litellm_settings:
+  # CRITICAL: explicit fallbacks array (issue #26015)
+  fallbacks:
+    - {"google/gemini-3-flash-preview": ["fast-pool", "local-fallback"]}
+    - {"fast-pool": ["local-fallback"]}
+    - {"reasoning": ["reasoning-local"]}
+  default_fallbacks: ["local-fallback"]
+  context_window_fallbacks:
+    - {"fast-pool": ["local-fallback"]}
+  request_timeout: 60
+  num_retries: 2
+  drop_params: true  # drop unsupported params per provider silently
+  success_callback: ["langfuse"]
+  failure_callback: ["langfuse"]
+
+router_settings:
+  routing_strategy: simple-shuffle
+  cooldown_time: 60
+  allowed_fails: 1
+  retry_policy:
+    RateLimitErrorRetries: 2
+    TimeoutErrorRetries: 2
+    InternalServerErrorRetries: 3
+  allowed_fails_policy:
+    RateLimitErrorAllowedFails: 2
+
+environment_variables:
+  LANGFUSE_PUBLIC_KEY: os.environ/LANGFUSE_PUBLIC_KEY
+  LANGFUSE_SECRET_KEY: os.environ/LANGFUSE_SECRET_KEY
+  LANGFUSE_HOST: "http://localhost:3000"
