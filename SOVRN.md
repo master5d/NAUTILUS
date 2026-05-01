@@ -1,5 +1,5 @@
-# SOVRN Architecture
-(Sovereign Operator · Vibe Runtime · N-agents) — Agentic AI Architecture v3.3
+# SOVRN Architecture v3.3
+(Sovereign Operator · Vibe Runtime · N-agents)
 
 > **Дата:** 28 апреля 2026 · **Статус:** consolidated source of truth · **Заменяет:** v3.0 (Loop 1), v3.1 (Loop 2), v3.2 (Loop 3) · **Loop:** 4 (Gmail AI Ingest synthesis applied)
 ---
