@@ -358,48 +358,7 @@ Gmail watch() → Pub/Sub → Cloudflare Worker webhook
 | **Marp** | LLM-friendly slides, version-controlled | keep |
 **Запрещено:** Stitch (Google) — sovereignty-hostile, watermarking. Pencil.dev v2 — superseded Code on Canvas (P6).
 ---
-## 16. Tooling для проектных приоритетов
-### Priority #1 — Local knowledge graph (foundation)
-- **Phase 0 (Felix/PARA):** Obsidian vault, daily.md, tacit/ — разверните за 30 минут до всего остального
-- **Phase 1 (graphiti slow path):** FalkorDB + Qdrant + BGE-M3 + Qwen3-8B + graphiti MCP v1.0 — только когда PARA упрётся
-- **Web intake:** Karakeep (AGPL-3.0, AI tagging via Ollama) + ArchiveBox + SingleFile + MarkDownload
-- **Evernote:** export → Joplin → Markdown → `~/life/archives/evernote/`, cancel renewal
-### Priority #2 — Affiliate websites + AI agency
-- **Sites:** Astro on Cloudflare Pages
-- **WP когда client demands:** Hetzner CX22 + Dokploy + Docker WP
-- **Agency-плейбуки:** n8n self-hosted (primary), Activepieces (license-allergic clients)
-- **Web scraping (новое v3.3, P11):** Apify free tier, либо self-hosted `apify/crawlee` с Playwright/Puppeteer на той же Hetzner CX22
-- **Avoid:** Bluehost AI All-Access ($1/mo SKU не существует — это $20/seat/mo AI bundle, Loop 2 finding)
-### Priority #3 — Digital goods (books, courses)
-- **Manuscript:** Quarto primary, Typst для technical books, Sigil для ePub QA
-- **Covers:** local FLUX-Q4 GGUF in ComfyUI + Affinity Publisher / Scribus
-- **Course platform:** LearnDash on Hetzner-hosted WP (0% platform fee)
-- **TTS:** Kokoro 82M (Apache 2.0, top of HF TTS Arena) для default; Chatterbox-Turbo (MIT) для personal-voice clone
-- **Substack-канал** как воронка (Loop 4, P12 опционально): weekly summary-newsletter из AI Ingest корпуса
-### Priority #4 — Android apps + Telegram bots
-- **App stack:** Kotlin Multiplatform + Compose Multiplatform
-- **TG bots:** aiogram 3.x (Python) или grammY (TS, для Cloudflare Workers)
-- **Hosting tier 1:** Cloudflare Workers + grammY + Workers KV
-- **Hosting tier 2:** Hetzner CX22 + Caddy + aiogram + systemd + SQLite
-- **Monetization:** Telegram Stars (XTR) с `bohd4nx/stars-payment` template
-- **Dead options:** Pyrogram (abandoned), Fly.io free tier (closed Oct 2024)
-### Priority #5 — YouTube + social automation
-- **NotebookLM становится formal частью pipeline (новое v3.3, P7):** Hermes skill `publish.podcast` принимает doc/url, возвращает MP3 через Drive
-- **Podcast tier:** NotebookLM → Spotify/Apple
-- **YouTube:** authored show с cloned voice (Chatterbox-Turbo), 1–3 uploads/week, FFmpeg + local SDXL stills + Ken Burns pans
-- **Не делать:** faceless AI factory (YouTube "inauthentic content" enforcement, янв 2026 wave демонетизировал 16 каналов / $10M ARR)
-- **Social posting:** Postiz self-hosted (AGPL-3.0) на той же Hetzner CX22; n8n для custom
-### Priority #6 — Game design + DeFi/blockchain
-- **Game engine:** Godot 4.x + GDScript (MIT, zero royalties, mobile export from Win11)
-- **AI gamedev:** Llama 3.3 8B Q4 для NPC dialog + SDXL/FLUX-Schnell для 2D + Tripo/Meshy free tier для 3D
-- **Smart contracts:** Foundry only (Solidity, Base/Optimism EVM)
-- **Keep-warm минимум:** ERC-20 deploy to Base Sepolia (8 ч), ERC-4337 paymaster sponsorship (12 ч)
-- **Опционально:** Neo4j AuraDB managed для transaction graph (Loop 4 уточнение — вы подписаны на Neo4j-вебинары, fraud-webinar пересылали в Evernote)
-### Priority #7 — Native Windows apps
-- **Stack:** Tauri 2 + Rust (как у Handy / Whispering)
-- **Local STT:** faster-whisper (CTranslate2, MIT) или Parakeet-TDT-v3 (NVIDIA, CC-BY-4.0)
-- **Wispr clone PoC после Handy validation phase**
----
+## 16. [REDACTED — LOCAL ONLY]
 ## 17. Tool matrix — финальная
 | Tool | Verdict | Replace with |
 | --- | --- | --- |
@@ -487,18 +446,8 @@ ollama launch hermes
 - First Astro affiliate site on Cloudflare Pages
 - **Phase II ingest (Loop 4): Cloudflare Worker + n8n + graphiti episodes**
 - **Если PARA упёрся (1–2 weeks)** → запуск Phase 1 graphiti slow path
-### Phase 3 — Revenue layer (Weeks 7–10, $9–10/mo)
-- 2–3 Astro affiliate sites
-- LearnDash WP setup на Hetzner если course planned
-- First TG bot (aiogram + Cloudflare Workers или Hetzner)
-- **Apify / Crawlee для lead-gen** (P11)
-- GCP $300 credit на конкретный Vertex AI experiment, $250 budget alert, walk away day 90
-- Grafana ops + Streamlit analyst, общий Postgres + Prometheus + Langfuse
-- **Phase III ingest (Loop 4): Hermes weekly-digest в Telegram (понедельник 09:00)**
-### Phase 4 — Future-proof + content (Weeks 11–14+, +$0–30/mo)
-- KMP + CMP Android PoC
-- Foundry + ERC-4337 keep-warm (8–12 ч)
-- Godot 4.x toy project в spare cycles
+
+### Phase 3 & 4 — [REDACTED — LOCAL ONLY]
 - **Authored YouTube/podcast show** через Chatterbox-Turbo cloned voice (1–3/week)
 - Wispr vs Handy 2-week parallel test → cancel loser (savings)
 - **Substack channel запуск** (P12 опционально) — weekly digest как воронка для priority-#3
