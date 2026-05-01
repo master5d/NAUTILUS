@@ -448,11 +448,8 @@ ollama launch hermes
 - **Если PARA упёрся (1–2 weeks)** → запуск Phase 1 graphiti slow path
 
 ### Phase 3 & 4 — [REDACTED — LOCAL ONLY]
-- **Authored YouTube/podcast show** через Chatterbox-Turbo cloned voice (1–3/week)
-- Wispr vs Handy 2-week parallel test → cancel loser (savings)
-- **Substack channel запуск** (P12 опционально) — weekly digest как воронка для priority-#3
-- Re-evaluate Claude Code Max только если измеренное использование >50M tok/мес
 ---
+## 19. Editor stack
 ## 19. Budget tiers
 ### $0/mo PoC (existing subscriptions only)
 - Local llama.cpp + Qwen3-Coder-30B-A3B + 9B + 8B
