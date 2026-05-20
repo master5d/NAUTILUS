@@ -20,14 +20,35 @@ def audit(root):
     click.echo(f"\n📋 Audit Report for {root_path}")
     click.echo("=" * 60)
 
-    # Count meta.json files safely
+    # Count meta.json files safely with multithreading
     meta_count = 0
+    click.echo("🔍 Scanning for metadata...")
     try:
-        meta_count = len(list(root_path.rglob("meta.json")))
+        from concurrent.futures import ThreadPoolExecutor
+        
+        def count_meta_in_dir(path: Path):
+            count = 0
+            try:
+                for item in path.iterdir():
+                    if item.is_dir():
+                        if item.name not in [".git", "node_modules", ".next", ".claude", "venv", ".venv"]:
+                            count += count_meta_in_dir(item)
+                    elif item.name == "meta.json":
+                        count += 1
+            except OSError: pass
+            return count
+
+        top_dirs = [d for d in root_path.iterdir() if d.is_dir() and not d.name.startswith('.')]
+        with ThreadPoolExecutor(max_workers=12) as executor:
+            meta_count = sum(executor.map(count_meta_in_dir, top_dirs))
+        
+        # Check root itself
+        for f in root_path.iterdir():
+            if not f.is_dir() and f.name == "meta.json":
+                meta_count += 1
+                
     except OSError as e:
-        click.secho(f"⚠️ Warning: Some directories were skipped during rglob due to permissions: {e}", fg="yellow")
-        # Fallback to a shallower or more careful search if needed, 
-        # but for audit we just warn.
+        click.secho(f"⚠️ Warning: Permissions issue: {e}", fg="yellow")
     
     click.echo(f"Folders with meta.json: {meta_count}")
 

@@ -191,3 +191,34 @@ export async function buildSimilarityEdges(docId: string, embedding: number[]) {
   }
   return similar.length
 }
+
+/**
+ * Extract cross-root links like [[tech:project]] or [[knowledge:topic]]
+ * and create explicit REFERENCES edges in Neo4j.
+ */
+export async function buildCrossRootLinks(docId: string, content: string): Promise<number> {
+  const linkPattern = /\[\[(tech|knowledge):([^\]]+)\]\]/g
+  const matches = [...content.matchAll(linkPattern)]
+  let linksCreated = 0
+
+  for (const match of matches) {
+    const rootType = match[1] // tech or knowledge
+    const targetName = match[2].trim()
+    
+    // Attempt to find a Document with a title or cluster matching the target
+    // and a source matching the rootType.
+    await runCypher(
+      `
+      MATCH (a:Document {id: $a})
+      MATCH (b:Document)
+      WHERE (b.title CONTAINS $target OR b.cluster CONTAINS $target)
+        AND b.source CONTAINS $rootType
+      MERGE (a)-[r:REFERENCES {type: 'cross-root'}]->(b)
+      RETURN count(r)
+      `,
+      { a: docId, target: targetName, rootType: rootType }
+    )
+    linksCreated++
+  }
+  return linksCreated
+}

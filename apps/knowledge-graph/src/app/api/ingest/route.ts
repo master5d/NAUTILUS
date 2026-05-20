@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { mergeDocument, buildSimilarityEdges, initSchema } from '@/lib/neo4j'
+import { mergeDocument, buildSimilarityEdges, buildCrossRootLinks, initSchema } from '@/lib/neo4j'
 import { embed, chunkText, hashContent } from '@/lib/embeddings'
 import { IngestRequest } from '@/types/knowledge'
 import { randomUUID } from 'crypto'
@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
       })
       if (created || contentChanged) {
         totalEdges = await buildSimilarityEdges(docId, embedding)
+        await buildCrossRootLinks(docId, content)
       }
     } else {
       // Multiple chunks — store first chunk as main node, rest as linked chunks
@@ -79,6 +80,8 @@ export async function POST(req: NextRequest) {
       })
 
       if (created || contentChanged) {
+        await buildCrossRootLinks(docId, content)
+        
         for (let i = 1; i < chunks.length; i++) {
           const chunkId = `${docId}--chunk-${i}`
           const chunkEmbedding = await embed(chunks[i])
