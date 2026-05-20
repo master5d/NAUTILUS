@@ -20,16 +20,31 @@ def audit(root):
     click.echo(f"\n📋 Audit Report for {root_path}")
     click.echo("=" * 60)
 
-    # Count meta.json files
-    meta_count = len(list(root_path.rglob("meta.json")))
+    # Count meta.json files safely
+    meta_count = 0
+    try:
+        meta_count = len(list(root_path.rglob("meta.json")))
+    except OSError as e:
+        click.secho(f"⚠️ Warning: Some directories were skipped during rglob due to permissions: {e}", fg="yellow")
+        # Fallback to a shallower or more careful search if needed, 
+        # but for audit we just warn.
+    
     click.echo(f"Folders with meta.json: {meta_count}")
 
-    # List top-level folders
-    top_level = [d for d in root_path.iterdir() if d.is_dir() and not d.name.startswith('.')]
+    # List top-level folders safely
+    top_level = []
+    try:
+        top_level = [d for d in root_path.iterdir() if d.is_dir() and not d.name.startswith('.')]
+    except OSError as e:
+        click.secho(f"⚠️ Warning: Could not list all top-level folders: {e}", fg="yellow")
+    
     click.echo(f"Top-level folders: {len(top_level)}")
     for folder in sorted(top_level)[:10]:
-        has_meta = (folder / "meta.json").exists()
-        click.echo(f"  {'✓' if has_meta else ' '} {folder.name}")
+        try:
+            has_meta = (folder / "meta.json").exists()
+            click.echo(f"  {'✓' if has_meta else ' '} {folder.name}")
+        except OSError:
+            click.echo(f"  ? {folder.name} (Access Denied)")
 
     # Check .facets status
     if facets_dir.exists():
