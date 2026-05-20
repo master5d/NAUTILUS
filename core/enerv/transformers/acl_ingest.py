@@ -76,7 +76,7 @@ if __name__ == "__main__":
         "sender": "Adam Bellemare",
         "content": "Facts are immutable. This is the core principle.",
         "source": "gmail-ingest",
-        "para_category": "02_Areas/SOVERN"
+        "para_category": "02_Areas/SOVRN"
     }
     
     transformer = ENERVTransformer()

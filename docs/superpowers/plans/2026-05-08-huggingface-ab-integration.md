@@ -16,7 +16,7 @@
 
 - [ ] **Step 1: Create the token**
 
-  Open: https://huggingface.co/settings/tokens → **New token** → Type: **Read** → Name: `sovern-read` → Generate.
+  Open: https://huggingface.co/settings/tokens → **New token** → Type: **Read** → Name: `SOVRN-read` → Generate.
 
   Copy the token value (starts with `hf_`). Store it in your password manager — you'll need it for the next 3 steps.
 
@@ -149,7 +149,7 @@
 ### Task 4: Add HF Models to LiteLLM
 
 **Files:**
-- Modify: `C:\telo\Efforts\Ongoing\SOVERN\config\litellm-config.yaml`
+- Modify: `C:\telo\Efforts\Ongoing\SOVRN\config\litellm-config.yaml`
 - Modify: `C:\telo\Atlas\Scripts\hermes_startup.ps1`
 
 - [ ] **Step 1: Add HF model entries to litellm-config.yaml**
@@ -205,7 +205,7 @@
   **After:**
   ```powershell
   $log = LogPath "lite_llm"
-  $litellmConfig = Join-Path $projectRoot "Efforts/Ongoing\SOVERN\config\litellm-config.yaml"
+  $litellmConfig = Join-Path $projectRoot "Efforts/Ongoing\SOVRN\config\litellm-config.yaml"
   Start-Process -FilePath $litellmExe `
       -ArgumentList @("--config", $litellmConfig, "--host", "127.0.0.1", "--port", "4000") `
       -RedirectStandardOutput $log.out -RedirectStandardError $log.err -NoNewWindow
@@ -218,7 +218,7 @@
   Start-Sleep -Seconds 3
 
   $env:HF_TOKEN = "hf_YOUR_TOKEN_HERE"
-  $configPath = "C:\telo\Efforts\Ongoing\SOVERN\config\litellm-config.yaml"
+  $configPath = "C:\telo\Efforts\Ongoing\SOVRN\config\litellm-config.yaml"
   Start-Process `
     -FilePath "C:\Users\sasha\AppData\Local\Programs\Python\Python313\Scripts\litellm.exe" `
     -ArgumentList @("--config", $configPath, "--host", "127.0.0.1", "--port", "4000") `
@@ -250,8 +250,8 @@
 
   ```bash
   cd "C:/telo"
-  git add "Efforts/Ongoing/SOVERN/config/litellm-config.yaml" "Atlas/Scripts/hermes_startup.ps1"
-  git commit -m "feat(sovern): add HF Serverless as 5th fallback in LiteLLM (A+B)"
+  git add "Efforts/Ongoing/SOVRN/config/litellm-config.yaml" "Atlas/Scripts/hermes_startup.ps1"
+  git commit -m "feat(SOVRN): add HF Serverless as 5th fallback in LiteLLM (A+B)"
   ```
 
 ---
@@ -486,11 +486,11 @@
 - [ ] **Step 9: Version-control the skill files**
 
   ```bash
-  mkdir -p "C:/telo/Efforts/Ongoing/SOVERN/skills/hf-models"
-  cp ~/.hermes/skills/hf-models/SKILL.md "C:/telo/Efforts/Ongoing/SOVERN/skills/hf-models/"
-  cp ~/.hermes/skills/hf-models/hf "C:/telo/Efforts/Ongoing/SOVERN/skills/hf-models/"
+  mkdir -p "C:/telo/Efforts/Ongoing/SOVRN/skills/hf-models"
+  cp ~/.hermes/skills/hf-models/SKILL.md "C:/telo/Efforts/Ongoing/SOVRN/skills/hf-models/"
+  cp ~/.hermes/skills/hf-models/hf "C:/telo/Efforts/Ongoing/SOVRN/skills/hf-models/"
   cd "C:/telo"
-  git add Efforts/Ongoing/SOVERN/skills/hf-models/
+  git add Efforts/Ongoing/SOVRN/skills/hf-models/
   git commit -m "feat(hermes): add hf-models skill (status/check/download/pin)"
   ```
 
@@ -540,5 +540,5 @@
   ```bash
   cd "C:/telo"
   git status
-  git commit -m "feat(sovern): HuggingFace A+B integration complete — registry + LiteLLM fallback"
+  git commit -m "feat(SOVRN): HuggingFace A+B integration complete — registry + LiteLLM fallback"
   ```

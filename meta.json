@@ -1,5 +1,5 @@
 {
-  "project": "SOVERN",
+  "project": "SOVRN",
   "version": "2.0.0",
   "status": "Active / Production",
   "priority": 10,
@@ -31,6 +31,6 @@
   "paths": {
     "vault": "/mnt/c/Users/User/Documents/Obsidian/life/",
     "skills": "~/.hermes/skills/",
-    "configs": "/mnt/c/telo/SOVERN/config/"
+    "configs": "/mnt/c/telo/SOVRN/config/"
   }
 }

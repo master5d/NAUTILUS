@@ -6,7 +6,7 @@ Set-Location -Path $PSScriptRoot
 
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║       SOVERN v3.3 — SOVEREIGN STACK RESTART SEQUENCE     ║" -ForegroundColor Cyan
+Write-Host "║       SOVRN v3.3 — SOVEREIGN STACK RESTART SEQUENCE     ║" -ForegroundColor Cyan
 Write-Host "╚══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 

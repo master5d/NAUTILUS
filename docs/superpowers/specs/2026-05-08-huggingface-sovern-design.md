@@ -1,4 +1,4 @@
-# HuggingFace Integration — SOVERN v3.3
+# HuggingFace Integration — SOVRN v3.3
 
 **Date:** 2026-05-08
 **Status:** approved
@@ -9,7 +9,7 @@
 
 ## Overview
 
-Two new layers added to SOVERN without changing existing stack:
+Two new layers added to SOVRN without changing existing stack:
 
 1. **Registry layer** — `huggingface_hub` CLI as single source for GGUF model downloads, pinned by commit hash via `~/.hermes/models.yaml`
 2. **Inference layer** — HF Serverless Inference API as 5th fallback in LiteLLM (after Cerebras → Groq → NIM → OpenRouter)

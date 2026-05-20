@@ -221,7 +221,7 @@ return [{ json: { result: result.trim(), ...$json } }];
 
 Вызывает `/home/node/Atlas/Scripts/acl_transformer.js` — Node.js скрипт внутри контейнера.
 
-**acl_transformer.js** (`/root/sovern/Atlas/Scripts/acl_transformer.js` на хосте):
+**acl_transformer.js** (`/root/SOVRN/Atlas/Scripts/acl_transformer.js` на хосте):
 ```js
 const fs = require("fs");
 const path = require("path");
@@ -481,8 +481,8 @@ MCP (Model Context Protocol) — стандарт интеграции AI-аге
 
 ### Docker Containers
 
-**Network:** `sovern-net` (bridge)  
-**Compose file:** `/root/sovern/docker-compose.yml`  
+**Network:** `SOVRN-net` (bridge)  
+**Compose file:** `/root/SOVRN/docker-compose.yml`  
 
 | Container | Image | Role |
 |---|---|---|
@@ -490,13 +490,13 @@ MCP (Model Context Protocol) — стандарт интеграции AI-аге
 | `enerv-indexer` | custom Python/FastAPI | Vector search API (`/context`, `/index`, `/search`) |
 | `enerv-memory-db` | `qdrant/qdrant` | Vector database (port 6333) |
 
-**enerv-indexer** (`/root/sovern/memory_app/main.py`):
+**enerv-indexer** (`/root/SOVRN/memory_app/main.py`):
 - `POST /index` — индексирует все `.md` файлы из vault в Qdrant (инкрементально)
 - `POST /reindex` — удаляет коллекцию, пересоздаёт и индексирует заново (нужно при смене модели)
 - `GET /context?q=...&limit=3` — semantic search, возвращает `{context, sources}`
 - `GET /search?q=...` — raw vector search с scores
 - **Модель: `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`** (FastEmbed, 384 dims, 50+ языков включая русский)
-- Vault mount: `/root/sovern/obsidian` → `/vault`
+- Vault mount: `/root/SOVRN/obsidian` → `/vault`
 - Текущий размер индекса: **447 документов**
 
 > **После добавления новых документов** — вызвать `POST /index`:
@@ -509,9 +509,9 @@ MCP (Model Context Protocol) — стандарт интеграции AI-аге
 > docker exec enerv-n8n wget -qO- --post-data="" http://enerv-indexer:8080/reindex
 > ```
 
-**Container:** `enerv-n8n` на `sovern-net` Docker bridge  
+**Container:** `enerv-n8n` на `SOVRN-net` Docker bridge  
 **Image:** `n8nio/n8n:latest`  
-**Compose file:** `/root/sovern/docker-compose.yml`  
+**Compose file:** `/root/SOVRN/docker-compose.yml`  
 
 **Critical env vars:**
 ```yaml
@@ -528,14 +528,14 @@ environment:
 ```yaml
 volumes:
   - /mnt/data/n8n:/home/node/.n8n           # n8n data
-  - /root/sovern/obsidian:/home/node/obsidian  # Obsidian vault
-  - /root/sovern/scripts:/home/node/scripts    # acl_transformer.js
+  - /root/SOVRN/obsidian:/home/node/obsidian  # Obsidian vault
+  - /root/SOVRN/scripts:/home/node/scripts    # acl_transformer.js
 ```
 
 ### Obsidian Vault Structure
 
 ```
-/root/sovern/obsidian/
+/root/SOVRN/obsidian/
 ├── Atlas/
 │   ├── Notes/
 │   │   └── Sources/     ← knowledge_ingest записи
@@ -658,9 +658,9 @@ Repo Link: [[https://github.com/Leonxlnx/taste-skill]]
 | Модель не найдена | `gemini-1.5-flash` deprecated | Обновить на `gemini-2.5-flash` |
 | executeCommand forbidden | n8n блокирует executeCommand node по permissions | Заменить на `code` node с `child_process.execSync` |
 | child_process disallowed | n8n sandbox запрещает builtin modules | Добавить `NODE_FUNCTION_ALLOW_BUILTIN=child_process` в docker-compose env |
-| EACCES permission denied | Obsidian volume смонтирован root-owned | `chown -R 1000:1000 /root/sovern/obsidian/` |
+| EACCES permission denied | Obsidian volume смонтирован root-owned | `chown -R 1000:1000 /root/SOVRN/obsidian/` |
 | acl_transformer SyntaxError | Literal newline в строке вместо `\n` | Перезаписать файл целиком через SCP |
-| enerv-indexer DNS not found | Контейнер не запущен или в другой Docker сети | `docker restart enerv-indexer`, проверить что в `sovern-net` |
+| enerv-indexer DNS not found | Контейнер не запущен или в другой Docker сети | `docker restart enerv-indexer`, проверить что в `SOVRN-net` |
 | enerv-indexer SyntaxError (main.py:55) | Multi-line f-string с `"` вместо triple-quotes | Заменить на `f"...\n..."` с `\n` escape |
 | Gemini RAG "Bad request" | `contentType: "json"` вместо `"raw"` + отсутствие `authentication`/`genericAuthType` в parameters | Установить `contentType: "raw"`, `rawContentType: "application/json"`, добавить auth поля |
 | Gemini RAG "invalid syntax" | Лишняя `"` перед `}]` в body expression (закрывала text string некорректно) | Убрать `"` — `text` property — это конкатенация выражений без закрывающей кавычки |

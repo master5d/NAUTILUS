@@ -362,7 +362,7 @@ Gmail watch() → Pub/Sub → Cloudflare Worker webhook
 
 **Falco** (`enerv_falco`) — eBPF kernel monitor + `enerv_falcosidekick` router.
 - Custom rule: Prompt Injection Detection (monitors n8n/Qdrant logs for "ignore previous instructions" / "system prompt")
-- Custom rule: Vault Tampering Alert (unauthorized write to `/root/sovern/obsidian` outside Syncthing)
+- Custom rule: Vault Tampering Alert (unauthorized write to `/root/SOVRN/obsidian` outside Syncthing)
 - Output: Telegram + n8n webhook → `retaliation_protocol.sh`
 
 **Wazuh** (single-node, port 443) — SIEM + FIM + Active Response.
@@ -370,14 +370,14 @@ Gmail watch() → Pub/Sub → Cloudflare Worker webhook
 - Admin: `admin` / `AgJ5*rkT1i1kRQTd12t4l97?KFDj8RNH` (rotate after first login)
 - Agents: Hetzner host (active), Windows WSL2/Mac Mini (pending)
 
-**Retaliation Protocol** (`/root/sovern/secops/retaliation/retaliation_protocol.sh`)
+**Retaliation Protocol** (`/root/SOVRN/secops/retaliation/retaliation_protocol.sh`)
 - Trigger: CRITICAL Falco/Wazuh alert
 - Actions: (1) Stop compromised container, (2) Ban attacker IP in CrowdSec (720h), (3) Telegram alert
 - Orchestrator: n8n webhook or direct SSH execution
 
 ### 13.4 .env required (fill before full activation)
 ```bash
-# C:\telo\secops\.env → push to /root/sovern/secops/.env
+# C:\telo\secops\.env → push to /root/SOVRN/secops/.env
 CF_API_TOKEN=your_cloudflare_token
 CS_LAPI_KEY=generate_via_cscli
 N8N_WEBHOOK_URL=http://n8n.synergify.com/webhook/retaliation-engine

@@ -1,4 +1,4 @@
-# SOVERN — Sovereign AI Data Mesh & Knowledge Graph
+# SOVRN — Sovereign AI Data Mesh & Knowledge Graph
 
 Unified autonomous environment for personal knowledge management, project indexing, and AI orchestration.
 

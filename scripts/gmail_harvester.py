@@ -14,8 +14,8 @@ def main():
     Lists the labels in the user's account.
     """
     creds = None
-    cred_path = '/mnt/c/Warp Projects/Efforts/Ongoing/SOVERN/config/credentials.json'
-    token_path = '/mnt/c/Warp Projects/Efforts/Ongoing/SOVERN/config/token.json'
+    cred_path = '/mnt/c/Warp Projects/Efforts/Ongoing/SOVRN/config/credentials.json'
+    token_path = '/mnt/c/Warp Projects/Efforts/Ongoing/SOVRN/config/token.json'
 
     if os.path.exists(token_path):
         creds = Credentials.from_authorized_user_file(token_path, SCOPES)

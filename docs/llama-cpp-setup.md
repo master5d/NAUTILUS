@@ -57,7 +57,7 @@ Alternatively download via browser and place at:
 
 ```powershell
 # Use the pre-configured launch script:
-pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\SOVERN\Atlas\Scripts\launch-llama-server.ps1"
+pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\SOVRN\Atlas\Scripts\launch-llama-server.ps1"
 
 # Or with custom model path:
 pwsh -File launch-llama-server.ps1 -ModelPath "E:\models\Qwen3-Coder.gguf"
