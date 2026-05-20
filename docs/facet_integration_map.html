@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facet Integration Map - Agentic AI v3.3</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --text-color: #c9d1d9;
+            --accent-color: #58a6ff;
+            --border-color: #30363d;
+            --highlight-color: #f0883e;
+            --success-color: #238636;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            width: 100%;
+            text-align: center;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            background: #161b22;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+        }
+        .legend {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 0.9em;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+        .dot {
+            height: 12px;
+            width: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .mermaid {
+            background: transparent;
+        }
+        .metadata-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-left: 4px solid var(--highlight-color);
+            background: #0d1117;
+        }
+        .synergy {
+            color: var(--highlight-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>FACET BRIDGE: Metadata Layer Integration</h1>
+    
+    <div class="container">
+        <div class="mermaid">
+graph TD
+    %% Define Styles
+    classDef physical fill:#21262d,stroke:#30363d,stroke-width:2px,color:#8b949e;
+    classDef context fill:#1f6feb,stroke:#58a6ff,stroke-width:2px,color:#fff;
+    classDef orchestration fill:#238636,stroke:#2ea043,stroke-width:2px,color:#fff;
+    classDef memory fill:#8957e5,stroke:#a371f7,stroke-width:2px,color:#fff;
+    classDef synergistic fill:#d29922,stroke:#f0883e,stroke-width:2px,color:#fff;
+
+    %% Layer 1: Physical Layer
+    subgraph Physical_Layer [Physical Layer: Disk & Storage]
+        DRIVE_C["C:\Warp Projects (Tech Root)"]:::physical
+        DRIVE_E["E:\ (Knowledge Root)"]:::physical
+    end
+
+    %% Layer 2: Context Layer
+    subgraph Context_Layer [Context Layer: FACET System]
+        META_JSON["meta.json (Directory Metadata)"]:::context
+        SCHEMAS["JSON Schemas (Tech/Knowledge)"]:::context
+        JOURNAL["Facet Journal (Event Log)"]:::context
+    end
+
+    %% Layer 3: Orchestration Layer
+    subgraph Orchestration_Layer [Orchestration Layer: HERMES & v3.3]
+        HERMES["Hermes Agent (v3.3 Core)"]:::orchestration
+        FACET_CLI["'facet' CLI Tool"]:::orchestration
+        LITELLM["LiteLLM Integration"]:::orchestration
+    end
+
+    %% Layer 4: Memory Layer
+    subgraph Memory_Layer [Memory Layer: PARA & Persistence]
+        OBSIDIAN["Obsidian PARA (Fast Path)"]:::memory
+        GRAPHITI["Graphiti (Slow Path - Temporal)"]:::memory
+    end
+
+    %% Relationships
+    DRIVE_C --> META_JSON
+    DRIVE_E --> META_JSON
+    META_JSON -. "Governed by" .-> SCHEMAS
+    
+    HERMES -- "Invokes" --> FACET_CLI
+    FACET_CLI -- "Reads/Writes" --> META_JSON
+    FACET_CLI -- "Indexes" --> DRIVE_C
+    FACET_CLI -- "Indexes" --> DRIVE_E
+    
+    FACET_CLI -- "Syncs Metadata" --> OBSIDIAN
+    OBSIDIAN -- "Nodes" --> GRAPHITI
+    JOURNAL -- "Feeds" --> GRAPHITI
+
+    %% Synergistic Highlight
+    SYNERGY_BOX["DeepVista (SKILLS) <==> Facet (DATA)"]:::synergistic
+    HERMES -. "Synthesizes" .-> SYNERGY_BOX
+
+    %% Global Labels
+    linkStyle default stroke:#c9d1d9,stroke-width:1px;
+        </div>
+
+        <div class="metadata-box">
+            <p><strong>Source of Truth:</strong> Physical Storage (C:\ & E:\) + Facet meta.json</p>
+            <p><strong>Consumption:</strong> Hermes Agent (for navigation) & Obsidian/Graphiti (for memory)</p>
+            <p class="synergy">SYNERGY: Facets define DATA (What/Where), DeepVista defines SKILLS (How).</p>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item"><span class="dot" style="background-color: #8b949e;"></span> Physical</div>
+            <div class="legend-item"><span class="dot" style="background-color: #1f6feb;"></span> Context (FACET)</div>
+            <div class="legend-item"><span class="dot" style="background-color: #238636;"></span> Orchestration (HERMES)</div>
+            <div class="legend-item"><span class="dot" style="background-color: #8957e5;"></span> Memory (PARA)</div>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            theme: 'dark',
+            startOnLoad: true,
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis'
+            }
+        });
+    </script>
+</body>
+</html>

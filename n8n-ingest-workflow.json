@@ -1,0 +1,76 @@
+{
+  "name": "Hermes AI Ingest Phase II",
+  "nodes": [
+    {
+      "parameters": {
+        "filters": {
+          "labelIds": [
+            "AI Ingest"
+          ],
+          "readStatus": "unread"
+        },
+        "options": {
+          "dataPropertyName": "emailData"
+        }
+      },
+      "id": "673f3c1d-15ec-4467-93dc-63ce734efb48",
+      "name": "Gmail Trigger",
+      "type": "n8nio.n8n.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        380,
+        240
+      ],
+      "credentials": {
+        "gmailOAuth2Api": {
+          "id": "your-credential-id",
+          "name": "Google Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "http://host.docker.internal:4000/v1/chat/completions",
+        "options": {},
+        "bodyParametersUi": {
+          "parameter": [
+            {
+              "name": "model",
+              "value": "google/gemini-3-flash-preview"
+            },
+            {
+              "name": "messages",
+              "value": "=[{\"role\": \"user\", \"content\": \"/ingest-email skip-search=true subject:{{ $node[\\\"Gmail Trigger\\\"].json[\\\"emailData\\\"].subject }} body:{{ $node[\\\"Gmail Trigger\\\"].json[\\\"emailData\\\"].textPlain }}\"}]"
+            }
+          ]
+        }
+      },
+      "id": "e21b2d3c-9457-418a-986b-a82f3c4db881",
+      "name": "Trigger Hermes Skill",
+      "type": "n8nio.n8n.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        600,
+        240
+      ]
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Trigger Hermes Skill",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

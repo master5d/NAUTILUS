@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Knowledge Meta Schema",
+  "type": "object",
+  "required": ["identifier", "title", "type", "status", "created", "updated"],
+  "properties": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z]+-[0-9]{8}-[0-9a-f]{4}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "type": {
+      "enum": ["vault", "topic", "practice"]
+    },
+    "status": {
+      "enum": ["active", "exploring", "dormant", "archive"]
+    },
+    "created": {
+      "type": "string",
+      "format": "date"
+    },
+    "updated": {
+      "type": "string",
+      "format": "date"
+    },
+    "subject_area": {
+      "enum": ["wellness", "biohacking", "esoteric", "metaphysics", "psychology", "psychotherapy", "spirituality", "personal-development", "history", "science", "art", "language"]
+    },
+    "source_type": {
+      "type": "array",
+      "items": {
+        "enum": ["book", "course", "summit", "method", "practice", "lecture", "podcast", "video", "article", "experience"]
+      }
+    },
+    "modality": {
+      "type": "array",
+      "items": {
+        "enum": ["text", "audio", "video", "experiential", "ritual", "meditation", "bodywork"]
+      }
+    },
+    "maturity": {
+      "enum": ["exploring", "learning", "practicing", "integrating", "teaching"]
+    },
+    "confidentiality": {
+      "enum": ["public", "personal", "internal", "sensitive"]
+    },
+    "parent": {
+      "type": ["string", "null"]
+    },
+    "language": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "links": {
+      "type": "object",
+      "properties": {
+        "notes": {"type": "string"},
+        "sources": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "llm_context_priority": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10
+    },
+    "evolutionary_links": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}

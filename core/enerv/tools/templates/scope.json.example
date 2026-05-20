@@ -1,0 +1,32 @@
+{
+  "root": "E:\\",
+  "whitelisted": [
+    {
+      "name": "Wellness & Biohacking",
+      "type": "vault",
+      "default_confidentiality": "personal"
+    },
+    {
+      "name": "Познание",
+      "type": "vault",
+      "default_confidentiality": "personal"
+    },
+    {
+      "name": "DIGITAL LIBRARY",
+      "type": "vault",
+      "default_confidentiality": "personal"
+    },
+    {
+      "name": "Client Cases",
+      "type": "vault",
+      "default_confidentiality": "sensitive"
+    }
+  ],
+  "ignored_patterns": [
+    "$RECYCLE.BIN",
+    "System Volume Information",
+    "~*",
+    "Thumbs.db",
+    ".DS_Store"
+  ]
+}

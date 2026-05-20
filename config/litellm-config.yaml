@@ -51,11 +51,11 @@ model_list:
       rpm: 20
       # $10 deposit for 1K RPD across 29 free models
 
-  # --- Hermes primary brain (Gemini 2.5 Flash via Google AI Studio free tier) ---
+  # --- Hermes primary brain (Gemini 3 Flash via Google AI Studio free tier) ---
   # model_name matches OpenRouter catalog ID so Hermes catalog validation passes
   - model_name: google/gemini-3-flash-preview
     litellm_params:
-      model: gemini/gemini-2.5-flash
+      model: gemini/gemini-3-flash-preview
       api_key: os.environ/GEMINI_API_KEY
       rpm: 15
       # Routes to Google AI Studio: free tier 15 RPM, 1500 RPD, 1M context
@@ -67,6 +67,21 @@ model_list:
       api_base: http://localhost:8080/v1
       api_key: dummy
       # llama-server running Qwen3-Coder-30B-A3B on port 8080
+
+  # --- HF Serverless Inference (5th fallback, free tier, ~5-30s cold start) ---
+  # Correct URL: router.huggingface.co/v1 (api-inference.huggingface.co/v1 is wrong/deprecated)
+  # openai/ prefix — HF router is OpenAI-compatible; huggingface/ prefix uses wrong URL construction
+  - model_name: hf-llama-70b
+    litellm_params:
+      model: openai/meta-llama/Llama-3.3-70B-Instruct
+      api_key: os.environ/HF_TOKEN
+      api_base: https://router.huggingface.co/v1
+
+  - model_name: hf-qwen-72b
+    litellm_params:
+      model: openai/Qwen/Qwen2.5-72B-Instruct
+      api_key: os.environ/HF_TOKEN
+      api_base: https://router.huggingface.co/v1
 
   # --- Reasoning models (on-demand, not in rotation) ---
   - model_name: reasoning
@@ -84,8 +99,10 @@ model_list:
 litellm_settings:
   # CRITICAL: explicit fallbacks array (issue #26015)
   fallbacks:
-    - {"google/gemini-3-flash-preview": ["fast-pool", "local-fallback"]}
-    - {"fast-pool": ["local-fallback"]}
+    - {"google/gemini-3-flash-preview": ["fast-pool", "hf-llama-70b", "local-fallback"]}
+    - {"fast-pool": ["hf-llama-70b", "local-fallback"]}
+    - {"hf-llama-70b": ["hf-qwen-72b", "local-fallback"]}
+    - {"hf-qwen-72b": ["local-fallback"]}
     - {"reasoning": ["reasoning-local"]}
   default_fallbacks: ["local-fallback"]
   context_window_fallbacks:

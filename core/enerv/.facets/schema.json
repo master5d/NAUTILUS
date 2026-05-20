@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Tech Meta Schema",
+  "type": "object",
+  "required": ["identifier", "title", "type", "status", "created", "updated"],
+  "properties": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z]+-[0-9]{8}-[0-9a-f]{4}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "type": {
+      "enum": ["project", "agent", "micro", "sandbox", "department", "portfolio"]
+    },
+    "status": {
+      "enum": ["active", "paused", "archive", "sandbox", "wip"]
+    },
+    "created": {
+      "type": "string",
+      "format": "date"
+    },
+    "updated": {
+      "type": "string",
+      "format": "date"
+    },
+    "team": {
+      "enum": ["ai", "infra", "research", "wellness", "personal", "client-work", "meta"]
+    },
+    "domain": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "tech": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "priority": {
+      "enum": ["P0", "P1", "P2", "P3", "P4"]
+    },
+    "confidentiality": {
+      "enum": ["public", "personal", "internal", "sensitive"]
+    },
+    "parent": {
+      "type": ["string", "null"]
+    },
+    "language": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "links": {
+      "type": "object",
+      "properties": {
+        "repo": {"type": "string"},
+        "deploy": {"type": "string"},
+        "docs": {"type": "string"}
+      }
+    }
+  }
+}

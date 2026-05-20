@@ -1,0 +1,6 @@
+# Patterns to ignore during indexing
+$RECYCLE.BIN
+System Volume Information
+~*
+Thumbs.db
+.DS_Store

@@ -14,4 +14,4 @@ foreach ($k in $keys) {
 }
 
 Write-Host "Starting LiteLLM proxy on http://localhost:4000 ..." -ForegroundColor Cyan
-litellm --config "C:\Warp Projects\Agentic AI\config\litellm-config.yaml" --port 4000
+litellm --config "C:\telo\Efforts\Ongoing\SOVERN\config\litellm-config.yaml" --port 4000

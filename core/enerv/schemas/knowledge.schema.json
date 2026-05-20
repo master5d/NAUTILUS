@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Knowledge Metadata Schema",
+  "type": "object",
+  "properties": {
+    "name": { "type": "string" },
+    "path": { "type": "string" },
+    "description": { "type": "string" },
+    "category": { "type": "string" },
+    "para_type": { "enum": ["Projects", "Areas", "Resources", "Archives"] },
+    "hot_topics": { "type": "array", "items": { "type": "string" } },
+    "assets_summary": { "type": "object" },
+    "version": { "type": "string" }
+  },
+  "required": ["name", "path", "para_type", "version"]
+}

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic AI v3.3 Architecture Diagram</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'JetBrains Mono', monospace; background: #020617; min-height: 100vh; padding: 2rem; color: white; line-height: 1.5; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .header { margin-bottom: 2rem; }
+    .header-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+    .pulse-dot { width: 12px; height: 12px; background: #34d399; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.8); } }
+    h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+    .subtitle { color: #94a3b8; font-size: 0.875rem; margin-left: 1.75rem; }
+    .diagram-container { background: rgba(15, 23, 42, 0.5); border-radius: 1rem; border: 1px solid #1e293b; padding: 1.5rem; overflow-x: auto; margin-bottom: 2rem; }
+    svg { width: 100%; min-width: 1000px; display: block; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+    .card { background: rgba(15, 23, 42, 0.5); border-radius: 0.75rem; border: 1px solid #1e293b; padding: 1.25rem; }
+    .card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+    .card-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .card-dot.cyan { background: #22d3ee; }
+    .card-dot.emerald { background: #34d399; }
+    .card-dot.violet { background: #a78bfa; }
+    .card-dot.amber { background: #fbbf24; }
+    .card-dot.rose { background: #fb7185; }
+    .card-dot.orange { background: #fb923c; }
+    .card h3 { font-size: 0.875rem; font-weight: 600; }
+    .card ul { list-style: none; color: #94a3b8; font-size: 0.75rem; }
+    .card li { margin-bottom: 0.375rem; }
+    .footer { text-align: center; margin-top: 2rem; color: #475569; font-size: 0.75rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>Agentic AI v3.3 Architecture</h1>
+      </div>
+      <p class="subtitle">Sovereign Solo Vibe Coder Stack — Loop 4 Synthesis</p>
+    </div>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1100 800">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- Boundaries -->
+        <!-- Local Environment -->
+        <rect x="250" y="40" width="820" height="740" rx="12" fill="rgba(34, 211, 238, 0.02)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="8,4"/>
+        <text x="260" y="58" fill="#22d3ee" font-size="10" font-weight="600">Local Environment (Surface Laptop Studio 2)</text>
+
+        <!-- Infrastructure Containers -->
+        <rect x="520" y="480" width="530" height="280" rx="8" fill="transparent" stroke="#fbbf24" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="530" y="495" fill="#fbbf24" font-size="9" font-weight="600">Hosting Fabric (Cloudflare + Hetzner)</text>
+
+        <!-- HUMAN LAYER -->
+        <rect x="40" y="320" width="160" height="80" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="120" y="350" fill="white" font-size="12" font-weight="700" text-anchor="middle">HUMAN</text>
+        <text x="120" y="370" fill="#94a3b8" font-size="9" text-anchor="middle">Architect · PM · Reviewer</text>
+        <text x="120" y="385" fill="#94a3b8" font-size="8" text-anchor="middle">Zed / Telegram / CLI</text>
+
+        <!-- BOSS LAYER -->
+        <rect x="300" y="320" width="180" height="80" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="390" y="350" fill="white" font-size="12" font-weight="700" text-anchor="middle">HERMES BOSS</text>
+        <text x="390" y="370" fill="#94a3b8" font-size="9" text-anchor="middle">Linux Shell / WSL2</text>
+        <text x="390" y="385" fill="#34d399" font-size="8" text-anchor="middle">Orchestration & Skills</text>
+
+        <!-- SKILLS -->
+        <rect x="300" y="100" width="180" height="150" rx="6" fill="rgba(30, 41, 59, 0.4)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="390" y="125" fill="white" font-size="11" font-weight="700" text-anchor="middle">DEEPVISTA SKILLS</text>
+        <text x="315" y="145" fill="#94a3b8" font-size="8">• architect.md (Ramp)</text>
+        <text x="315" y="160" fill="#94a3b8" font-size="8">• tool_use_dispatch</text>
+        <text x="315" y="175" fill="#94a3b8" font-size="8">• compound_engineering</text>
+        <text x="315" y="190" fill="#94a3b8" font-size="8">• evo_promote</text>
+        <text x="390" y="215" fill="#fb7185" font-size="7" font-weight="600" text-anchor="middle">--dry-run requirement</text>
+
+        <!-- CODING SUB-AGENTS -->
+        <rect x="540" y="320" width="180" height="120" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="630" y="345" fill="white" font-size="11" font-weight="700" text-anchor="middle">CODING AGENTS</text>
+        <text x="630" y="365" fill="#94a3b8" font-size="9" text-anchor="middle">Aider · Cline · Claude Code</text>
+        <line x1="550" y1="375" x2="710" y2="375" stroke="#1e293b" stroke-width="1"/>
+        <text x="630" y="395" fill="#22d3ee" font-size="9" text-anchor="middle">Compound Engineering</text>
+        <text x="630" y="410" fill="#94a3b8" font-size="8" text-anchor="middle">Plan → Work → Assess</text>
+
+        <!-- MODEL GATEWAY -->
+        <rect x="780" y="320" width="220" height="130" rx="6" fill="rgba(251, 146, 60, 0.2)" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="890" y="345" fill="white" font-size="11" font-weight="700" text-anchor="middle">LITELLM GATEWAY</text>
+        <text x="890" y="365" fill="#fb923c" font-size="8" text-anchor="middle">Rotating Pool & Fallbacks</text>
+        <text x="795" y="385" fill="#94a3b8" font-size="8">Local: Qwen3-Coder (llama.cpp)</text>
+        <text x="795" y="400" fill="#94a3b8" font-size="8">Cloud: Gemini 2.5 Flash / Groq</text>
+        <text x="795" y="415" fill="#94a3b8" font-size="8">Reasoning: DeepSeek-R1 / O1</text>
+
+        <!-- MEMORY -->
+        <rect x="540" y="100" width="240" height="150" rx="6" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="660" y="125" fill="white" font-size="11" font-weight="700" text-anchor="middle">MEMORY SYSTEM</text>
+        <text x="555" y="145" fill="#a78bfa" font-size="9" font-weight="600">Phase 0: PARA Stack</text>
+        <text x="555" y="160" fill="#94a3b8" font-size="8">Obsidian Vault (Filesystem)</text>
+        <line x1="550" y1="175" x2="770" y2="175" stroke="#1e293b" stroke-width="1"/>
+        <text x="555" y="195" fill="#a78bfa" font-size="9" font-weight="600">Phase 1: Graphiti</text>
+        <text x="555" y="210" fill="#94a3b8" font-size="8">FalkorDB (Graph + Vector)</text>
+        <text x="555" y="225" fill="#94a3b8" font-size="8">Extraction: Qwen3-8B local</text>
+
+        <!-- TOOLS / MCP -->
+        <rect x="840" y="100" width="160" height="150" rx="6" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="920" y="125" fill="white" font-size="11" font-weight="700" text-anchor="middle">TOOL LAYER (MCP)</text>
+        <text x="855" y="150" fill="#94a3b8" font-size="8">• graphiti MCP</text>
+        <text x="855" y="165" fill="#94a3b8" font-size="8">• Telegram Relay</text>
+        <text x="855" y="180" fill="#94a3b8" font-size="8">• Playwright / Apify</text>
+        <text x="855" y="195" fill="#94a3b8" font-size="8">• Granola / NotebookLM</text>
+
+        <!-- OBSERVABILITY -->
+        <rect x="300" y="520" width="180" height="100" rx="6" fill="rgba(136, 19, 55, 0.4)" stroke="#fb7185" stroke-width="1.5"/>
+        <text x="390" y="545" fill="white" font-size="11" font-weight="700" text-anchor="middle">OBSERVABILITY</text>
+        <text x="390" y="565" fill="#94a3b8" font-size="9" text-anchor="middle">OpenLLMetry SDK</text>
+        <text x="390" y="580" fill="#fb7185" font-size="9" text-anchor="middle">Langfuse (Self-hosted)</text>
+        <text x="390" y="595" fill="#94a3b8" font-size="8" text-anchor="middle">Grafana + Prometheus</text>
+
+        <!-- HOSTING COMPONENTS -->
+        <rect x="540" y="520" width="140" height="60" rx="6" fill="rgba(30, 41, 59, 0.4)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="610" y="545" fill="white" font-size="10" font-weight="700" text-anchor="middle">CLOUDFLARE</text>
+        <text x="610" y="560" fill="#94a3b8" font-size="8" text-anchor="middle">Edge Pages & Workers</text>
+
+        <rect x="700" y="520" width="140" height="60" rx="6" fill="rgba(30, 41, 59, 0.4)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="770" y="545" fill="white" font-size="10" font-weight="700" text-anchor="middle">HETZNER CX22</text>
+        <text x="770" y="560" fill="#94a3b8" font-size="8" text-anchor="middle">Docker / n8n / DBs</text>
+
+        <rect x="860" y="520" width="140" height="60" rx="6" fill="rgba(30, 41, 59, 0.4)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="930" y="545" fill="white" font-size="10" font-weight="700" text-anchor="middle">FASTMAIL</text>
+        <text x="930" y="560" fill="#94a3b8" font-size="8" text-anchor="middle">AI Ingest Source</text>
+
+        <!-- Connections (Early to be behind) -->
+        <!-- Human to Boss -->
+        <line x1="200" y1="360" x2="292" y2="360" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="246" y="355" fill="#94a3b8" font-size="8" text-anchor="middle">Command</text>
+
+        <!-- Boss to Agents -->
+        <line x1="480" y1="360" x2="532" y2="360" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="506" y="355" fill="#94a3b8" font-size="8" text-anchor="middle">Dispatch</text>
+
+        <!-- Agents to Gateway -->
+        <line x1="720" y1="360" x2="772" y2="360" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="746" y="355" fill="#94a3b8" font-size="8" text-anchor="middle">Inference</text>
+
+        <!-- Boss to Skills -->
+        <line x1="390" y1="312" x2="390" y2="258" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        
+        <!-- Boss to Memory (RAG Orchestration) -->
+        <path d="M 390 320 C 390 280, 540 200, 532 200" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arrowhead)"/>
+        <text x="460" y="240" fill="#a78bfa" font-size="8" text-anchor="middle" transform="rotate(-15, 460, 240)">Context Retrieval</text>
+
+        <!-- Memory flow -->
+        <path d="M 780 175 C 810 175, 810 175, 832 175" fill="none" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <text x="810" y="170" fill="#94a3b8" font-size="8" text-anchor="middle">RAG</text>
+
+        <!-- Observability gathering -->
+        <line x1="120" y1="400" x2="120" y2="700" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,3"/>
+        <path d="M 120 700 L 300 570" fill="none" stroke="#fb7185" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrowhead)"/>
+        
+        <!-- Legend (outside boundaries as per skill) -->
+        <text x="40" y="440" fill="white" font-size="10" font-weight="600">Legend</text>
+        <rect x="40" y="455" width="16" height="10" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1"/>
+        <text x="62" y="463" fill="#94a3b8" font-size="8">Orchestration</text>
+        <rect x="40" y="475" width="16" height="10" rx="2" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="62" y="483" fill="#94a3b8" font-size="8">Execution Agent</text>
+        <rect x="40" y="495" width="16" height="10" rx="2" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="62" y="503" fill="#94a3b8" font-size="8">Memory / KG</text>
+        <rect x="40" y="515" width="16" height="10" rx="2" fill="rgba(251, 146, 60, 0.2)" stroke="#fb923c" stroke-width="1"/>
+        <text x="62" y="523" fill="#94a3b8" font-size="8">LLM Gateway</text>
+
+      </svg>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot emerald"></div>
+          <h3>Orchestration Vibe</h3>
+        </div>
+        <ul>
+          <li>• <b>Hermes:</b> Linux Shell / WSL2 environment</li>
+          <li>• <b>DeepVista:</b> Stateful/Stateless YAML schema</li>
+          <li>• <b>Compound Engineering:</b> Self-correcting loops</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot violet"></div>
+          <h3>Memory Tiers</h3>
+        </div>
+        <ul>
+          <li>• <b>PARA Phase 0:</b> Filesystem first via Obsidian</li>
+          <li>• <b>Graphiti Phase 1:</b> FalkorDB Graph & Vector</li>
+          <li>• <b>Contextual:</b> Dynamic RAG via Graphiti</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-dot amber"></div>
+          <h3>Compute Strategy</h3>
+        </div>
+        <ul>
+          <li>• <b>Local:</b> Surface RTX 4060 (Llama.cpp)</li>
+          <li>• <b>Cloud Pool:</b> Cerebras/Groq/NIM free tiers</li>
+          <li>• <b>Hosting:</b> Cloudflare edge + Hetzner CX22</li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="footer">
+      Agentic AI v3.3 • Loop 4 Consolidated Stack • Generated by Hermes Agent
+    </p>
+  </div>
+</body>
+</html>

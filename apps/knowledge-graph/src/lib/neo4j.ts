@@ -1,0 +1,193 @@
+import neo4j, { Driver, Integer } from 'neo4j-driver'
+
+let driver: Driver | null = null
+
+export function getDriver(): Driver {
+  if (!driver) {
+    driver = neo4j.driver(
+      process.env.NEO4J_URI!,
+      neo4j.auth.basic(
+        process.env.NEO4J_USERNAME ?? 'neo4j',
+        process.env.NEO4J_PASSWORD!
+      ),
+      { disableLosslessIntegers: true }
+    )
+  }
+  return driver
+}
+
+export async function runCypher(
+  cypher: string,
+  params: Record<string, unknown> = {}
+) {
+  const session = getDriver().session({
+    database: process.env.NEO4J_DATABASE ?? 'neo4j',
+  })
+  try {
+    const result = await session.run(cypher, params)
+    return result.records
+  } finally {
+    await session.close()
+  }
+}
+
+// Initialize schema: constraints + vector index
+// IMPORTANT: Vector dimensions MUST match the embedding model:
+// - gemini-embedding-001 returns 768-dim vectors (used in MVP)
+// - gemini-embedding-2-preview returns 768-dim vectors (multimodal, Sprint 2)
+export async function initSchema() {
+  const constraints = [
+    'CREATE CONSTRAINT doc_id IF NOT EXISTS FOR (n:Document) REQUIRE n.id IS UNIQUE',
+    'CREATE CONSTRAINT highlight_id IF NOT EXISTS FOR (n:Highlight) REQUIRE n.id IS UNIQUE',
+    'CREATE CONSTRAINT cluster_id IF NOT EXISTS FOR (n:Cluster) REQUIRE n.id IS UNIQUE',
+    'CREATE CONSTRAINT tag_name IF NOT EXISTS FOR (n:Tag) REQUIRE n.name IS UNIQUE',
+  ]
+
+  const vectorIndex = `
+    CREATE VECTOR INDEX document_embeddings IF NOT EXISTS
+    FOR (n:Document) ON n.embedding
+    OPTIONS {indexConfig: {\`vector.dimensions\`: 768, \`vector.similarity_function\`: 'cosine'}}
+  `
+
+  for (const c of constraints) {
+    await runCypher(c)
+  }
+  await runCypher(vectorIndex)
+}
+
+// Vector similarity search — returns top k nodes by cosine similarity
+export async function vectorSearch(
+  embedding: number[],
+  topK: number = 10,
+  minScore: number = 0.7
+) {
+  const records = await runCypher(
+    `
+    CALL db.index.vector.queryNodes('document_embeddings', $topK, $embedding)
+    YIELD node, score
+    WHERE score >= $minScore
+    RETURN node.id AS id, node.title AS title, node.content AS content,
+           node.url AS url, node.source AS source, node.cluster AS cluster,
+           score
+    ORDER BY score DESC
+    `,
+    { topK, embedding, minScore }
+  )
+  return records.map((r) => ({
+    id: r.get('id') as string,
+    title: r.get('title') as string,
+    content: r.get('content') as string | null,
+    url: r.get('url') as string | null,
+    source: r.get('source') as string,
+    cluster: r.get('cluster') as string | null,
+    score: r.get('score') as number,
+  }))
+}
+
+// Merge a document node (create or update)
+// Returns { created: boolean, edgesRefreshed: boolean } for tracking re-syncs
+export async function mergeDocument(params: {
+  id: string
+  title: string
+  content: string
+  url?: string
+  source: string
+  cluster?: string
+  tags?: string[]
+  embedding: number[]
+  contentHash?: string // SHA-256 hash for deduplication on re-sync
+  metadata?: Record<string, any>
+}): Promise<{ created: boolean; contentChanged: boolean }> {
+  // Check if document exists and content hash matches (prevents re-embedding on re-sync)
+  const existing = await runCypher(
+    `MATCH (d:Document {id: $id}) RETURN d.contentHash as existingHash, d.id as exists`,
+    { id: params.id }
+  )
+
+  const contentChanged = !existing.length || existing[0].get('existingHash') !== params.contentHash
+  const created = !existing.length
+
+  await runCypher(
+    `
+    MERGE (d:Document {id: $id})
+    ON CREATE SET d.createdAt = datetime()
+    SET d.title = $title,
+        d.content = $content,
+        d.url = $url,
+        d.source = $source,
+        d.cluster = $cluster,
+        d.embedding = $embedding,
+        d.contentHash = $contentHash,
+        d.metadata = $metadata,
+        d.updatedAt = datetime()
+    `,
+    {
+      id: params.id,
+      title: params.title,
+      content: params.content,
+      url: params.url ?? null,
+      source: params.source,
+      cluster: params.cluster ?? 'default',
+      embedding: params.embedding,
+      contentHash: params.contentHash ?? null,
+      metadata: params.metadata ?? {},
+    }
+  )
+
+  // Ensure cluster node exists
+  if (params.cluster) {
+    await runCypher(
+      `
+      MERGE (c:Cluster {id: $clusterId})
+      ON CREATE SET c.name = $clusterName, c.createdAt = datetime()
+      WITH c
+      MATCH (d:Document {id: $docId})
+      MERGE (d)-[:BELONGS_TO]->(c)
+      `,
+      {
+        clusterId: params.cluster.toLowerCase().replace(/\s+/g, '-'),
+        clusterName: params.cluster,
+        docId: params.id,
+      }
+    )
+  }
+
+  // Attach tags
+  if (params.tags?.length) {
+    for (const tag of params.tags) {
+      await runCypher(
+        `
+        MERGE (t:Tag {name: $tag})
+        WITH t
+        MATCH (d:Document {id: $docId})
+        MERGE (d)-[:TAGGED]->(t)
+        `,
+        { tag, docId: params.id }
+      )
+    }
+  }
+
+  return { created, contentChanged }
+}
+
+// Find similar documents and create SIMILAR_TO edges
+// THRESHOLD = 0.75 (cosine similarity): lowered from 0.82 to account for multilingual content
+// (Cyrillic + English notes). This allows the graph to find cross-language connections while
+// still avoiding false positives. Trade-off: may create some false-positive SIMILAR_TO edges,
+// acceptable for MVP validation. Adjust to 0.80+ in Sprint 2 if tuning becomes needed.
+// NOTE: Call this only when contentChanged=true to avoid redundant edge recreation on re-sync.
+export async function buildSimilarityEdges(docId: string, embedding: number[]) {
+  const similar = await vectorSearch(embedding, 5, 0.75)
+  for (const s of similar) {
+    if (s.id === docId) continue
+    await runCypher(
+      `
+      MATCH (a:Document {id: $a}), (b:Document {id: $b})
+      MERGE (a)-[r:SIMILAR_TO]-(b)
+      SET r.score = $score
+      `,
+      { a: docId, b: s.id, score: s.score }
+    )
+  }
+  return similar.length
+}

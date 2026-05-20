@@ -49,5 +49,5 @@ Read-SecureKey -Prompt "Langfuse Secret key"  -EnvVar "LANGFUSE_SECRET_KEY"
 Write-Host ""
 Write-Host "All keys saved. Start LiteLLM with:" -ForegroundColor Cyan
 Write-Host '  pip install "litellm[proxy]==1.57.4"'
-Write-Host '  litellm --config "C:\Warp Projects\Agentic AI\config\litellm-config.yaml" --port 4000'
+Write-Host '  litellm --config "C:\telo\Efforts\Ongoing\SOVERN\config\litellm-config.yaml" --port 4000'
 Write-Host ""

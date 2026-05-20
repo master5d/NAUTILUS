@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOVERN v3.3 | Hosting Provisioning Map</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #020617;
+            --card-bg: #0f172a;
+            --border: #1e293b;
+            --text-dim: #94a3b8;
+            --text-bright: #f8fafc;
+            --cyan: #22d3ee;
+            --emerald: #34d399;
+            --violet: #a78bfa;
+            --amber: #fbbf24;
+            --rose: #fb7185;
+            --orange: #fb923c;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-bright);
+            font-family: 'JetBrains Mono', monospace;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--emerald);
+            background: rgba(52, 211, 153, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(52, 211, 153, 0.2);
+            margin-bottom: 16px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--emerald);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+        }
+
+        h1 { margin: 0; font-size: 24px; letter-spacing: -0.025em; }
+        p.subtitle { color: var(--text-dim); margin-top: 8px; font-size: 14px; }
+
+        .diagram-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        svg {
+            background-image: 
+                radial-gradient(var(--border) 0.5px, transparent 0.5px);
+            background-size: 40px 40px;
+            width: 100%;
+            height: auto;
+        }
+
+        .grid-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .card h3 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            color: var(--text-bright);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .cyan-bg { background: var(--cyan); }
+        .violet-bg { background: var(--violet); }
+        .amber-bg { background: var(--amber); }
+
+        .card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 12px;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="status">
+            <div class="dot"></div>
+            SOVERN v3.3 Active Phase
+        </div>
+        <h1>Hosting Provisioning Map</h1>
+        <p class="subtitle">Distributed architecture: Local Primary Core + Cloud Operations Hub</p>
+    </header>
+
+    <div class="diagram-container">
+        <svg viewBox="0 0 920 480" xmlns="http://www.w3.org/2000/svg">
+            <!-- Markers for Arrows -->
+            <defs>
+                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                    <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8" />
+                </marker>
+            </defs>
+
+            <!-- Boundaries -->
+            <!-- Local Boundary -->
+            <rect x="20" y="40" width="400" height="380" rx="12" fill="none" stroke="#fb7185" stroke-width="1.5" stroke-dasharray="8,4" />
+            <text x="40" y="30" fill="#fb7185" font-size="10" font-weight="bold">LOCAL RIG (Surface Laptop Studio 2)</text>
+
+            <!-- Cloud Boundary -->
+            <rect x="500" y="40" width="400" height="380" rx="12" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="8,4" />
+            <text x="520" y="30" fill="#fbbf24" font-size="10" font-weight="bold">CLOUD HUB (Hetzner CX22 + Dokploy)</text>
+
+            <!-- CONNECTIONS (Drawn first to be behind) -->
+            <path d="M 420 220 L 500 220" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrowhead)" />
+            <text x="425" y="210" fill="#94a3b8" font-size="9">SSH Tunnel / Tls</text>
+
+            <!-- COMPONENT: Human -->
+            <rect x="180" y="80" width="80" height="40" rx="6" fill="#0f172a" />
+            <rect x="180" y="80" width="80" height="40" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5" />
+            <text x="200" y="105" fill="#f8fafc" font-size="12">Sasha</text>
+
+            <!-- COMPONENT: Hermes -->
+            <rect x="140" y="180" width="160" height="60" rx="6" fill="#0f172a" />
+            <rect x="140" y="180" width="160" height="60" rx="6" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5" />
+            <text x="185" y="205" fill="#f8fafc" font-size="12" font-weight="bold">Hermes Agent</text>
+            <text x="165" y="225" fill="#94a3b8" font-size="9">Orchestration & Logic</text>
+
+            <!-- COMPONENT: Llama Server -->
+            <rect x="60" y="300" width="140" height="60" rx="6" fill="#0f172a" />
+            <rect x="60" y="300" width="140" height="60" rx="6" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1.5" />
+            <text x="85" y="325" fill="#f8fafc" font-size="11">llama.cpp</text>
+            <text x="75" y="345" fill="#94a3b8" font-size="9">Qwen3 local GPU</text>
+
+            <!-- COMPONENT: Obsidian -->
+            <rect x="240" y="300" width="140" height="60" rx="6" fill="#0f172a" />
+            <rect x="240" y="300" width="140" height="60" rx="6" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5" />
+            <text x="275" y="325" fill="#f8fafc" font-size="11">Obsidian</text>
+            <text x="260" y="345" fill="#94a3b8" font-size="9">PARA / ENERV Docs</text>
+
+            <!-- CLOUD HUB COMPONENTS -->
+            <!-- Dokploy -->
+            <rect x="540" y="80" width="320" height="300" rx="10" fill="#0f172a" />
+            <rect x="540" y="80" width="320" height="300" rx="10" fill="rgba(120, 53, 15, 0.1)" stroke="#fbbf24" stroke-width="1" />
+            <text x="660" y="105" fill="#fbbf24" font-size="12" font-weight="bold">DOKPLOY (PaaS Engine)</text>
+
+            <!-- n8n -->
+            <rect x="580" y="130" width="240" height="60" rx="6" fill="#0f172a" />
+            <rect x="580" y="130" width="240" height="60" rx="6" fill="rgba(251, 146, 60, 0.3)" stroke="#fb923c" stroke-width="1.5" />
+            <text x="675" y="155" fill="#f8fafc" font-size="12">n8n</text>
+            <text x="615" y="175" fill="#94a3b8" font-size="9">Automation & Ingest Pipeline</text>
+
+            <!-- Langfuse -->
+            <rect x="580" y="210" width="240" height="60" rx="6" fill="#0f172a" />
+            <rect x="580" y="210" width="240" height="60" rx="6" fill="rgba(136, 19, 55, 0.4)" stroke="#fb7185" stroke-width="1.5" />
+            <text x="660" y="235" fill="#f8fafc" font-size="12">Langfuse</text>
+            <text x="625" y="255" fill="#94a3b8" font-size="9">AI Observability & Trace</text>
+
+            <!-- Postiz / Extras -->
+            <rect x="580" y="290" width="240" height="60" rx="6" fill="#0f172a" />
+            <rect x="580" y="290" width="240" height="60" rx="6" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,2" />
+            <text x="660" y="315" fill="#f8fafc" font-size="12">Postiz</text>
+            <text x="625" y="335" fill="#94a3b8" font-size="9">Social Auto-posting (Draft)</text>
+
+        </svg>
+    </div>
+
+    <div class="grid-info">
+        <div class="card">
+            <h3><div class="card-dot cyan-bg"></div> Local Primary</h3>
+            <ul>
+                <li>• Qwen3-Coder GPU (llama.cpp)</li>
+                <li>• Hermes Core (Linux/WSL2)</li>
+                <li>• Obsidian PARA (Single Source)</li>
+                <li>• "High-Speed" Creative Loop</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3><div class="card-dot violet-bg"></div> Cloud Operations</h3>
+            <ul>
+                <li>• Hetzner CX22 (2vCPU / 4GB)</li>
+                <li>• Dokploy (Self-hosted PaaS)</li>
+                <li>• n8n (Always-on Workflows)</li>
+                <li>• Langfuse (Observability)</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3><div class="card-dot amber-bg"></div> Connectivity</h3>
+            <ul>
+                <li>• Cloudflare Tunnels (Remote Access)</li>
+                <li>• SSL Management (Auto-cert)</li>
+                <li>• GitHub Webhooks (Auto-deploy)</li>
+                <li>• Telegram Relay (Global Control)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "embedding-agent",
+  "type": "tech",
+  "status": "idle",
+  "llm_context_priority": 5,
+  "description": "Agent for generating and managing vector embeddings."
+}

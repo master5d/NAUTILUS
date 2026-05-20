@@ -30,7 +30,7 @@ foreach ($dir in $dirs) {
     }
 }
 
-# Seed tacit/ files (only if not present)
+# Seed Atlas/Workflows/ files (only if not present)
 $tacitFiles = @{
     "communication-preferences.md" = @"
 ---
@@ -108,7 +108,6 @@ updated: $(Get-Date -Format 'yyyy-MM-dd')
 
 ## v3.0 → v3.1
 - CrewAI as primary orchestrator — too much ceremony, replaced by Pydantic AI
-- Bluehost hosting — vendor lock-in, migrated to Cloudflare + Hetzner
 - Custom Next.js dashboard — productivity trap for solo operator
 
 ## v3.1 → v3.2
@@ -122,7 +121,6 @@ updated: $(Get-Date -Format 'yyyy-MM-dd')
 - 1-phase graphiti migration — 2-phase (PARA first) is safer
 
 ## Ongoing watch
-- Bluehost AI All-Access "$1/mo" — does not exist, it's $20/seat/mo (Loop 2 finding)
 - Pyrogram — abandoned, use aiogram 3.x
 - Fly.io free tier — closed Oct 2024
 "@

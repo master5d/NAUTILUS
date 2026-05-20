@@ -1,0 +1,9 @@
+{
+  "hooks": {
+    "sessionstart": {
+      "command": ".claude/hooks/sessionstart.sh",
+      "enabled": true,
+      "description": "Auto-reindex tech and knowledge roots on session start"
+    }
+  }
+}

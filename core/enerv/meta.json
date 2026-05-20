@@ -1,0 +1,7 @@
+{
+  "name": "ENERV",
+  "type": "tech",
+  "status": "active",
+  "llm_context_priority": 7,
+  "description": "Core system for project indexing and facet management."
+}

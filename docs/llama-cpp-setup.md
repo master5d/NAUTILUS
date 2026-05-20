@@ -1,6 +1,6 @@
 # llama.cpp CUDA 13.1 Setup — Windows 11
 
-Agentic AI v3.3 | Phase 0
+SOVRN v3.3 | Phase 0
 
 ## Critical version constraints
 
@@ -57,7 +57,7 @@ Alternatively download via browser and place at:
 
 ```powershell
 # Use the pre-configured launch script:
-pwsh -ExecutionPolicy Bypass -File "C:\Warp Projects\Agentic AI\scripts\launch-llama-server.ps1"
+pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\SOVERN\Atlas\Scripts\launch-llama-server.ps1"
 
 # Or with custom model path:
 pwsh -File launch-llama-server.ps1 -ModelPath "E:\models\Qwen3-Coder.gguf"

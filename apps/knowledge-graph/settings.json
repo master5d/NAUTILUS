@@ -1,0 +1,15 @@
+{
+  "semanticLogging": true,
+  "semanticLoggerConfig": {
+    "enabled": true,
+    "collectToolCalls": true,
+    "collectDecisions": true,
+    "collectCoordination": false,
+    "collectMemoryAccess": false,
+    "collectShellCommands": false
+  },
+  "hooks": {
+    "SessionStart": "bash ~/.claude/hooks/semantic-logger-init.sh",
+    "SessionEnd": "bash ~/.claude/hooks/semantic-logger-flush.sh"
+  }
+}

@@ -1,23 +1,58 @@
-# Agentic AI Project
+# SOVERN — Sovereign AI Data Mesh & Knowledge Graph
 
-This repository contains the setup for an autonomous AI development environment leveraging **Hermes Agent**, **LiteLLM**, and a **LLaMA server**. The core components currently running are:
+Unified autonomous environment for personal knowledge management, project indexing, and AI orchestration.
 
-- **LiteLLM proxy** (`litellm-config.yaml`) on port **4000** with rotating keys (Cerebras, Groq, NIM, OpenRouter) and a local fallback.
-- **LLaMA server** (`Qwen3-Coder-30B-A3B`) on port **8080** (launched via `launch-llama-server.ps1`).
-- **Gateway** (Telegram) already connected (PID 3121).
-- **Reasoning level** set to `medium` in `config.yaml`.
-- API keys for OpenRouter and GitHub are stored in `~/.hermes/.env`.
+## 🏗 Architecture (Monorepo)
 
-## What’s Included
+- **`/apps/knowledge-graph`**: 3D WebGL visualization and GraphRAG (Next.js 16, Neo4j, Gemini).
+- **`/core/enerv`**: Faceted indexing system and metadata management (Python CLI).
+- **`/config`**: Centralized configurations (LiteLLM, agents, services).
+- **`/scripts`**: Lifecycle and startup automation.
+- **`/hermes`**: Agent gateway and orchestration logic.
 
-- **Configuration files** (`config/`, `docker/`, `scripts/`).
-- **Documentation** (`docs/`, `hermes/`).
-- **Utility scripts** for launching services and setting up keys.
+## 🚀 Quick Start
 
-## Next Steps (To‑Do)
+### 1. Environment Setup
+Copy root `.env` and fill in your keys (Google AI, Neo4j):
+```bash
+cp .env.example .env # or edit existing .env
+```
 
-1. **README** – this file.
-2. **Git initialization** – create a repository for version control.
-3. **Weekly digest cron** – schedule a job that runs weekly to collect health‑check info or other metrics.
+### 2. Launch Services
+Use the canonical startup script:
+```powershell
+./scripts/hermes_startup.ps1
+```
 
-Feel free to extend the documentation, add more scripts, or adjust the cron job as needed.
+### 3. Integrated Workflow (CLI)
+The `facet` CLI (from ENERV) is now the unified interface:
+
+- **Visualize**: Open 3D graph for current context:
+  ```bash
+  facet visualize .
+  ```
+- **Ingest**: Add content to the Knowledge Graph with automatic metadata sync:
+  ```bash
+  facet ingest path/to/note.md
+  ```
+- **Audit**: Check system-wide metadata consistency:
+  ```bash
+  facet audit
+  ```
+
+## 🧠 Synergy Features
+
+- **Unified Ingest**: Files ingested via `facet` automatically pull tags and team assignments from `.facets/meta.json`.
+- **Metadata Sync**: ENERV attributes (status, priority, team) are stored as node properties in Neo4j, enabling multi-dimensional graph queries.
+- **Hermes Integration**: Sub-agents use the shared index to discover tools and knowledge without manual path mapping.
+
+## 🛠 Tech Stack
+
+- **LLM Proxy**: LiteLLM (OpenRouter, Groq, local fallback).
+- **Graph DB**: Neo4j AuraDB.
+- **Embeddings**: `gemini-embedding-exp-03-07` via Google AI Studio.
+- **UI**: Next.js + Three.js (react-force-graph-3d).
+- **Indexer**: Python 3.12 + JSON Schema.
+
+---
+*Vibe coded with Sovereignty in mind. (v3.4 — Integrated Mesh)*

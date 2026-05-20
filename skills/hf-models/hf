@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MODELS_YAML="$HOME/.hermes/models.yaml"
+COMMAND="${1:-status}"
+
+case "$COMMAND" in
+  status)
+    echo "=== ~/.hermes/models.yaml ==="
+    cat "$MODELS_YAML"
+    echo ""
+    echo "=== Disk usage ==="
+    python3 - "$MODELS_YAML" << 'INNEREOF'
+import sys, yaml, os
+with open(sys.argv[1]) as f:
+    data = yaml.safe_load(f)
+for m in data['models']:
+    filepath = os.path.join(m['path'], m['file'])
+    if os.path.exists(filepath):
+        size_gb = os.path.getsize(filepath) / (1024**3)
+        print(f"  {m['name']}: {size_gb:.1f} GB  [rev: {m['revision'][:8]}...]")
+    else:
+        print(f"  {m['name']}: NOT FOUND  (expected: {filepath})")
+INNEREOF
+    ;;
+
+  check)
+    echo "=== HuggingFace Hub version check ==="
+    python3 - "$MODELS_YAML" << 'INNEREOF'
+import sys, yaml, json, urllib.request, urllib.error, os
+token = os.environ.get('HF_TOKEN', '')
+if not token:
+    print("  WARNING: HF_TOKEN is not set — running unauthenticated (private repos will fail)")
+with open(sys.argv[1]) as f:
+    data = yaml.safe_load(f)
+for m in data['models']:
+    try:
+        req = urllib.request.Request(
+            f"https://huggingface.co/api/models/{m['repo']}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        with urllib.request.urlopen(req) as r:
+            info = json.loads(r.read())
+        latest = info.get('sha', 'unknown')
+        pinned = m['revision']
+        if pinned == latest:
+            status = "UP TO DATE"
+        else:
+            status = f"UPDATE AVAILABLE -> {latest[:8]}..."
+        print(f"  {m['name']}: pinned={pinned[:8]}...  {status}")
+    except (urllib.error.URLError, urllib.error.HTTPError) as e:
+        print(f"  {m['name']}: ERROR - {e}")
+INNEREOF
+    ;;
+
+  download)
+    MODEL_NAME="${2:-}"
+    if [ -z "$MODEL_NAME" ]; then
+      echo "Usage: hf download <model-name>"
+      echo "Available models:"
+      MODELS_YAML_PATH="$MODELS_YAML" python3 -c "import yaml,os; d=yaml.safe_load(open(os.environ['MODELS_YAML_PATH'])); [print(' -', m['name']) for m in d['models']]"
+      exit 1
+    fi
+    python3 - "$MODELS_YAML" "$MODEL_NAME" << 'INNEREOF'
+import sys, yaml, subprocess
+with open(sys.argv[1]) as f:
+    data = yaml.safe_load(f)
+name = sys.argv[2]
+models = {m['name']: m for m in data['models']}
+if name not in models:
+    print(f"Model not found: {name}")
+    print(f"Available: {list(models.keys())}")
+    sys.exit(1)
+m = models[name]
+cmd = [
+    '/usr/local/lib/hermes-agent/venv/bin/huggingface-cli', 'download',
+    m['repo'], m['file'],
+    '--revision', m['revision'],
+    '--local-dir', m['path']
+]
+print(f"Downloading {name}...")
+print(f"Command: {' '.join(cmd)}")
+subprocess.run(cmd, check=True)
+print(f"Done -> {m['path']}/{m['file']}")
+INNEREOF
+    ;;
+
+  pin)
+    MODEL_NAME="${2:-}"
+    NEW_HASH="${3:-}"
+    if [ -z "$MODEL_NAME" ] || [ -z "$NEW_HASH" ]; then
+      echo "Usage: hf pin <model-name> <hash>"
+      exit 1
+    fi
+    python3 - "$MODELS_YAML" "$MODEL_NAME" "$NEW_HASH" << 'INNEREOF'
+import sys, yaml, tempfile, os
+models_file, name, new_hash = sys.argv[1], sys.argv[2], sys.argv[3]
+with open(models_file) as f:
+    data = yaml.safe_load(f)
+found = False
+for m in data['models']:
+    if m['name'] == name:
+        old_hash = m['revision']
+        m['revision'] = new_hash
+        found = True
+        print(f"Pinned {name}: {old_hash[:8]}... -> {new_hash[:8]}...")
+        break
+if not found:
+    print(f"Model not found: {name}")
+    print(f"Available: {[m['name'] for m in data['models']]}")
+    sys.exit(1)
+tmp_path = models_file + '.tmp'
+with open(tmp_path, 'w') as f:
+    yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+os.replace(tmp_path, models_file)
+print("models.yaml updated.")
+INNEREOF
+    ;;
+
+  *)
+    echo "Unknown command: $COMMAND"
+    echo "Usage: hf <status|check|download <name>|pin <name> <hash>>"
+    exit 1
+    ;;
+esac

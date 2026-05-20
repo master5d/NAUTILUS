@@ -1,6 +1,6 @@
 # Compound Engineering Plugin Setup
 
-Agentic AI v3.3 | Phase 0 P2
+SOVRN v3.3 | Phase 0 P2
 
 ## What it is
 
@@ -35,7 +35,7 @@ If the above fails (plugin name may vary):
 # Should enter fast execution mode
 ```
 
-## Usage in Agentic AI v3.3
+## Usage in SOVRN v3.3
 
 The `compound_engineering` Hermes skill (`~/.hermes/skills/compound_engineering.md`) wraps this plugin.
 
