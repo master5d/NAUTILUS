@@ -2,7 +2,7 @@ import pytest
 import json
 from datetime import datetime, timedelta
 from unittest.mock import patch, Mock
-from tools.commands.auto_index import should_rebuild, read_last_index_timestamp, write_last_index_timestamp, check_root_rebuild_needed, build_summary, rebuild_index_for_root, auto_index_command
+from tools.tools.commands.auto_index import should_rebuild, read_last_index_timestamp, write_last_index_timestamp, check_root_rebuild_needed, build_summary, rebuild_index_for_root, auto_index_command
 
 def test_should_rebuild_when_elapsed_exceeds_threshold():
     """Tech root (3 min threshold): rebuild if 3+ minutes elapsed."""

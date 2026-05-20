@@ -1,7 +1,7 @@
 import pytest
 import json
 from pathlib import Path
-from tools.commands.current_info import validate_folder_path, detect_root, lookup_metadata_in_index, calculate_folder_stats
+from tools.tools.commands.current_info import validate_folder_path, detect_root, lookup_metadata_in_index, calculate_folder_stats
 
 
 def test_validate_folder_path_exists():
@@ -122,7 +122,7 @@ def test_calculate_folder_stats_empty(tmp_path):
 
 def test_enumerate_children_with_index_status(tmp_path):
     """List children and mark which are indexed."""
-    from tools.commands.current_info import enumerate_children
+    from tools.tools.commands.current_info import enumerate_children
 
     # Setup structure
     folder = tmp_path / "parent"
@@ -159,7 +159,7 @@ def test_enumerate_children_with_index_status(tmp_path):
 
 def test_build_output_indexed(tmp_path):
     """Build output with indexed metadata."""
-    from tools.commands.current_info import build_output
+    from tools.tools.commands.current_info import build_output
 
     # Setup structure
     folder = tmp_path / "indexed-folder"
@@ -192,7 +192,7 @@ def test_build_output_indexed(tmp_path):
 
 def test_build_output_unindexed(tmp_path):
     """Build output without metadata."""
-    from tools.commands.current_info import build_output
+    from tools.tools.commands.current_info import build_output
 
     # Setup structure
     folder = tmp_path / "unindexed-folder"
@@ -214,7 +214,7 @@ def test_build_output_unindexed(tmp_path):
 def test_current_info_cli_command_success(tmp_path, monkeypatch):
     """CLI command succeeds with valid folder."""
     from click.testing import CliRunner
-    from tools.commands.current_info import current_info_cli
+    from tools.tools.commands.current_info import current_info_cli
 
     # Setup structure under tmp_path
     folder = tmp_path / "test-folder"
@@ -234,7 +234,7 @@ def test_current_info_cli_command_success(tmp_path, monkeypatch):
     index_file.write_text(json.dumps(metadata) + "\n")
 
     # Mock detect_root to return tmp_path as root
-    from tools.commands import current_info
+    from tools.tools.commands import current_info
     original_detect_root = current_info.detect_root
     monkeypatch.setattr(current_info, "detect_root", lambda p: (tmp_path, "tech"))
 
@@ -254,7 +254,7 @@ def test_current_info_cli_command_success(tmp_path, monkeypatch):
 def test_current_info_cli_command_missing_folder():
     """CLI command fails for missing folder."""
     from click.testing import CliRunner
-    from tools.commands.current_info import current_info_cli
+    from tools.tools.commands.current_info import current_info_cli
 
     runner = CliRunner()
     result = runner.invoke(current_info_cli, ["/nonexistent/path"])
@@ -266,7 +266,7 @@ def test_current_info_cli_command_missing_folder():
 
 def test_enumerate_children_with_corrupted_index(tmp_path):
     """Gracefully handle corrupted index.jsonl."""
-    from tools.commands.current_info import enumerate_children
+    from tools.tools.commands.current_info import enumerate_children
 
     # Setup structure
     folder = tmp_path / "parent"
@@ -289,7 +289,7 @@ def test_enumerate_children_with_corrupted_index(tmp_path):
 
 def test_enumerate_children_missing_facets_dir(tmp_path):
     """Gracefully handle missing .facets directory."""
-    from tools.commands.current_info import enumerate_children
+    from tools.tools.commands.current_info import enumerate_children
 
     # Setup structure
     folder = tmp_path / "parent"
@@ -309,7 +309,7 @@ def test_enumerate_children_missing_facets_dir(tmp_path):
 
 def test_enumerate_children_special_characters(tmp_path):
     """Handle children with special characters in names."""
-    from tools.commands.current_info import enumerate_children
+    from tools.tools.commands.current_info import enumerate_children
 
     # Setup structure with special characters
     folder = tmp_path / "parent"

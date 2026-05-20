@@ -1,7 +1,6 @@
 import click
 import webbrowser
 import os
-from ...core.config import get_config
 
 @click.command()
 @click.argument('path', default='.')
@@ -11,8 +10,8 @@ def visualize(path):
     click.echo(f"🚀 Visualizing knowledge graph for: {abs_path}")
     
     # Base URL for the embedding-agent (apps/knowledge-graph)
-    # Default is localhost:3000
-    base_url = "http://localhost:3000"
+    # Default shifted to 3001 to avoid conflict with LangGraph
+    base_url = "http://localhost:3001"
     
     # In the future, we can add ?path=... query parameter if we implement 
     # filtering in the frontend.

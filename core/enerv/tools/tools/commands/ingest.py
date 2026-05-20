@@ -2,12 +2,11 @@ import click
 import requests
 import os
 import json
-from ...core.file_ops import read_file
-from ...core.meta import get_meta_path
+from pathlib import Path
 
 @click.command()
 @click.argument('path')
-@click.option('--api-url', default='http://localhost:3000/api/ingest', help='API URL for ingestion')
+@click.option('--api-url', default='http://localhost:3001/api/ingest', help='API URL for ingestion')
 def ingest(path, api_url):
     """Ingest a file or folder into the 3D Knowledge Graph with ENERV metadata sync."""
     if os.path.isdir(path):
@@ -39,7 +38,7 @@ def ingest(path, api_url):
         current_dir = os.path.dirname(current_dir)
 
     try:
-        content = read_file(abs_path)
+        content = Path(abs_path).read_text(encoding='utf-8')
         title = os.path.basename(abs_path)
         
         payload = {
