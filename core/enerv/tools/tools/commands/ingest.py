@@ -6,7 +6,7 @@ from pathlib import Path
 
 @click.command()
 @click.argument('path')
-@click.option('--api-url', default='http://localhost:3001/api/ingest', help='API URL for ingestion')
+@click.option('--api-url', default='http://localhost:3010/api/ingest', help='API URL for ingestion')
 def ingest(path, api_url):
     """Ingest a file or folder into the 3D Knowledge Graph with ENERV metadata sync."""
     if os.path.isdir(path):

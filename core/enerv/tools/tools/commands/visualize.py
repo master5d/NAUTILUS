@@ -10,8 +10,8 @@ def visualize(path):
     click.echo(f"🚀 Visualizing knowledge graph for: {abs_path}")
     
     # Base URL for the embedding-agent (apps/knowledge-graph)
-    # Default shifted to 3001 to avoid conflict with LangGraph
-    base_url = "http://localhost:3001"
+    # Default shifted to 3010 to avoid conflict with LangGraph and Point of Assembly
+    base_url = "http://localhost:3010"
     
     # In the future, we can add ?path=... query parameter if we implement 
     # filtering in the frontend.
