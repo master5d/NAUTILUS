@@ -8,7 +8,7 @@ import re
 from datetime import datetime
 
 # Configuration
-TOKEN_PATH = '/mnt/c/Warp Projects/Efforts/Ongoing/SOVRN/config/token.json'
+TOKEN_PATH = '/mnt/c/Warp Projects/Efforts/Ongoing/NAUTILUS/config/token.json'
 OBSIDIAN_BASE = '/mnt/c/Obsidian/life/resources/AI-Ingest'
 LITELLM_URL = 'http://localhost:4000/v1/chat/completions'
 

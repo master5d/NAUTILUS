@@ -149,7 +149,7 @@
 ### Task 4: Add HF Models to LiteLLM
 
 **Files:**
-- Modify: `C:\telo\Efforts\Ongoing\SOVRN\config\litellm-config.yaml`
+- Modify: `C:\telo\Efforts\Ongoing\NAUTILUS\config\litellm-config.yaml`
 - Modify: `C:\telo\Atlas\Scripts\hermes_startup.ps1`
 
 - [ ] **Step 1: Add HF model entries to litellm-config.yaml**
@@ -218,7 +218,7 @@
   Start-Sleep -Seconds 3
 
   $env:HF_TOKEN = "hf_YOUR_TOKEN_HERE"
-  $configPath = "C:\telo\Efforts\Ongoing\SOVRN\config\litellm-config.yaml"
+  $configPath = "C:\telo\Efforts\Ongoing\NAUTILUS\config\litellm-config.yaml"
   Start-Process `
     -FilePath "C:\Users\sasha\AppData\Local\Programs\Python\Python313\Scripts\litellm.exe" `
     -ArgumentList @("--config", $configPath, "--host", "127.0.0.1", "--port", "4000") `
@@ -250,7 +250,7 @@
 
   ```bash
   cd "C:/telo"
-  git add "Efforts/Ongoing/SOVRN/config/litellm-config.yaml" "Atlas/Scripts/hermes_startup.ps1"
+  git add "Efforts/Ongoing/NAUTILUS/config/litellm-config.yaml" "Atlas/Scripts/hermes_startup.ps1"
   git commit -m "feat(SOVRN): add HF Serverless as 5th fallback in LiteLLM (A+B)"
   ```
 
@@ -486,11 +486,11 @@
 - [ ] **Step 9: Version-control the skill files**
 
   ```bash
-  mkdir -p "C:/telo/Efforts/Ongoing/SOVRN/skills/hf-models"
-  cp ~/.hermes/skills/hf-models/SKILL.md "C:/telo/Efforts/Ongoing/SOVRN/skills/hf-models/"
-  cp ~/.hermes/skills/hf-models/hf "C:/telo/Efforts/Ongoing/SOVRN/skills/hf-models/"
+  mkdir -p "C:/telo/Efforts/Ongoing/NAUTILUS/skills/hf-models"
+  cp ~/.hermes/skills/hf-models/SKILL.md "C:/telo/Efforts/Ongoing/NAUTILUS/skills/hf-models/"
+  cp ~/.hermes/skills/hf-models/hf "C:/telo/Efforts/Ongoing/NAUTILUS/skills/hf-models/"
   cd "C:/telo"
-  git add Efforts/Ongoing/SOVRN/skills/hf-models/
+  git add Efforts/Ongoing/NAUTILUS/skills/hf-models/
   git commit -m "feat(hermes): add hf-models skill (status/check/download/pin)"
   ```
 

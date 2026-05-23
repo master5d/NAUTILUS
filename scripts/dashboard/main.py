@@ -48,7 +48,7 @@ with col1:
 with col2:
     st.subheader("🕵️ Agent activity")
     # Placeholder for reading actual logs
-    log_path = "/mnt/c/Warp Projects/Efforts/Ongoing/SOVRN/Calendar/Logs/activity.log"
+    log_path = "/mnt/c/Warp Projects/Efforts/Ongoing/NAUTILUS/Calendar/Logs/activity.log"
     if os.path.exists(log_path):
         with open(log_path, "r") as f:
             logs = f.readlines()[-10:]

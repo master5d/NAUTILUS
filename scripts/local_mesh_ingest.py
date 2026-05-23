@@ -14,7 +14,7 @@ from watchdog.events import FileSystemEventHandler
 # ================= Configuration =================
 LITELLM_URL = "http://localhost:11434/v1/chat/completions"
 OBSIDIAN_DIR = Path("/mnt/c/Obsidian/life/Atlas/Notes/Library")
-STATE_FILE = Path("/mnt/c/Warp Projects/Efforts/Ongoing/SOVRN/config/shadow_ingest_state.json")
+STATE_FILE = Path("/mnt/c/Warp Projects/Efforts/Ongoing/NAUTILUS/config/shadow_ingest_state.json")
 MODEL_NAME = "hermes3:8b" 
 MAX_CHARS = 6000 # Влезает до 2 000 токенов контекста. Идеально для Qwen/DeepSeek
 
