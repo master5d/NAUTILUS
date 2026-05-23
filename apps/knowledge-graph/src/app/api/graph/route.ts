@@ -1,11 +1,14 @@
 import { runCypher } from '@/lib/neo4j'
 import { GraphData, KnowledgeNode, KnowledgeEdge } from '@/types/knowledge'
+import { walkVault } from '@/lib/sources/obsidian'
+import fs from 'fs'
 
 const CLUSTER_COLORS: Record<string, string> = {
   file: '#4f46e5',
   url: '#059669',
   readwise: '#d97706',
   highlight: '#dc2626',
+  calendar: '#0ea5e9',
   default: '#6b7280',
 }
 
@@ -19,6 +22,20 @@ function clusterColor(cluster: string | null): string {
   for (const c of cluster) hash = c.charCodeAt(0) + ((hash << 5) - hash)
   const hue = Math.abs(hash) % 360
   return `hsl(${hue}, 65%, 55%)`
+}
+
+function normalizeId(filePath: string, vaultPath: string): string {
+  const normalizedFile = filePath.replace(/\\/g, '/')
+  const normalizedVault = vaultPath.replace(/\\/g, '/')
+  const relative = normalizedFile
+    .replace(normalizedVault, '')
+    .replace(/^\//, '')
+    .replace(/\.md$/, '')
+  return ('obsidian/' + relative)
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\p{L}\p{N}\-/]/gu, '')
+    .slice(0, 100)
 }
 
 export async function GET() {
@@ -97,10 +114,99 @@ export async function GET() {
 
     return Response.json(data)
   } catch (err) {
-    console.error('[graph]', err)
-    return Response.json(
-      { error: err instanceof Error ? err.message : 'Failed to load graph' },
-      { status: 500 }
-    )
+    console.warn('⚠️ Neo4j offline. Falling back to local Obsidian PARA vault extraction:', err)
+    
+    try {
+      const vaultPath = process.env.OBSIDIAN_VAULT_PATH ?? 'C:\\Users\\sasha\\Downloads\\Notes_ACE'
+      if (!fs.existsSync(vaultPath)) {
+        throw new Error(`Local vault path not found: ${vaultPath}`)
+      }
+
+      const notes = [...walkVault(vaultPath)]
+      
+      const nodes: KnowledgeNode[] = []
+      const links: KnowledgeEdge[] = []
+      const clusterIds = new Set<string>()
+
+      // Index of note titles to their doc IDs for fast target resolution
+      const titleToId = new Map<string, string>()
+
+      for (const note of notes) {
+        const docId = normalizeId(note.filePath, vaultPath)
+        titleToId.set(note.title.toLowerCase(), docId)
+        
+        nodes.push({
+          id: docId,
+          title: note.title,
+          source: 'obsidian' as any,
+          type: 'Document' as const,
+          content: note.content.slice(0, 1000),
+          cluster: note.cluster,
+          color: clusterColor(note.cluster),
+        })
+
+        if (note.cluster && note.cluster !== 'vault-root') {
+          clusterIds.add(note.cluster)
+        }
+      }
+
+      // Add Cluster nodes
+      for (const cluster of clusterIds) {
+        const clusterId = `cluster:${cluster.toLowerCase().replace(/\s+/g, '-')}`
+        nodes.push({
+          id: clusterId,
+          title: cluster,
+          source: 'file' as const,
+          type: 'Cluster' as const,
+          cluster: cluster,
+          color: clusterColor(cluster),
+        })
+      }
+
+      // Build BELONGS_TO links and REFERENCE links from mentions
+      for (const note of notes) {
+        const docId = normalizeId(note.filePath, vaultPath)
+
+        // Cluster belongs link
+        if (note.cluster && note.cluster !== 'vault-root') {
+          const clusterId = `cluster:${note.cluster.toLowerCase().replace(/\s+/g, '-')}`
+          links.push({
+            source: docId,
+            target: clusterId,
+            type: 'BELONGS_TO' as const,
+            score: 0.5,
+          })
+        }
+
+        // Mention reference links
+        if (note.mentions && note.mentions.length) {
+          for (const mention of note.mentions) {
+            const cleanMention = mention.replace(/\\/g, '/').split('/').pop()?.replace(/\.md$/, '') || mention
+            const targetId = titleToId.get(cleanMention.toLowerCase())
+            if (targetId && targetId !== docId) {
+              links.push({
+                source: docId,
+                target: targetId,
+                type: 'SIMILAR_TO' as const, // Render as semantic links in WebGL view
+                score: 0.8,
+              })
+            }
+          }
+        }
+      }
+
+      const data: GraphData = {
+        nodes,
+        links,
+      }
+
+      return Response.json(data)
+    } catch (fallbackErr) {
+      console.error('❌ Fallback extraction failed:', fallbackErr)
+      return Response.json(
+        { error: 'Failed to connect to Neo4j and local fallback failed' },
+        { status: 500 }
+      )
+    }
   }
 }
