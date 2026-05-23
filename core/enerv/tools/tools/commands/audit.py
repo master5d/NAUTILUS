@@ -1,5 +1,6 @@
 import click
 import json
+import sys
 from pathlib import Path
 from core.config import ScopeConfig, get_current_root
 from core.meta import MetaFile
@@ -14,7 +15,7 @@ def audit(root):
         root_path = Path(root) if root else get_current_root()
     except ValueError as e:
         click.secho(f"❌ {str(e)}", fg="red")
-        raise click.Exit(1)
+        sys.exit(1)
     facets_dir = root_path / ".facets"
 
     click.echo(f"\n📋 Audit Report for {root_path}")
@@ -66,6 +67,47 @@ def audit(root):
             click.echo(f"  {'✓' if has_meta else ' '} {folder.name}")
         except OSError:
             click.echo(f"  ? {folder.name} (Access Denied)")
+
+    # 🚀 Efforts Bandwidth Audit
+    efforts_dir = root_path / "Efforts"
+    if efforts_dir.exists() and efforts_dir.is_dir():
+        click.echo("\n🚀 Efforts Bandwidth Audit:")
+        click.echo("-" * 60)
+        
+        intensities = {
+            "On": {"icon": "🔥", "label": "Active (On)", "limit": 5},
+            "Ongoing": {"icon": "♻️", "label": "Continuous (Ongoing)", "limit": None},
+            "Simmering": {"icon": "〜", "label": "Simmering", "limit": None},
+            "Sleeping": {"icon": "💤", "label": "Sleeping", "limit": None}
+        }
+        
+        counts = {}
+        for intensity, cfg in intensities.items():
+            path = efforts_dir / intensity
+            if path.exists() and path.is_dir():
+                subdirs = [d for d in path.iterdir() if d.is_dir() and not d.name.startswith('.')]
+                counts[intensity] = len(subdirs)
+                limit_str = f" / {cfg['limit']}" if cfg['limit'] else ""
+                health_str = ""
+                
+                if intensity == "On":
+                    if len(subdirs) > cfg['limit']:
+                        health_str = click.style(" (OVERLOADED)", fg="red", bold=True)
+                    else:
+                        health_str = click.style(" (HEALTHY)", fg="green")
+                        
+                click.echo(f"  {cfg['icon']} {cfg['label']}: {len(subdirs)}{limit_str}{health_str}")
+            else:
+                click.secho(f"  ❌ Missing Status Directory: Efforts/{intensity}", fg="yellow")
+                
+        # Warn if Efforts/On exceeds 5 active focus items
+        if "On" in counts and counts["On"] > 5:
+            click.echo()
+            click.secho("  ⚠️ WARNING: Cognitive Bandwidth Overloaded!", fg="red", bold=True)
+            click.secho(f"  You are running {counts['On']} active efforts under 'Efforts/On'.", fg="yellow")
+            click.secho("  Nick Milo's LYT framework recommends keeping active focus to 3-5 items.", fg="yellow")
+            click.secho("  Action: Move lower-priority tasks to 'Efforts/Simmering' (back-burner) or 'Efforts/Sleeping' (archived).", fg="cyan")
+        click.echo("-" * 60)
 
     # Check .facets status
     if facets_dir.exists():

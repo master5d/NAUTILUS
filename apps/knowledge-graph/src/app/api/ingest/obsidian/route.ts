@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { walkVault } from '@/lib/sources/obsidian'
-import { mergeDocument, buildSimilarityEdges, initSchema } from '@/lib/neo4j'
+import { mergeDocument, buildSimilarityEdges, initSchema, mergeDailyLog, linkMentionToDailyLog } from '@/lib/neo4j'
 import { embed, chunkText, hashContent } from '@/lib/embeddings'
 let schemaInitialized = false
 async function ensureSchema() {
@@ -73,35 +73,72 @@ export async function POST(req: NextRequest) {
           const docId = normalizeId(note.filePath, vaultPath)
           const contentHash = hashContent(note.content)
 
-          // Check if content changed (deduplication for re-sync)
+          // Check if this is a daily log
+          const dateMatch = note.filePath.match(/[\\/](\d{4}-\d{2}-\d{2})\.md$/)
+          const isDailyLog = note.cluster === 'Calendar' && dateMatch !== null
+
           const firstEmbedding = await embed(chunks[0])
-          const { created, contentChanged } = await mergeDocument({
-            id: docId,
-            title: note.title,
-            content: note.content.slice(0, 5000),
-            source: 'obsidian',
-            cluster: note.cluster,
-            tags: note.tags,
-            embedding: firstEmbedding,
-            contentHash,
-          })
+          
+          let created = false
+          let contentChanged = false
+
+          if (isDailyLog) {
+            const date = dateMatch![1]
+            const result = await mergeDailyLog({
+              date,
+              title: note.title,
+              content: note.content,
+              source: 'obsidian',
+              tags: note.tags,
+              embedding: firstEmbedding,
+              contentHash,
+            })
+            created = result.created
+            contentChanged = result.contentChanged
+
+            if (created || contentChanged) {
+              // Parse wiki-link mentions in the daily log and link them dynamically
+              if (note.mentions && note.mentions.length) {
+                for (const mention of note.mentions) {
+                  await linkMentionToDailyLog(mention, date).catch((err) => {
+                    console.error(`Failed to link mention "${mention}" to daily log:`, err)
+                  })
+                }
+              }
+            }
+          } else {
+            const result = await mergeDocument({
+              id: docId,
+              title: note.title,
+              content: note.content.slice(0, 5000),
+              source: 'obsidian',
+              cluster: note.cluster,
+              tags: note.tags,
+              embedding: firstEmbedding,
+              contentHash,
+            })
+            created = result.created
+            contentChanged = result.contentChanged
+          }
 
           // Only process chunks and edges if this is a new document or content changed
           if (created || contentChanged) {
-            // Extra chunks
-            for (let i = 1; i < chunks.length; i++) {
-              const chunkId = `${docId}--chunk-${i}`
-              const chunkEmbedding = await embed(chunks[i])
-              await mergeDocument({
-                id: chunkId,
-                title: `${note.title} (part ${i + 1})`,
-                content: chunks[i],
-                source: 'obsidian',
-                cluster: note.cluster,
-                tags: note.tags,
-                embedding: chunkEmbedding,
-                contentHash,
-              })
+            // Extra chunks (skip for daily logs)
+            if (!isDailyLog) {
+              for (let i = 1; i < chunks.length; i++) {
+                const chunkId = `${docId}--chunk-${i}`
+                const chunkEmbedding = await embed(chunks[i])
+                await mergeDocument({
+                  id: chunkId,
+                  title: `${note.title} (part ${i + 1})`,
+                  content: chunks[i],
+                  source: 'obsidian',
+                  cluster: note.cluster,
+                  tags: note.tags,
+                  embedding: chunkEmbedding,
+                  contentHash,
+                })
+              }
             }
 
             const edges = await buildSimilarityEdges(docId, firstEmbedding)

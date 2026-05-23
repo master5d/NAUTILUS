@@ -38,13 +38,33 @@ def detect_root(folder_path):
     """
     folder_path = Path(folder_path).resolve()
 
-    # Define roots
+    # Walk up parent directories to find a folder containing .facets
+    for parent in [folder_path] + list(folder_path.parents):
+        if (parent / ".facets").exists():
+            # Classify as tech if it contains telo or tech in its path
+            if "telo" in str(parent).lower() or "tech" in str(parent).lower():
+                return parent, "tech"
+            # Check schema title if available
+            schema_file = parent / ".facets" / "schema.json"
+            if schema_file.exists():
+                try:
+                    schema_data = json.loads(schema_file.read_text(encoding='utf-8'))
+                    if "tech" in schema_data.get("title", "").lower():
+                        return parent, "tech"
+                except Exception:
+                    pass
+            return parent, "knowledge"
+
+    # Define fallback roots
     tech_root = Path("C:/telo").resolve()
     knowledge_root = Path("E:/").resolve()
+    notes_ace_root = Path("C:/Users/sasha/Downloads/Notes_ACE").resolve()
 
-    # Check which root contains this folder
+    # Check fallbacks
     if str(folder_path).startswith(str(tech_root)):
         return tech_root, "tech"
+    elif str(folder_path).startswith(str(notes_ace_root)):
+        return notes_ace_root, "knowledge"
     elif str(folder_path).startswith(str(knowledge_root)):
         return knowledge_root, "knowledge"
     else:

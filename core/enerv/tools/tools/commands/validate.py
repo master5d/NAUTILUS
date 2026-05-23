@@ -1,5 +1,6 @@
 import json
 import click
+import sys
 from pathlib import Path
 from jsonschema import validate as json_validate, ValidationError
 from core.config import get_current_root
@@ -14,7 +15,7 @@ def validate(root):
         root_path = Path(root) if root else get_current_root()
     except ValueError as e:
         click.secho(f"❌ {str(e)}", fg="red")
-        raise click.Exit(1)
+        sys.exit(1)
 
     # Load appropriate schema based on root path
     if root_path.name == "telo" or "tech" in str(root_path).lower():
@@ -32,13 +33,15 @@ def validate(root):
     click.echo(f"\n🔍 Validating meta.json in {root_path}")
     click.echo("=" * 60)
 
+    ignored_parts = {".git", "node_modules", ".next", ".claude", "venv", ".venv", ".worktrees"}
+
     for meta_file in root_path.rglob("meta.json"):
-        # Skip meta files in .facets directory
-        if ".facets" in meta_file.parts:
+        # Skip meta files in .facets or ignored directories
+        if ".facets" in meta_file.parts or any(p in ignored_parts for p in meta_file.parts):
             continue
 
         try:
-            meta = json.loads(meta_file.read_text())
+            meta = json.loads(meta_file.read_text(encoding='utf-8'))
             json_validate(meta, schema)
             valid_count += 1
             click.echo(f"  ✓ {meta_file.relative_to(root_path)}")
@@ -56,6 +59,6 @@ def validate(root):
 
     if invalid_count > 0:
         click.secho("\n❌ Validation failed", fg="red")
-        raise click.Exit(1)
+        sys.exit(1)
     else:
         click.secho("\n✅ All valid", fg="green")

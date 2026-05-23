@@ -1,36 +1,11 @@
 {
-  "project": "SOVRN",
-  "version": "2.0.0",
-  "status": "Active / Production",
-  "priority": 10,
+  "identifier": "pro-20260523-11a2",
+  "title": "Untitled",
+  "type": "project",
+  "status": "active",
+  "created": "2026-05-23",
+  "updated": "2026-05-23",
   "description": "Core Orchestrator - Sovereignty-first personal AI organization for Solo Vibe Coder. Orchestrates sub-agents and manages memory using a dual-stage PARA/Graphiti approach.",
-  "stack": {
-    "boss": "Hermes Agent (Linux Shell / WSL2)",
-    "gateway": "LiteLLM (with fallbacks)",
-    "local_inference": "llama.cpp (CUDA 13.1)",
-    "models": ["Qwen3-Coder-30B-A3B", "Hermes", "Llama.cpp"],
-    "sub_agents": ["Aider", "Cline", "Compound Engineering plugin"],
-    "memory_phase_0": "Obsidian (PARA)",
-    "memory_phase_1": "Graphiti (FalkorDB + Qdrant)",
-    "observability": "Langfuse (self-hosted)",
-    "dashboard": "Streamlit / Grafana",
-    "cloud_providers": ["Cerebras", "Groq", "NVIDIA NIM"]
-  },
-  "agentic": {
-    "llm_context_priority": 10,
-    "evolutionary_links": ["v3.0", "v3.1", "v3.2", "v3.3"],
-    "dependencies": ["facet-system", "obsidian-para"],
-    "skills_schema": "DeepVista",
-    "orchestration_mode": "Boss/Sub-agent"
-  },
-  "infrastructure": {
-    "local": "Surface Laptop Studio 2 (RTX 4060 8GB / 64GB RAM)",
-    "edge": "Cloudflare Pages/Workers/R2/D1",
-    "compute": "Hetzner CX23 (Dokploy)"
-  },
-  "paths": {
-    "vault": "/mnt/c/Users/User/Documents/Obsidian/life/",
-    "skills": "~/.hermes/skills/",
-    "configs": "/mnt/c/telo/SOVRN/config/"
-  }
+  "team": "personal",
+  "llm_context_priority": 10
 }

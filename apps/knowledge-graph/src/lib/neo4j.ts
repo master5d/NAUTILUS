@@ -41,18 +41,28 @@ export async function initSchema() {
     'CREATE CONSTRAINT highlight_id IF NOT EXISTS FOR (n:Highlight) REQUIRE n.id IS UNIQUE',
     'CREATE CONSTRAINT cluster_id IF NOT EXISTS FOR (n:Cluster) REQUIRE n.id IS UNIQUE',
     'CREATE CONSTRAINT tag_name IF NOT EXISTS FOR (n:Tag) REQUIRE n.name IS UNIQUE',
+    'CREATE CONSTRAINT dailylog_date IF NOT EXISTS FOR (n:DailyLog) REQUIRE n.date IS UNIQUE',
   ]
 
   const vectorIndex = `
     CREATE VECTOR INDEX document_embeddings IF NOT EXISTS
-    FOR (n:Document) ON n.embedding
+    FOR (n:Document) ON (n.embedding)
     OPTIONS {indexConfig: {\`vector.dimensions\`: 768, \`vector.similarity_function\`: 'cosine'}}
   `
 
   for (const c of constraints) {
     await runCypher(c)
   }
-  await runCypher(vectorIndex)
+
+  // Use procedure for vector index as it is more robust in some 5.x versions
+  const indexes = await runCypher('SHOW INDEXES')
+  const hasVector = indexes.some(r => r.get('name') === 'document_embeddings')
+  
+  if (!hasVector) {
+    await runCypher(`
+      CALL db.index.vector.createNodeIndex('document_embeddings', 'Document', 'embedding', 768, 'cosine')
+    `)
+  }
 }
 
 // Vector similarity search — returns top k nodes by cosine similarity
@@ -130,7 +140,7 @@ export async function mergeDocument(params: {
       cluster: params.cluster ?? 'default',
       embedding: params.embedding,
       contentHash: params.contentHash ?? null,
-      metadata: params.metadata ?? {},
+      metadata: JSON.stringify(params.metadata ?? {}),
     }
   )
 
@@ -221,4 +231,139 @@ export async function buildCrossRootLinks(docId: string, content: string): Promi
     linksCreated++
   }
   return linksCreated
+}
+
+// Merge a daily log node and link to previous/next chronological nodes
+export async function mergeDailyLog(params: {
+  date: string      // YYYY-MM-DD
+  title: string
+  content: string
+  source: string
+  tags?: string[]
+  embedding?: number[]
+  contentHash?: string
+  metadata?: Record<string, any>
+}): Promise<{ created: boolean; contentChanged: boolean }> {
+  // Check if DailyLog already exists
+  const existing = await runCypher(
+    `MATCH (d:DailyLog {date: $date}) RETURN d.contentHash as existingHash, d.id as exists`,
+    { date: params.date }
+  )
+
+  const contentChanged = !existing.length || existing[0].get('existingHash') !== params.contentHash
+  const created = !existing.length
+
+  const id = `daily-log-${params.date}`
+
+  // MERGE standard Document node representing the log file so it shows in 3D graph and vector search
+  await mergeDocument({
+    id,
+    title: params.title,
+    content: params.content,
+    source: params.source,
+    cluster: 'Calendar',
+    tags: params.tags,
+    embedding: params.embedding ?? Array(768).fill(0), // default empty embedding if none
+    contentHash: params.contentHash,
+    metadata: params.metadata,
+  })
+
+  // MERGE DailyLog node itself
+  await runCypher(
+    `
+    MERGE (dl:DailyLog {date: $date})
+    ON CREATE SET dl.createdAt = datetime()
+    SET dl.id = $id,
+        dl.title = $title,
+        dl.content = $content,
+        dl.source = $source,
+        dl.contentHash = $contentHash,
+        dl.updatedAt = datetime()
+    `,
+    {
+      date: params.date,
+      id,
+      title: params.title,
+      content: params.content.slice(0, 2000),
+      source: params.source,
+      contentHash: params.contentHash ?? null,
+    }
+  )
+
+  // Link standard Document to DailyLog
+  await runCypher(
+    `
+    MATCH (d:Document {id: $id}), (dl:DailyLog {date: $date})
+    MERGE (d)-[:REPRESENTS_LOG]->(dl)
+    `,
+    { id, date: params.date }
+  )
+
+  // Chronological linking: find previous daily log and link (prev)-[:NEXT_DAY]->(curr)
+  // And find next daily log and link (curr)-[:NEXT_DAY]->(next)
+  await runCypher(
+    `
+    MATCH (dl:DailyLog {date: $date})
+    WITH dl
+    // Link to previous day
+    OPTIONAL MATCH (prev:DailyLog)
+    WHERE prev.date < $date
+    WITH dl, prev
+    ORDER BY prev.date DESC
+    LIMIT 1
+    FOREACH (p IN CASE WHEN prev IS NOT NULL THEN [prev] ELSE [] END |
+      MERGE (p)-[:NEXT_DAY]->(dl)
+    )
+    `,
+    { date: params.date }
+  )
+
+  await runCypher(
+    `
+    MATCH (dl:DailyLog {date: $date})
+    WITH dl
+    // Link to next day
+    OPTIONAL MATCH (next:DailyLog)
+    WHERE next.date > $date
+    WITH dl, next
+    ORDER BY next.date ASC
+    LIMIT 1
+    FOREACH (n IN CASE WHEN next IS NOT NULL THEN [next] ELSE [] END |
+      MERGE (dl)-[:NEXT_DAY]->(n)
+    )
+    `,
+    { date: params.date }
+  )
+
+  return { created, contentChanged }
+}
+
+// Link a document to a daily log (representing active cognitive focus on that day)
+export async function linkDocumentToDailyLog(docId: string, logDate: string) {
+  await runCypher(
+    `
+    MATCH (d:Document {id: $docId}), (dl:DailyLog {date: $logDate})
+    MERGE (d)-[r:LOGGED_ON]->(dl)
+    SET r.date = $logDate
+    `,
+    { docId, logDate }
+  )
+}
+
+// Link an internal wiki-link mention to a daily log by title or ID contains match
+export async function linkMentionToDailyLog(targetTitle: string, logDate: string) {
+  // Normalize targetTitle
+  const cleanTitle = targetTitle.replace(/\\/g, '/').split('/').pop()?.replace(/\.md$/, '') || targetTitle
+  await runCypher(
+    `
+    MATCH (dl:DailyLog {date: $logDate})
+    MATCH (d:Document)
+    WHERE d.title = $targetTitle 
+       OR d.id CONTAINS $cleanTitle
+       OR toLower(d.title) = toLower($cleanTitle)
+    MERGE (d)-[r:LOGGED_ON]->(dl)
+    SET r.date = $logDate
+    `,
+    { targetTitle, cleanTitle: cleanTitle.toLowerCase(), logDate }
+  )
 }

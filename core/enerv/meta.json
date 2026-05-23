@@ -1,7 +1,11 @@
 {
-  "name": "ENERV",
-  "type": "tech",
+  "identifier": "pro-20260523-63a4",
+  "title": "ENERV",
+  "type": "project",
   "status": "active",
-  "llm_context_priority": 7,
-  "description": "Core system for project indexing and facet management."
+  "created": "2026-05-23",
+  "updated": "2026-05-23",
+  "description": "Core system for project indexing and facet management.",
+  "team": "personal",
+  "llm_context_priority": 7
 }

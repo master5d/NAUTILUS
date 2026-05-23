@@ -7,6 +7,7 @@ export interface ObsidianNote {
   content: string
   cluster: string   // top-level folder name
   tags: string[]
+  mentions: string[] // parsed wiki-link references
 }
 
 // Folders to skip inside the vault
@@ -170,8 +171,15 @@ export function* walkVault(vaultPath: string): Generator<ObsidianNote> {
             : entry.name.replace(/\.md$/, '')
 
         const tags = extractTags(meta, body)
+        const mentions: string[] = []
+        const inlineRe = /\[\[([^\]|]+)(?:\|[^\]]+)?\]\]/g
+        let m: RegExpExecArray | null
+        while ((m = inlineRe.exec(body)) !== null) {
+          mentions.push(m[1].trim())
+        }
+        const uniqueMentions = [...new Set(mentions)]
 
-        yield { filePath, title, content, cluster: cluster || 'vault-root', tags }
+        yield { filePath, title, content, cluster: cluster || 'vault-root', tags, mentions: uniqueMentions }
       }
     }
   }
