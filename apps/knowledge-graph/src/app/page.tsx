@@ -30,7 +30,7 @@ export default function Home() {
       <header className="flex items-center justify-between px-5 py-3 border-b border-zinc-900 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-          <span className="text-sm font-mono text-zinc-300 tracking-wide">EMBEDDING AGENT</span>
+          <span className="text-sm font-mono text-zinc-300 tracking-wide">NOOSCOPE</span>
           <span className="text-xs text-zinc-700 font-mono">/ knowledge graph</span>
         </div>
         <nav className="flex gap-1" aria-label="Panel navigation">

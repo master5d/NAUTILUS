@@ -1,10 +1,13 @@
 'use client'
 
-// This file is always loaded via dynamic(() => import(...), { ssr: false })
-// so top-level browser API usage is safe here
-import ForceGraph3D from 'react-force-graph-3d'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { GraphData, KnowledgeNode } from '@/types/knowledge'
+
+// Safe client-side dynamic loading of WebGL library to prevent SSR evaluate crashes
+let ForceGraph3D: any = null
+if (typeof window !== 'undefined') {
+  ForceGraph3D = require('react-force-graph-3d').default || require('react-force-graph-3d')
+}
 
 interface Graph3DProps {
   onNodeClick?: (node: KnowledgeNode) => void
@@ -68,7 +71,7 @@ export function Graph3D({ onNodeClick }: Graph3DProps) {
 
   return (
     <div ref={containerRef} className="relative w-full h-full bg-background rounded-lg overflow-hidden">
-      {!loading && !error && (
+      {!loading && !error && ForceGraph3D && (
         <ForceGraph3D
           ref={fgRef}
           graphData={graphData}

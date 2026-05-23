@@ -1,4 +1,4 @@
-# Embedding Agent MVP — Complete Priority Summary
+# Nooscope MVP — Complete Priority Summary
 
 **Status**: ✅ **ALL PRIORITIES COMPLETE**
 **Date**: 2026-03-30
@@ -259,7 +259,7 @@ Cost: 95% reduction on unchanged re-sync
 
 ## Conclusion
 
-**Embedding Agent MVP is now feature-complete and ready for testing.**
+**Nooscope MVP is now feature-complete and ready for testing.**
 
 All high and medium priority items are done. The critical vector dimension bug is fixed. Performance is optimized with content hash deduplication (6× speedup on re-sync). Documentation is comprehensive for future developers.
 

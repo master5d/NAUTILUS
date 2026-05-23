@@ -1,6 +1,6 @@
 @AGENTS.md
 
-# Embedding Agent — Context for Claude
+# Nooscope — Context for Claude
 
 ## What this project is
 Personal AI second brain / knowledge graph MVP. See full PRD:

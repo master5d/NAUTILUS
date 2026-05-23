@@ -1,7 +1,7 @@
 {
-  "path": "C:\\telo\\embedding-agent",
+  "path": "C:\\telo\\nooscope",
   "identifier": "embed-agent-20260422-0001",
-  "title": "Embedding Agent",
+  "title": "Nooscope",
   "description": "Personal Knowledge Graph MVP - Next.js 16, Google AI free tier, Neo4j AuraDB",
   "type": "project",
   "status": "active",

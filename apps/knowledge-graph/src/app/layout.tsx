@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Embedding Agent — Knowledge Graph",
+  title: "Nooscope — Knowledge Graph",
   description: "Personal AI knowledge graph with multimodal embeddings",
 };
 

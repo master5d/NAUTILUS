@@ -1,4 +1,4 @@
-# Embedding Agent — Personal Knowledge Graph
+# Nooscope — Personal Knowledge Graph
 
 **PRD**: https://www.notion.so/synergify/Embedding-Agent-PRD-32896060a52d80ae882eefbc2c7aba73
 

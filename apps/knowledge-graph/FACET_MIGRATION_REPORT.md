@@ -1,16 +1,16 @@
 # Facet System Migration Report
-## Real-World Skill Test: embedding-agent Project
+## Real-World Skill Test: nooscope Project
 
 **Date:** 2026-04-22  
 **Time:** 16:05 UTC  
-**Project:** embedding-agent  
+**Project:** nooscope  
 **Status:** ✅ MIGRATION COMPLETE
 
 ---
 
 ## Executive Summary
 
-Successfully migrated the **embedding-agent** project into the Faceted indexing system. The project is now registered with full metadata and discoverable via the `facet` CLI.
+Successfully migrated the **nooscope** project into the Faceted indexing system. The project is now registered with full metadata and discoverable via the `facet` CLI.
 
 - **Before:** Unindexed, invisible to Facet system
 - **After:** Indexed as a project, team-assigned (ai), metadata-enriched
@@ -22,7 +22,7 @@ Successfully migrated the **embedding-agent** project into the Faceted indexing 
 
 ### Step 1: Pre-Migration Assessment
 ```
-Path:             C:\telo\embedding-agent
+Path:             C:\telo\nooscope
 Indexed Status:   ❌ false
 Metadata:         none
 Files:            21
@@ -41,9 +41,9 @@ Created `.facets/meta.json` with complete project metadata:
 
 ```json
 {
-  "path": "C:\\telo\\embedding-agent",
+  "path": "C:\\telo\\nooscope",
   "identifier": "embed-agent-20260422-0001",
-  "title": "Embedding Agent",
+  "title": "Nooscope",
   "description": "Personal Knowledge Graph MVP - Next.js 16, Google AI free tier, Neo4j AuraDB",
   "type": "project",
   "status": "active",
@@ -68,7 +68,7 @@ Created `.facets/meta.json` with complete project metadata:
 ```
 
 **Result:** Central index (index.jsonl) rebuilt, now contains:
-- 13 total indexed folders (12 existing + embedding-agent)
+- 13 total indexed folders (12 existing + nooscope)
 - Proper JSONL format for aggregate querying
 - Updated timestamp: 2026-04-22T16:06:00Z
 
@@ -108,7 +108,7 @@ Top-level folders: 37
 | Attribute | Value |
 |-----------|-------|
 | **Indexed** | ✅ Yes |
-| **Title** | Embedding Agent |
+| **Title** | Nooscope |
 | **Identifier** | embed-agent-20260422-0001 |
 | **Type** | project |
 | **Status** | active |
@@ -127,7 +127,7 @@ Top-level folders: 37
 The skill enabled:
 
 1. **Folder Inspection** (`facet_current_info`)
-   - Identified that embedding-agent was unindexed
+   - Identified that nooscope was unindexed
    - Captured complete before/after state
    - Showed folder structure and composition
 
@@ -154,9 +154,9 @@ The skill enabled:
 
 ## Project Now Discoverable
 
-The embedding-agent project can now be:
+The nooscope project can now be:
 
-- **Queried:** `facet current-info C:\telo\embedding-agent`
+- **Queried:** `facet current-info C:\telo\nooscope`
 - **Searched:** Via the central index for team assignments, status, type
 - **Managed:** Updated metadata via .facets/meta.json
 - **Referenced:** By identifier (embed-agent-20260422-0001) in other systems
@@ -221,4 +221,4 @@ The skill worked well, but consider:
 ✅ **System Integrity Verified**  
 ✅ **Project Now Organized**
 
-The embedding-agent project is now registered, discoverable, and properly managed through the Faceted indexing system.
+The nooscope project is now registered, discoverable, and properly managed through the Faceted indexing system.

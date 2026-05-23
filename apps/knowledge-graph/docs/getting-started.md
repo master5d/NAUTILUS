@@ -1,4 +1,4 @@
-# Getting Started with Embedding Agent
+# Getting Started with Nooscope
 
 Your personal AI knowledge graph. Ingest anything → it becomes a node → connections emerge automatically.
 

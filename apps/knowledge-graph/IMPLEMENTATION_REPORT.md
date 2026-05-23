@@ -1,4 +1,4 @@
-# Embedding Agent MVP — Implementation Report
+# Nooscope MVP — Implementation Report
 **Date**: 2026-03-30
 **Sprint**: Sprint 1 (MVP) — Text-only embeddings, Obsidian vault, Neo4j graph
 **Status**: ✅ **READY FOR TESTING** (critical bug fixed)
