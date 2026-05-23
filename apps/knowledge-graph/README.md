@@ -1,4 +1,6 @@
-# Nooscope — Personal Knowledge Graph
+# Nautilus — 3D Interactive Knowledge Graph UI
+
+Nautilus is a personal AI second brain and 3D visual explorer, running on the **SOVRN Architecture** (sovereignty-first local stack).
 
 **PRD**: https://www.notion.so/synergify/Embedding-Agent-PRD-32896060a52d80ae882eefbc2c7aba73
 

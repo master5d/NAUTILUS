@@ -1,4 +1,6 @@
-# SOVRN — Sovereign AI Data Mesh & Knowledge Graph
+# NAUTILUS — Personal Knowledge Mesh & Data Graph
+
+**NAUTILUS** is a unified autonomous environment for personal knowledge management, project indexing, and AI orchestration. It is built on the **SOVRN Architecture** (the sovereignty-first, local-first agentic stack & principles).
 
 Unified autonomous environment for personal knowledge management, project indexing, and AI orchestration.
 

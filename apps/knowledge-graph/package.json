@@ -2,13 +2,35 @@
   "dependencies": {
     "@ai-sdk/google": "^3.0.53",
     "@ai-sdk/react": "^3.0.143",
+    "@base-ui/react": "^1.5.0",
+    "@google/generative-ai": "^0.24.1",
+    "@tailwindcss/postcss": "^4.3.0",
+    "@tailwindcss/typography": "^0.5.19",
     "ai": "^6.0.141",
-    "neo4j-driver": "^6.0.1"
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.16.0",
+    "neo4j-driver": "^6.0.1",
+    "next": "^16.2.6",
+    "postcss": "^8.5.15",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-force-graph-3d": "^1.29.1",
+    "react-markdown": "^10.1.0",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.3.0",
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.184.0"
   },
   "scripts": {
     "dev": "next dev -p 3010",
     "build": "next build",
     "start": "next start -p 3010",
     "lint": "next lint"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "typescript": "6.0.3"
   }
 }

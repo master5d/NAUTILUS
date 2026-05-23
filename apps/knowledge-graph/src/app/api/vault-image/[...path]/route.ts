@@ -6,10 +6,11 @@ const VAULT_PATH = process.env.OBSIDIAN_VAULT_PATH || 'C:/Users/sasha/Documents/
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { path: string[] } }
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const filePath = params.path.join('/')
+    const { path: pathSegments } = await params
+    const filePath = pathSegments.join('/')
     // Prevent directory traversal
     if (filePath.includes('..')) {
       return new Response('Forbidden', { status: 403 })

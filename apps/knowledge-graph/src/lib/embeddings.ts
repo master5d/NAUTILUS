@@ -50,7 +50,11 @@ export async function embed(text: string): Promise<number[]> {
     model: 'gemini-embedding-001',
   })
 
-  const result = await model.embedContent(normalizeText(text))
+  const result = await model.embedContent({
+    content: { parts: [{ text: normalizeText(text) }], role: 'user' },
+    outputDimensionality: 768,
+  } as any)
+  console.log(`[embed] text length: ${text.length}, dim: ${result.embedding.values.length}`)
   return result.embedding.values
 }
 

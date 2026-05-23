@@ -1,11 +1,11 @@
 {
   "identifier": "pro-20260523-a190",
-  "title": "nooscope",
+  "title": "Nautilus UI",
   "type": "project",
   "status": "paused",
   "created": "2026-05-23",
   "updated": "2026-05-23",
-  "description": "Agent for generating and managing vector embeddings.",
+  "description": "3D Interactive Knowledge Graph UI for Nautilus, powered by the SOVRN agentic stack.",
   "team": "personal",
   "llm_context_priority": 5
 }

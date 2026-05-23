@@ -1,11 +1,11 @@
 {
   "identifier": "pro-20260523-11a2",
-  "title": "Untitled",
+  "title": "Nautilus",
   "type": "project",
   "status": "active",
   "created": "2026-05-23",
   "updated": "2026-05-23",
-  "description": "Core Orchestrator - Sovereignty-first personal AI organization for Solo Vibe Coder. Orchestrates sub-agents and manages memory using a dual-stage PARA/Graphiti approach.",
+  "description": "Core Orchestrator - Nautilus Personal Knowledge Mesh, built on the SOVRN sovereignty-first agentic architecture.",
   "team": "personal",
   "llm_context_priority": 10
 }
