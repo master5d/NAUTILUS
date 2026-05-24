@@ -3,7 +3,6 @@
 import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import { KnowledgeNode } from '@/types/knowledge'
-import { IngestPanel } from '@/components/ingest-panel'
 import { SearchPanel } from '@/components/search-panel'
 import { NodeViewer } from '@/components/node-viewer'
 
@@ -22,7 +21,6 @@ const Graph3D = dynamic(
 
 export default function Home() {
   const [selectedNode, setSelectedNode] = useState<KnowledgeNode | null>(null)
-  const [sidePanel, setSidePanel] = useState<'ingest' | 'search'>('ingest')
 
   return (
     <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
@@ -33,30 +31,6 @@ export default function Home() {
           <span className="text-sm font-mono text-zinc-300 tracking-wide">NOOSCOPE</span>
           <span className="text-xs text-zinc-700 font-mono">/ knowledge graph</span>
         </div>
-        <nav className="flex gap-1" aria-label="Panel navigation">
-          <button
-            onClick={() => setSidePanel('ingest')}
-            aria-pressed={sidePanel === 'ingest'}
-            className={`px-3 py-1 text-xs font-mono rounded border transition-colors ${
-              sidePanel === 'ingest'
-                ? 'bg-zinc-800 border-zinc-700 text-zinc-200'
-                : 'border-zinc-900 text-muted-foreground hover:border-zinc-800 hover:text-zinc-400'
-            }`}
-          >
-            + ingest
-          </button>
-          <button
-            onClick={() => setSidePanel('search')}
-            aria-pressed={sidePanel === 'search'}
-            className={`px-3 py-1 text-xs font-mono rounded border transition-colors ${
-              sidePanel === 'search'
-                ? 'bg-zinc-800 border-zinc-700 text-zinc-200'
-                : 'border-zinc-900 text-muted-foreground hover:border-zinc-800 hover:text-zinc-400'
-            }`}
-          >
-            ⌕ query
-          </button>
-        </nav>
       </header>
 
       {/* Main layout */}
@@ -68,21 +42,10 @@ export default function Home() {
 
         {/* Side panel */}
         <aside aria-label="Knowledge graph controls" className="w-[380px] border-l border-zinc-900 bg-background overflow-y-auto p-4 shrink-0">
-          {sidePanel === 'ingest' ? (
-            <>
-              <h2 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-4">
-                Add to Knowledge Graph
-              </h2>
-              <IngestPanel />
-            </>
-          ) : (
-            <>
-              <h2 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-4">
-                Query Knowledge Graph
-              </h2>
-              <SearchPanel onNodeClick={setSelectedNode} />
-            </>
-          )}
+          <h2 className="text-xs font-mono text-muted-foreground uppercase tracking-wider mb-4">
+            Query Knowledge Graph
+          </h2>
+          <SearchPanel onNodeClick={setSelectedNode} />
         </aside>
       </div>
 
