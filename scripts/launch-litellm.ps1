@@ -13,5 +13,13 @@ foreach ($k in $keys) {
     else { Write-Warning "$k not set — run setup-litellm-keys.ps1 first" }
 }
 
-Write-Host "Starting LiteLLM proxy on http://localhost:4000 ..." -ForegroundColor Cyan
-litellm --config "C:\telo\Efforts\Ongoing\SOVRN\config\litellm-config.yaml" --port 4000
+# 1. Allocate a dynamic port using the port broker
+$scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$brokerPath = Join-Path $scriptRoot "port_broker.py"
+$configPath = Join-Path (Split-Path -Parent $scriptRoot) "config\litellm-config.yaml"
+
+$allocatedPortStr = python $brokerPath "litellm" 4000 | Select-Object -Last 1
+$allocatedPort = [int]$allocatedPortStr.Trim()
+
+Write-Host "Starting LiteLLM proxy on http://localhost:$allocatedPort ..." -ForegroundColor Cyan
+litellm --config $configPath --port $allocatedPort

@@ -16,6 +16,12 @@ param(
     [string]$LlamaServerPath = "C:\llama.cpp\llama-server.exe"  # b8943, CUDA 13.1
 )
 
+# 1. Allocate a dynamic port using the port broker
+$scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$brokerPath = Join-Path $scriptRoot "port_broker.py"
+$allocatedPortStr = python $brokerPath "llama-server" $Port | Select-Object -Last 1
+$Port = [int]$allocatedPortStr.Trim()
+
 # Validate model file
 if (-not (Test-Path $ModelPath)) {
     Write-Error "Model not found: $ModelPath"
