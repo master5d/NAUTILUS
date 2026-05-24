@@ -1,23 +1,65 @@
 # Synergy: The Integrated Mesh
 
-The true power of SOVRN lies in the synergy between its components. It is not just a collection of tools, but an integrated mesh where the sum is greater than the parts.
+The ultimate capacity of Nautilus is found in the deep **synergy** between its components. Rather than operating as isolated tools, they build an integrated, self-healing mesh where the operations of each component enrich the other.
 
-## 1. Metadata-Aware Ingestion
-When you run `facet ingest my_note.md`, the system doesn't just treat the file as raw text.
-- **Context Lookup**: It searches for the nearest `.facets/meta.json`.
-- **Enrichment**: It attaches "Team", "Project Status", and "Tags" to the ingestion request.
-- **Multidimensional Graph**: In Neo4j, your nodes are now searchable by both semantic content *and* systemic metadata. You can ask: *"Show me all high-priority research notes for the AI team."*
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Coder as Solo Vibe Coder
+    participant CLI as facet CLI (enerv)
+    participant Meta as .facets/meta.json
+    participant Proxy as LiteLLM Proxy
+    participant DB as Neo4j Graph DB
+    participant UI as Nooscope 3D UI
 
-## 2. Dynamic 3D Context Navigation
-The `facet visualize` command bridges the gap between the terminal and the visual brain.
-- **Instant Access**: Open a spatial representation of your project folder.
-- **Cluster Emergence**: See how different files relate across projects, potentially discovering overlaps you didn't know existed.
+    Coder->>CLI: facet ingest "Atlas/Notes/Refactoring.md"
+    activate CLI
+    CLI->>Meta: Resolve parent meta.json schema
+    activate Meta
+    Meta-->>CLI: Return context (Team=Core, Priority=High, Status=Active)
+    deactivate Meta
+    
+    CLI->>CLI: Segment text into normalized chunks & hash
+    
+    CLI->>Proxy: Request embedding for text chunks
+    activate Proxy
+    Proxy-->>CLI: Return 768-dim vector embeddings
+    deactivate Proxy
 
-## 3. Agentic Context Injection
-Because ENERV and the Knowledge Graph share a common schema, agents in the `hermes` layer can perform "Cross-Project Reasonings."
-- **Scenario**: An agent tasked with "Optimizing deployment" can consult ENERV for the current `status` of all relevant projects and the Knowledge Graph for the actual `deploy.md` logs and documentation.
+    CLI->>DB: Execute MERGE transactions (Docs, Metadata, Vectors)
+    activate DB
+    DB->>DB: Identify similarities & link SIMILAR_TO edges
+    DB-->>CLI: Confirm transaction success
+    deactivate DB
+    
+    CLI-->>Coder: Ingestion complete (Console summary)
+    deactivate CLI
 
-## 4. Unified Life-Cycle
-The `scripts/` directory provides a single point of failure-resistance and orchestration.
-- **hermes_startup.ps1**: Launches the LLM servers, the Python indexer, the Neo4j connection, and the Next.js frontend in one orchestrated sequence.
-- **Unified .env**: One source of truth for API keys and database credentials across all Python, Node.js, and Bash components.
+    UI->>DB: Fetch active nodes & semantic links
+    activate DB
+    DB-->>UI: Return graph coordinates & properties
+    deactivate DB
+    UI->>Coder: Render live 3D visual cluster update
+```
+
+## Core Synergistic Workflows
+
+### 1. Metadata-Aware Ingestion
+When the coder executes `facet ingest my_note.md`, the ingestion pipeline does not treat the document as a simple, unstructured text dump.
+- **Context Boundary Check**: The indexer ascends the directory path to resolve the closest `.facets/meta.json` file.
+- **Context Enrichment**: It automatically merges parameters (e.g., project team, priority level, execution status) into the node properties.
+- **Multi-Dimensional Graph**: The database creates a node queryable both by raw semantic meaning (vector similarity) and system-wide structural tags (metadata). This allows for complex searches like: *"Find all high-priority notes linked to the game engine database optimization."*
+
+### 2. Dynamic 3D Context Navigation
+The `facet visualize` command links the command-line workspace to the visual brain.
+- **Instant Mapping**: By analyzing the active working directory, the Next.js visualizer loads the exact node neighborhood on your screen.
+- **Emergent Overlaps**: Seeing physical cluster separations allows the developer to identify hidden conceptual redundancies, circular task loops, and structural gaps.
+
+### 3. Agentic Context Injection
+Because ENERV and the Knowledge Graph share unified Pydantic schemas, autonomous agents (Aider, Cline) operating in the orchestration layer can execute context-rich operations.
+- **Example Scenario**: An agent tasked with "Resolving port collisions" checks the indexer for services listed under `/config/services.json` and simultaneously queries the Graph for all previous incident reports and documentation files containing "port broker design". The agent receives a hyper-focused, bitemporal context package, preventing "context sprawl" and protecting model reasoning performance.
+
+### 4. Unified Lifecycles
+A single startup script orchestrates the monorepo's resilient stack:
+- **`master-restart.ps1`**: Queries the port broker, allocates free local sockets (LiteLLM, Neo4j, llama-server, Next.js), writes dynamic variables to `.env` and `.env.local`, and bootstraps all services concurrently.
+- **Shared `.env`**: A single source of truth for local paths, database logins, and model aliases, preventing environment drift.
