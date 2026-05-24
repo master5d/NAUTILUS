@@ -3,30 +3,23 @@
 **The Knowledge Graph** represents the visual and semantic brain of the Nautilus environment. It maps the meaning of your documents, codebases, and ideas in a dynamic 3D coordinate space, linking vector similarity to systemic metadata relationships.
 
 ```mermaid
-graph TD
-    %% Styling
-    classDef Ingest fill:#0f172a,stroke:#3b82f6,stroke-width:1.5px,color:#93c5fd;
-    classDef Compute fill:#1e293b,stroke:#475569,stroke-width:1.5px,color:#f8fafc;
-    classDef Active fill:#10b981,stroke:#047857,stroke-width:1.5px,color:#fff;
-    classDef Fallback fill:#d97706,stroke:#b45309,stroke-width:1.5px,color:#fff;
-
-    %% Nodes
-    Source[Markdown Note / Code File]:::Ingest
-    Normalize[Text Normalizer & SHA-256 Hash]:::Ingest
+flowchart TD
+    Source[Markdown Note / Code File]
+    Normalize[Text Normalizer & SHA-256 Hash]
     
-    CheckDB{Is Neo4j Online?}:::Compute
+    CheckDB{Is Neo4j Online?}
     
     %% Neo4j Active Path
-    Chunk[Chunk Text & Generate Embeddings]:::Compute
-    MergeNodes[Merge Document & Metadata Nodes]:::Active
-    EdgeGen[Generate Vector Similarity SIMILAR_TO Edges]:::Active
-    Neo4jDB[(Neo4j Graph Database)]:::Active
-    WebGL[Nooscope 3D WebGL Interface]:::Compute
+    Chunk[Chunk Text & Generate Embeddings]
+    MergeNodes[Merge Document & Metadata Nodes]
+    EdgeGen[Generate Vector Similarity SIMILAR_TO Edges]
+    Neo4jDB[(Neo4j Graph Database)]
+    WebGL[Nooscope 3D WebGL Interface]
     
     %% Offline Fallback Path
-    ObsidianSweep[Local Obsidian Vault walkVault Sweep]:::Fallback
-    LocalExtract[Extract Frontmatter & Backlinks]:::Fallback
-    LocalGraph[Construct Direct Backlink Graph Coordinates]:::Fallback
+    ObsidianSweep[Local Obsidian Vault walkVault Sweep]
+    LocalExtract[Extract Frontmatter & Backlinks]
+    LocalGraph[Construct Direct Backlink Graph Coordinates]
 
     %% Connections
     Source --> Normalize

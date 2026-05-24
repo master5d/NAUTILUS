@@ -3,46 +3,37 @@
 Nautilus follows a **Modular Monorepo Architecture**, separating operational concerns while maintaining a unified bitemporal state across directories.
 
 ```mermaid
-graph TD
-    %% Styling
-    classDef Human fill:#6366f1,stroke:#4f46e5,stroke-width:2px,color:#fff;
-    classDef Orch fill:#0ea5e9,stroke:#0284c7,stroke-width:1.5px,color:#fff;
-    classDef Gateway fill:#475569,stroke:#334155,stroke-width:1.5px,color:#fff;
-    classDef Inference fill:#10b981,stroke:#059669,stroke-width:1.5px,color:#fff;
-    classDef Mem fill:#f59e0b,stroke:#d97706,stroke-width:1.5px,color:#fff;
-    classDef Host fill:#7c3aed,stroke:#6d28d9,stroke-width:1.5px,color:#fff;
-
-    %% Nodes
-    Coder[Solo Vibe Coder]:::Human
+flowchart TD
+    Coder[Solo Vibe Coder]
     
     subgraph Orchestration["Orchestration Layer"]
-        Hermes[Hermes Boss Agent]:::Orch
-        SubAgents[Aider / Cline / Claude Code]:::Orch
+        Hermes[Hermes Boss Agent]
+        SubAgents[Aider / Cline / Claude Code]
     end
     
     subgraph GatewayLayer["Model Gateway Layer"]
-        LiteLLM[LiteLLM Proxy Router]:::Gateway
+        LiteLLM[LiteLLM Proxy Router]
     end
     
     subgraph InferenceLayer["Inference Layer"]
-        LocalInference[llama.cpp CUDA GGUF]:::Inference
-        FreeClouds[Cerebras / Groq / NIM Pools]:::Inference
-        PaidClouds[Anthropic API]:::Inference
+        LocalInference[llama.cpp CUDA GGUF]
+        FreeClouds[Cerebras / Groq / NIM Pools]
+        PaidClouds[Anthropic API]
     end
 
     subgraph MemoryLayer["Bitemporal Memory Layer"]
-        FastPath[Fast Path: Obsidian ACE Vault]:::Mem
-        SlowPath[Slow Path: FalkorDB / Neo4j Graph]:::Mem
+        FastPath[Fast Path: Obsidian ACE Vault]
+        SlowPath[Slow Path: FalkorDB / Neo4j Graph]
     end
     
     subgraph ObservabilityLayer["Observability & Tools"]
-        OpenLLM[OpenLLM SDK & Langfuse]:::Gateway
-        FacetCLI[facet CLI & Port Broker]:::Gateway
+        OpenLLM[OpenLLM SDK & Langfuse]
+        FacetCLI[facet CLI & Port Broker]
     end
     
     subgraph HostingFabric["Hosting Fabric"]
-        Surface[Surface Laptop Dev System]:::Host
-        CloudEdge[Cloudflare Pages & Hetzner VPS]:::Host
+        Surface[Surface Laptop Dev System]
+        CloudEdge[Cloudflare Pages & Hetzner VPS]
     end
 
     %% Connections
@@ -59,12 +50,6 @@ graph TD
     FastPath --> |Daily Consolidation| SlowPath
     HostingFabric --- Surface
     HostingFabric --- CloudEdge
-
-    class Orchestration Orch;
-    class GatewayLayer Gateway;
-    class InferenceLayer Inference;
-    class MemoryLayer Mem;
-    class HostingFabric Host;
 ```
 
 ## The Three Core Layers

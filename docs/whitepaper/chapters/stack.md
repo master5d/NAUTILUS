@@ -3,31 +3,22 @@
 Nautilus is engineered as a **sovereignty-first platform**. Every layer of the technical stack is modular, allowing you to swap out cloud providers, databases, or local models in days rather than weeks.
 
 ```mermaid
-graph TD
-    %% Styling
-    classDef Caller fill:#0f172a,stroke:#3b82f6,stroke-width:1.5px,color:#93c5fd;
-    classDef Router fill:#1e293b,stroke:#475569,stroke-width:1.5px,color:#f8fafc;
-    classDef Free fill:#10b981,stroke:#047857,stroke-width:1.5px,color:#fff;
-    classDef Local fill:#3b82f6,stroke:#1d4ed8,stroke-width:1.5px,color:#fff;
-    classDef Paid fill:#7c3aed,stroke:#6d28d9,stroke-width:1.5px,color:#fff;
-    classDef Alert fill:#7f1d1d,stroke:#b91c1c,stroke-width:1.5px,color:#fff;
-
-    %% Nodes
-    Caller[Orchestrator / Agent / CLI]:::Caller
-    LiteLLM[LiteLLM Proxy Router: localhost:4000]:::Router
+flowchart TD
+    Caller[Orchestrator / Agent / CLI]
+    LiteLLM[LiteLLM Proxy Router: localhost:4000]
     
-    CheckPool{1. Query Free Pools?}:::Router
-    FreePool[Cerebras / Groq / NIM APIs]:::Free
+    CheckPool{1. Query Free Pools?}
+    FreePool[Cerebras / Groq / NIM APIs]
     
-    CheckError{Error or Rate Limit?}:::Router
+    CheckError{Error or Rate Limit?}
     
-    CheckGGUF{2. Query Local GGUF?}:::Router
-    LocalGGUF[llama.cpp CUDA Qwen3-Coder]:::Local
+    CheckGGUF{2. Query Local GGUF?}
+    LocalGGUF[llama.cpp CUDA Qwen3-Coder]
     
-    CheckLocal{Local Server Offline?}:::Router
+    CheckLocal{Local Server Offline?}
     
-    PaidCloud[3. Paid Cloud: Anthropic API]:::Paid
-    FailSafe[Failsafe Alert & Thread Terminate]:::Alert
+    PaidCloud[3. Paid Cloud: Anthropic API]
+    FailSafe[Failsafe Alert & Thread Terminate]
 
     %% Connections
     Caller --> LiteLLM

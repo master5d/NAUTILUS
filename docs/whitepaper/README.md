@@ -3,24 +3,18 @@
 **Nautilus** is a next-generation, local-first autonomous computing environment designed for the **Solo Vibe Coder**. It represents a fundamental shift from fragmented tools and disparate text archives to a unified, self-healing **Sovereign Personal Knowledge Mesh & Data Graph**.
 
 ```mermaid
-graph TD
-    %% Styling
-    classDef Coder fill:#6366f1,stroke:#4f46e5,stroke-width:2px,color:#fff;
-    classDef Layer fill:#1e293b,stroke:#475569,stroke-width:1.5px,color:#f8fafc;
-    classDef Offline fill:#0f172a,stroke:#3b82f6,stroke-width:1px,color:#93c5fd,stroke-dasharray: 5 5;
-
-    %% Nodes
+flowchart TD
     Coder[Solo Vibe Coder]
     
     subgraph SovereignWorkspace["Sovereign Local Workspace (Offline-First Boundary)"]
-        Compass["Compass Layer (ENERV Indexer)"]:::Layer
-        Brain["Brain Layer (Knowledge Graph & RAG)"]:::Layer
-        Pilot["Pilot Layer (Hermes Agent & Skills)"]:::Layer
+        Compass["Compass Layer (ENERV Indexer)"]
+        Brain["Brain Layer (Knowledge Graph & RAG)"]
+        Pilot["Pilot Layer (Hermes Agent & Skills)"]
     end
     
     subgraph SharedStorage["Sovereign Memory & Storage"]
-        FastMemory["Fast Path (ACE Markdown Vault)"]:::Offline
-        SlowMemory["Slow Path (FalkorDB / Neo4j Graph)"]:::Offline
+        FastMemory["Fast Path (ACE Markdown Vault)"]
+        SlowMemory["Slow Path (FalkorDB / Neo4j Graph)"]
     end
 
     %% Connections
@@ -30,10 +24,6 @@ graph TD
     Compass <--> |Scan & Audit| FastMemory
     Brain <--> |Query & Embed| SlowMemory
     FastMemory --> |Daily Fact Consolidation| SlowMemory
-
-    %% Assign classes
-    class Coder Coder;
-    class SovereignWorkspace Layer;
 ```
 
 ## What is Nautilus?

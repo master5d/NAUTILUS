@@ -3,28 +3,21 @@
 **ENERV** is the structural compass of the Nautilus environment. It provides a schema-first, lightweight metadata framework that catalogs and validates your directories without incurring the cost of deep semantic ingestion.
 
 ```mermaid
-graph TD
-    %% Styling
-    classDef Scan fill:#0f172a,stroke:#3b82f6,stroke-width:1.5px,color:#93c5fd;
-    classDef Logic fill:#1e293b,stroke:#475569,stroke-width:1.5px,color:#f8fafc;
-    classDef Output fill:#10b981,stroke:#047857,stroke-width:1.5px,color:#fff;
-    classDef Alert fill:#7f1d1d,stroke:#b91c1c,stroke-width:1.5px,color:#fff;
-
-    %% Nodes
-    Start[CLI: facet audit / walk]:::Scan
-    ReadDir[Read Directory Node]:::Scan
-    CheckMeta{Has .facets/meta.json?}:::Logic
+flowchart TD
+    Start[CLI: facet audit / walk]
+    ReadDir[Read Directory Node]
+    CheckMeta{Has .facets/meta.json?}
     
-    InheritMeta[Inherit Context from Parent Directory]:::Logic
-    ParseMeta[Parse meta.json & Validate JSON Schema]:::Logic
+    InheritMeta[Inherit Context from Parent Directory]
+    ParseMeta[Parse meta.json & Validate JSON Schema]
     
-    CheckSchema{Valid Schema?}:::Logic
-    SchemaError[Flag Audit Failure & Log Warnings]:::Alert
+    CheckSchema{Valid Schema?}
+    SchemaError[Flag Audit Failure & Log Warnings]
     
-    AuditFiles[Scan Child Files & Markdown Frontmatter]:::Scan
+    AuditFiles[Scan Child Files & Markdown Frontmatter]
     
-    CompileMesh[Generate In-Memory Metadata Mesh]:::Output
-    UpdateRegistry[Write Status Summary to CLI]:::Output
+    CompileMesh[Generate In-Memory Metadata Mesh]
+    UpdateRegistry[Write Status Summary to CLI]
 
     %% Connections
     Start --> ReadDir

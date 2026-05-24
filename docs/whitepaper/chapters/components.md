@@ -3,35 +3,27 @@
 The Nautilus monorepo is divided into highly specialized, loosely coupled modules that share state through environment variables, dynamic port allocation, and standardized JSON schemas.
 
 ```mermaid
-graph LR
-    %% Styling
-    classDef Web fill:#3b82f6,stroke:#1d4ed8,stroke-width:1.5px,color:#fff;
-    classDef Py fill:#10b981,stroke:#047857,stroke-width:1.5px,color:#fff;
-    classDef Config fill:#6b7280,stroke:#374151,stroke-width:1.5px,color:#fff;
-    classDef Script fill:#eab308,stroke:#a16207,stroke-width:1.5px,color:#fff;
-    classDef Agent fill:#a855f7,stroke:#6b21a8,stroke-width:1.5px,color:#fff;
-
-    %% Nodes
+flowchart LR
     subgraph apps["apps/ (Next.js Web UI)"]
-        Nooscope["Nooscope UI (react-force-graph-3d)"]:::Web
+        Nooscope["Nooscope UI (react-force-graph-3d)"]
     end
     
     subgraph core["core/ (Python CLI)"]
-        Enerv["ENERV Indexer (facet CLI)"]:::Py
+        Enerv["ENERV Indexer (facet CLI)"]
     end
     
     subgraph config["config/ (Shared Registry)"]
-        Services["services.json Registry"]:::Config
-        LiteLLMConfig["litellm_config.yaml"]:::Config
+        Services["services.json Registry"]
+        LiteLLMConfig["litellm_config.yaml"]
     end
     
     subgraph scripts["scripts/ (Automation)"]
-        Broker["Port Broker Script"]:::Script
-        Launcher["Service Launchers"]:::Script
+        Broker["Port Broker Script"]
+        Launcher["Service Launchers"]
     end
     
     subgraph hermes["hermes/ (Orchestration)"]
-        HermesAgent["Hermes Boss (WSL2 Shell)"]:::Agent
+        HermesAgent["Hermes Boss (WSL2 Shell)"]
     end
 
     %% Interactions

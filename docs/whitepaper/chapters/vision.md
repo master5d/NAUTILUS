@@ -3,22 +3,16 @@
 The Nautilus project is built on the philosophy of **Sovereign Solo Vibe Coding**. This approach prioritizes absolute individual autonomy, local control, high-velocity development, and extreme failure resilience.
 
 ```mermaid
-graph TD
-    %% Styling
-    classDef Local fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#93c5fd;
-    classDef Gateway fill:#1e293b,stroke:#475569,stroke-width:1.5px,color:#f8fafc;
-    classDef Cloud fill:#111827,stroke:#dc2626,stroke-width:1px,color:#fca5a5,stroke-dasharray: 4 4;
+flowchart TD
+    Developer[Solo Vibe Coder]
+    Workspace[Local Workspace: ENERV & Obsidian]
+    LocalLLM[Local GGUF: llama.cpp CUDA]
     
-    %% Nodes
-    Developer[Solo Vibe Coder]:::Local
-    Workspace[Local Workspace: ENERV & Obsidian]:::Local
-    LocalLLM[Local GGUF: llama.cpp CUDA]:::Local
-    
-    LiteLLM[LiteLLM Proxy Router]:::Gateway
+    LiteLLM[LiteLLM Proxy Router]
     
     subgraph CloudBoundary["Cloud Boundary (Subject to Outages/Rate-Limits)"]
-        FreeCloud[Free Cloud Pools: Cerebras/Groq]:::Cloud
-        PaidCloud[Paid Cloud Pools: Anthropic API]:::Cloud
+        FreeCloud[Free Cloud Pools: Cerebras/Groq]
+        PaidCloud[Paid Cloud Pools: Anthropic API]
     end
 
     %% Connections
@@ -28,9 +22,8 @@ graph TD
     LiteLLM <--> |3. Paid Deep-Reasoning| PaidCloud
     LiteLLM <--> |2. Absolute Offline Fallback Floor| LocalLLM
 
-    %% Boundary Annotation
-    classDef Warning fill:#7f1d1d,color:#fff,stroke:#b91c1c;
-    NetworkCut["Failure Cut: If Internet/Cloud Fails"]:::Warning
+    %% Failure Representation
+    NetworkCut["Failure Cut: If Internet/Cloud Fails"]
     LiteLLM -.-> |Blocked| CloudBoundary
     NetworkCut -.- CloudBoundary
 ```
