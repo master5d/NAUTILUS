@@ -1,60 +1,92 @@
-# NAUTILUS — Personal Knowledge Mesh & Data Graph
+# NAUTILUS — Sovereign Personal Knowledge Mesh & AI Pilot
 
-**NAUTILUS** is a unified autonomous environment for personal knowledge management, project indexing, and AI orchestration. It is built on the **SOVRN Architecture** (the sovereignty-first, local-first agentic stack & principles).
+**Nautilus** is a local-first autonomous environment for personal knowledge management, multi-dimensional semantic indexing, and secure AI agent orchestration. It is built upon the **SOVRN Architecture blueprints**—a set of sovereignty-first, zero-telemetry, and highly resilient technical principles.
 
-Unified autonomous environment for personal knowledge management, project indexing, and AI orchestration.
+```mermaid
+flowchart TD
+    Coder[Solo Vibe Coder]
+    
+    subgraph SovereignWorkspace["Sovereign Local Workspace (Offline-First Boundary)"]
+        Compass["Compass Layer (ENERV Indexer)"]
+        Brain["Brain Layer (Knowledge Graph & RAG)"]
+        Pilot["Pilot Layer (Hermes Agent & Skills)"]
+    end
+    
+    subgraph SharedStorage["Sovereign Memory & Storage"]
+        FastMemory["Fast Path (ACE Markdown Vault)"]
+        SlowMemory["Slow Path (FalkorDB / Neo4j Graph)"]
+    end
 
-## 🏗 Architecture (Monorepo)
+    %% Connections
+    Coder <--> |Natural Interface & Code IDE| Pilot
+    Pilot <--> |Faceted Schema Lookup| Compass
+    Pilot <--> |Semantic Search & GraphRAG| Brain
+    Compass <--> |Scan & Audit| FastMemory
+    Brain <--> |Query & Embed| SlowMemory
+    FastMemory --> |Daily Fact Consolidation| SlowMemory
+```
 
-- **`/apps/knowledge-graph`**: 3D WebGL visualization and GraphRAG (Next.js 16, Neo4j, Gemini).
-- **`/core/enerv`**: Faceted indexing system and metadata management (Python CLI).
-- **`/config`**: Centralized configurations (LiteLLM, agents, services).
-- **`/scripts`**: Lifecycle and startup automation.
-- **`/hermes`**: Agent gateway and orchestration logic.
+---
+
+## 🏗 Monorepo Architecture
+
+Nautilus is divided into modular directory boundaries:
+
+* **`/apps/knowledge-graph` (Nooscope UI)**: A WebGL-powered 3D force-directed node visualization dashboard (Next.js 16 + React + Three.js). Features custom GraphRAG searches and supports a robust offline fallback (`walkVault`) sweeping local Obsidian directories when database servers are offline.
+* **`/core/enerv` (ENERV Indexer)**: A fast, schema-first environmental compass (Python CLI). Validates project directories against strict JSON contracts (`.facets/meta.json`) and powers the local `facet ingest` pipeline.
+* **`/config` (Shared Service Configs)**: Houses LiteLLM provider configurations and holds the dynamic service registry updated by the Port Broker.
+* **`/scripts` (Lifecycle & Port Broker Automation)**: Prevents port collisions on local Windows hosts via socket availability sweeps, automatically synchronizing dynamic ports across envs (`.env`, `.env.local`, `.hermes/config.yaml`).
+* **`/hermes` (Orchestration & Skills)**: The central AI pilot gateway. Listens to Telegram bot directives, manages cumulative dry-runs, and dispatches tasks to specialist coding agents (Aider, Cline).
+
+---
+
+## 🧠 Sovereignty-First Principles
+
+1. **Autonomy Under Failure**: The stack is designed to operate 100% offline on your local hardware (Surface Studio/WSL2) if every cloud goes dark. Local GGUF (`llama-server`) and local Obsidian directories serve as the guaranteed baseline floor.
+2. **Zero Telemetry Constraint**: Opaque development environments with closed telemetry tracking are strictly prohibited. Open, local-first tools (Zed, Aider, Cline) are leveraged exclusively.
+3. **Gateway Agnosticism**: All Large Language Models are routed through a central LiteLLM gateway (`localhost:4000`) with dynamic failover arrays (Free cloud pools first → Local GGUF second → Paid cloud third).
+
+---
 
 ## 🚀 Quick Start
 
-### 1. Environment Setup
-Copy root `.env` and fill in your keys (Google AI, Neo4j):
+### 1. Environment Preparation
+Initialize the environment configuration by copying the template and setting up your keys:
 ```bash
-cp .env.example .env # or edit existing .env
+cp .env.example .env
 ```
 
-### 2. Launch Services
-Use the canonical startup script:
+### 2. Bootstrap the Local Stack
+Execute the canonical launch script. The **Port Broker** will scan for available host ports, synchronize configurations, and safely start all database, inference, and visualization services:
 ```powershell
-./scripts/hermes_startup.ps1
+./scripts/master-restart.ps1
 ```
 
-### 3. Integrated Workflow (CLI)
-The `facet` CLI (from ENERV) is now the unified interface:
+### 3. Integrated CLI Commands
+The Python-powered `facet` CLI provides a unified control interface:
 
-- **Visualize**: Open 3D graph for current context:
-  ```bash
-  facet visualize .
-  ```
-- **Ingest**: Add content to the Knowledge Graph with automatic metadata sync:
+* **Ingest Documents**: Chunk, hash, embed, and transactionally merge files into your knowledge graph with automatic metadata inheritance:
   ```bash
   facet ingest path/to/note.md
   ```
-- **Audit**: Check system-wide metadata consistency:
+* **Audit Directory Contexts**: Recursively scan all project directories for schema drift or missing configurations:
   ```bash
   facet audit
   ```
-
-## 🧠 Synergy Features
-
-- **Unified Ingest**: Files ingested via `facet` automatically pull tags and team assignments from `.facets/meta.json`.
-- **Metadata Sync**: ENERV attributes (status, priority, team) are stored as node properties in Neo4j, enabling multi-dimensional graph queries.
-- **Hermes Integration**: Sub-agents use the shared index to discover tools and knowledge without manual path mapping.
-
-## 🛠 Tech Stack
-
-- **LLM Proxy**: LiteLLM (OpenRouter, Groq, local fallback).
-- **Graph DB**: Neo4j AuraDB.
-- **Embeddings**: `gemini-embedding-exp-03-07` via Google AI Studio.
-- **UI**: Next.js + Three.js (react-force-graph-3d).
-- **Indexer**: Python 3.12 + JSON Schema.
+* **Open 3D Visualization**: Instantly map the current directory context in the WebGL Nooscope UI:
+  ```bash
+  facet visualize .
+  ```
 
 ---
-*Vibe coded with Sovereignty in mind. (v3.4 — Integrated Mesh)*
+
+## 📖 Deeper Reading
+The full system architecture, bitemporal memory designs, and multi-phase rollout lifecycles are documented in the **[Nautilus White Paper](docs/whitepaper/README.md)**:
+
+* **[Vision & Principles](docs/whitepaper/chapters/vision.md)**: Failure boundaries and zero-telemetry rules.
+* **[Architecture Overview](docs/whitepaper/chapters/architecture.md)**: Metadata, semantic, and orchestration layers.
+* **[Core Components](docs/whitepaper/chapters/components.md)**: Monorepo folder layouts and dynamics.
+* **[ENERV: Metadata Mesh](docs/whitepaper/chapters/enerv.md)**: Schema-first faceted directory indexer.
+* **[Knowledge Graph & RAG](docs/whitepaper/chapters/knowledge-graph.md)**: Ingestion flows, 3D WebGL, and `walkVault` local fallbacks.
+* **[Technical Stack](docs/whitepaper/chapters/stack.md)**: LiteLLM rotating pools and SecOps Sovereign Shield monitoring.
+* **[Phased Roadmap](docs/whitepaper/chapters/roadmap.md)**: Progression timeline (Phases 0 to 4).
