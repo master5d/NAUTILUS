@@ -1,5 +1,5 @@
 # Hermes Context — Phase 1 Handover
-# SOVRN v3.3 | Date: 2026-04-29
+# SOVRN v3.4 | Date: 2026-05-23
 
 ---
 
@@ -22,14 +22,14 @@
 
 ```powershell
 # 1. Langfuse (Docker)
-cd "C:\telo\Efforts\Ongoing\SOVRN\docker"
+cd "C:\telo\Efforts\Ongoing\NAUTILUS\docker"
 docker compose up -d
 
 # 2. LiteLLM proxy (СНАЧАЛА — Hermes зависит от него)
-pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\SOVRN\Atlas\Scripts\launch-litellm.ps1"
+pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\NAUTILUS\scripts\launch-litellm.ps1"
 
 # 3. llama-server (Qwen3-Coder, CUDA) — опционально, нужен как fallback
-pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\SOVRN\Atlas\Scripts\launch-llama-server.ps1"
+pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\NAUTILUS\scripts\launch-llama-server.ps1"
 
 # 4. Hermes Telegram gateway
 wsl -e bash -c "hermes gateway run"
@@ -175,8 +175,8 @@ Hermes, uv Python, все конфиги установлены в `/root/`. Mir
 ## Pending (Phase 1)
 
 ### Track A: Gmail Phase I (не начат)
-- Дамп 211 писем из Gmail (лейбл "AI Ingest") → `~/life/Atlas/References/AI-Ingest/`
-- Формат: PARA Markdown с YAML frontmatter
+- Дамп 211 писем из Gmail (лейбл "AI Ingest") → `~/life/Atlas/References/`
+- Формат: ACE/LYT Markdown с YAML frontmatter
 - Нужно: Google OAuth / Gmail API setup
 - Оценка: ~4 часа
 
@@ -188,20 +188,21 @@ Hermes, uv Python, все конфиги установлены в `/root/`. Mir
 ## Key File Locations
 
 ```
-C:\telo\Efforts\Ongoing\SOVRN\
+C:\telo\Efforts\Ongoing\NAUTILUS\
 ├── config\litellm-config.yaml      # LiteLLM pool (gemini + fast-pool + local)
 ├── docker\docker-compose.yml       # Langfuse self-hosted
 ├── scripts\
 │   ├── launch-litellm.ps1          # Start LiteLLM (загружает GEMINI_API_KEY + все ключи)
 │   ├── launch-llama-server.ps1     # Start llama-server CUDA
 │   ├── launch-hermes.ps1           # Start Hermes + health check
-│   └── setup-para.ps1              # Create ~/life/ PARA vault
+│   └── setup-ace.ps1               # Create ~/life/ ACE vault
 ├── hermes\
 │   ├── system-prompt.md            # Hermes identity + DeepVista rules
 │   ├── context-phase0.md           # Phase 0 handover (исторический)
 │   ├── context-phase1.md           # Этот файл
 │   └── reports\
 │       └── phase1-track-b.md       # Docker MCP / GitHub MCP report
+```
 
 C:\Users\sasha\.wslconfig           # WSL2 mirrored networking
 

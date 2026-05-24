@@ -1,41 +1,53 @@
-# setup-para.ps1
-# Felix/PARA fast path — creates ~/life/ Obsidian vault structure
-# Phase 0, P4 — Agentic AI v3.3
-# Run once: pwsh -ExecutionPolicy Bypass -File setup-para.ps1
+# setup-ace.ps1
+# Felix/ACE fast path — creates ~/life/ Obsidian vault structure under the Nick Milo ACE/LYT design system
+# Phase 0, P4 — Agentic AI v3.4 (Nautilus Rebrand)
+# Run once: pwsh -ExecutionPolicy Bypass -File setup-ace.ps1
 
 $vault = "$env:USERPROFILE\life"
 
 $dirs = @(
-    "projects\01-knowledge-graph-foundation",
-    "projects\02-affiliate-agency",
-    "projects\03-digital-goods",
-    "projects\04-android-tg-bots",
-    "projects\05-yt-social",
-    "projects\06-game-defi",
-    "projects\07-native-windows-apps",
-    "areas",
-    "resources\AI-Ingest",
-    "archives\evernote",
-    "daily",
-    "tacit"
+    "+",
+    "Atlas\Maps",
+    "Atlas\Notes",
+    "Atlas\References",
+    "Atlas\Utilities",
+    "Calendar\Inbox",
+    "Calendar\Logs",
+    "Efforts\On\01-knowledge-graph-foundation",
+    "Efforts\On\04-android-tg-bots",
+    "Efforts\Ongoing\02-affiliate-agency",
+    "Efforts\Ongoing\03-digital-goods",
+    "Efforts\Ongoing\05-yt-social",
+    "Efforts\Ongoing\06-game-defi",
+    "Efforts\Ongoing\07-native-windows-apps",
+    "Efforts\Simmering",
+    "Efforts\Sleeping\evernote"
 )
 
+# 1. Create directory structure
+Write-Host "=== Step 1: Creating ACE Vault Folders ==="
 foreach ($dir in $dirs) {
     $path = Join-Path $vault $dir
     if (-not (Test-Path $path)) {
         New-Item -ItemType Directory -Path $path -Force | Out-Null
-        Write-Host "  created: $path"
+        Write-Host "  [+] created: $path"
     } else {
-        Write-Host "  exists:  $path"
+        Write-Host "  [.] exists:  $path"
     }
 }
 
-# Seed Atlas/Workflows/ files (only if not present)
+# 2. Seed Atlas/Notes with updated, flat tacit knowledge files
+Write-Host "`n=== Step 2: Seeding Atlas/Notes (Tacit Knowledge) ==="
+$today_str = (Get-Date -Format 'yyyy-MM-dd')
 $tacitFiles = @{
-    "communication-preferences.md" = @"
+    "Communication Preferences.md" = @"
 ---
 title: Communication Preferences
-updated: $(Get-Date -Format 'yyyy-MM-dd')
+category: Personal
+created: $today_str
+updated: $today_str
+up:
+  - "[[100 Human Soul MOC]]"
 ---
 
 ## Preferred channels
@@ -51,10 +63,15 @@ updated: $(Get-Date -Format 'yyyy-MM-dd')
 - Direct corrections welcome
 - Flag when assumptions are made
 "@
-    "workflow-habits.md" = @"
+
+    "Workflow Habits.md" = @"
 ---
 title: Workflow Habits
-updated: $(Get-Date -Format 'yyyy-MM-dd')
+category: Personal
+created: $today_str
+updated: $today_str
+up:
+  - "[[200 Sovereign Tech MOC]]"
 ---
 
 ## Daily rhythm
@@ -72,10 +89,15 @@ updated: $(Get-Date -Format 'yyyy-MM-dd')
 2. Aider (CLI/git refactors)
 3. Cline (VS Code long sessions)
 "@
-    "hard-rules.md" = @"
+
+    "Hard Rules.md" = @"
 ---
 title: Hard Rules
-updated: $(Get-Date -Format 'yyyy-MM-dd')
+category: Security
+created: $today_str
+updated: $today_str
+up:
+  - "[[200 Sovereign Tech MOC]]"
 ---
 
 ## Sovereignty rules
@@ -100,10 +122,15 @@ updated: $(Get-Date -Format 'yyyy-MM-dd')
 - stateful skills require --dry-run or confirmation
 - Hermes = orchestration only, NOT coding harness
 "@
-    "lessons-from-past-mistakes.md" = @"
+
+    "Lessons from Past Mistakes.md" = @"
 ---
 title: Lessons from Past Mistakes
-updated: $(Get-Date -Format 'yyyy-MM-dd')
+category: Personal
+created: $today_str
+updated: $today_str
+up:
+  - "[[200 Sovereign Tech MOC]]"
 ---
 
 ## v3.0 → v3.1
@@ -127,26 +154,30 @@ updated: $(Get-Date -Format 'yyyy-MM-dd')
 }
 
 foreach ($name in $tacitFiles.Keys) {
-    $path = Join-Path $vault "tacit\$name"
+    $path = Join-Path $vault "Atlas\Notes\$name"
     if (-not (Test-Path $path)) {
         Set-Content -Path $path -Value $tacitFiles[$name] -Encoding UTF8
-        Write-Host "  created: $path"
+        Write-Host "  [+] seeded:  $path"
     } else {
-        Write-Host "  exists:  $path (skipped)"
+        Write-Host "  [.] skipped: $path (exists)"
     }
 }
 
-# Create today's daily note
-$today = Get-Date -Format 'yyyy-MM-dd'
-$dailyPath = Join-Path $vault "daily\$today.md"
+# 3. Create today's daily note in Calendar/Logs/
+Write-Host "`n=== Step 3: Seeding Daily Note in Calendar/Logs/ ==="
+$dailyPath = Join-Path $vault "Calendar\Logs\$today_str.md"
 if (-not (Test-Path $dailyPath)) {
     $dailyContent = @"
 ---
-date: $today
+date: $today_str
+tags:
+  - journal/daily
+up:
+  - "[[Calendar Inbox]]"
 ---
 
 ## Focus
-- [ ] Phase 0: PARA setup complete
+- [ ] Phase 0: ACE setup complete
 - [ ] Phase 0: Hermes launch
 - [ ] Phase 0: Skills schema
 
@@ -157,17 +188,23 @@ date: $today
 
 "@
     Set-Content -Path $dailyPath -Value $dailyContent -Encoding UTF8
-    Write-Host "  created: $dailyPath"
+    Write-Host "  [+] created: $dailyPath"
+} else {
+    Write-Host "  [.] skipped: $dailyPath (exists)"
 }
 
-# Create .obsidian stub so Obsidian recognizes the vault
+# 4. Create .obsidian stub so Obsidian recognizes the vault
+Write-Host "`n=== Step 4: Configuring Obsidian Stub ==="
 $obsidianDir = Join-Path $vault ".obsidian"
 if (-not (Test-Path $obsidianDir)) {
     New-Item -ItemType Directory -Path $obsidianDir -Force | Out-Null
     Set-Content -Path "$obsidianDir\app.json" -Value '{}' -Encoding UTF8
-    Write-Host "  created: .obsidian/app.json (vault marker)"
+    Write-Host "  [+] created: .obsidian/app.json (vault marker)"
+} else {
+    Write-Host "  [.] exists:  .obsidian/"
 }
 
-Write-Host ""
-Write-Host "PARA vault ready at: $vault"
+Write-Host "`n============================================================"
+Write-Host "✅ Upgraded ACE vault ready at: $vault"
 Write-Host "Open in Obsidian: File > Open vault > $vault"
+Write-Host "============================================================"

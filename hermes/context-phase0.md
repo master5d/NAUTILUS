@@ -1,5 +1,5 @@
 # Hermes Context — Phase 0 Handover
-# SOVRN v3.3 | Date: 2026-04-28
+# SOVRN v3.4 | Date: 2026-05-23
 
 ## What Was Built (Phase 0 — Complete)
 
@@ -17,14 +17,14 @@
 
 ```powershell
 # Langfuse (Docker)
-cd "C:\telo\Efforts\Ongoing\SOVRN\docker"
+cd "C:\telo\Efforts\Ongoing\NAUTILUS\docker"
 docker compose up -d
 
 # LiteLLM proxy
-pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\SOVRN\Atlas\Scripts\launch-litellm.ps1"
+pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\NAUTILUS\scripts\launch-litellm.ps1"
 
 # llama-server (Qwen3-Coder, CUDA)
-pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\SOVRN\Atlas\Scripts\launch-llama-server.ps1"
+pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\NAUTILUS\scripts\launch-llama-server.ps1"
 
 # Hermes Telegram gateway
 wsl -e bash -c "hermes gateway run"
@@ -67,10 +67,10 @@ Reasoning: `groq/qwen/qwen3-32b` (hybrid thinking, replaces deepseek-r1)
 
 ## Pending (Phase 0 — Not Yet Done)
 
-### 1. PARA Vault (`~/life/`)
-- **Script:** `C:\telo\Efforts\Ongoing\SOVRN\Atlas\Scripts\setup-para.ps1` — generated but NOT run
-- **Action:** Run `pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\SOVRN\Atlas\Scripts\setup-para.ps1"`
-- **Creates:** Full `~/life/` PARA structure + tacit knowledge files + first daily note
+### 1. ACE Vault (`~/life/`)
+- **Script:** `C:\telo\Efforts\Ongoing\NAUTILUS\scripts\setup-ace.ps1` — generated but NOT run
+- **Action:** Run `pwsh -ExecutionPolicy Bypass -File "C:\telo\Efforts\Ongoing\NAUTILUS\scripts\setup-ace.ps1"`
+- **Creates:** Full `~/life/` ACE structure + tacit knowledge files + first daily note
 
 ### 2. Hermes Telegram Gateway Restart
 - After config change (model update), gateway needs restart
@@ -95,8 +95,8 @@ llama.cpp CUDA builds break on 13.2+. Use b8943/b8946 (CUDA 13.1). This is a har
 
 1. **Cloud pool fine-tuning** — monitor Cerebras/Groq rate limits, adjust rpm caps
 2. **Docker MCP Toolkit** — Langfuse MCP server as container
-3. **Gmail ingest Phase I** — 211-email dump, tagging, PARA routing
-4. **graphiti/FalkorDB** — only if PARA flat-file search fails 3+ times/week
+3. **Gmail ingest Phase I** — 211-email dump, tagging, ACE routing
+4. **graphiti/FalkorDB** — only if ACE flat-file search fails 3+ times/week
 5. **Handy (voice):** `winget install cjpais.Handy`
 
 ---
@@ -104,7 +104,7 @@ llama.cpp CUDA builds break on 13.2+. Use b8943/b8946 (CUDA 13.1). This is a har
 ## Key File Locations
 
 ```
-C:\telo\Efforts\Ongoing\SOVRN\
+C:\telo\Efforts\Ongoing\NAUTILUS\
 ├── config\litellm-config.yaml      # LiteLLM rotating pool
 ├── docker\docker-compose.yml       # Langfuse self-hosted
 ├── scripts\
@@ -112,7 +112,7 @@ C:\telo\Efforts\Ongoing\SOVRN\
 │   ├── launch-llama-server.ps1     # Start llama-server CUDA
 │   ├── launch-hermes.ps1           # Start Hermes + health check
 │   ├── setup-litellm-keys.ps1      # One-time key setup (SecureString)
-│   └── setup-para.ps1              # Create ~/life/ PARA vault
+│   └── setup-ace.ps1               # Create ~/life/ ACE vault
 ├── hermes\
 │   ├── system-prompt.md            # Hermes identity + DeepVista rules
 │   └── context-phase0.md           # This file
@@ -143,3 +143,4 @@ wsl -e bash -c "hermes chat -q 'What skills do you have?'"
 # Langfuse
 # Open http://localhost:3000 in browser
 ```
+
