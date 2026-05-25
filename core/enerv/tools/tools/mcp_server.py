@@ -81,6 +81,68 @@ async def list_tools() -> list[Tool]:
                 "required": []
             }
         ),
+        Tool(
+            name="facet_ingest",
+            description="Ingest a document file (Markdown/Text) into the Nautilus Knowledge Graph (performs normalizations, vector embeddings, and Neo4j similar-to link mapping)",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "file_path": {
+                        "type": "string",
+                        "description": "Absolute path to the file to ingest"
+                    },
+                    "force": {
+                        "type": "boolean",
+                        "description": "Force re-ingestion even if content hash matches",
+                        "default": False
+                    }
+                },
+                "required": ["file_path"]
+            }
+        ),
+        Tool(
+            name="facet_search",
+            description="Perform a semantic vector similarity search against the Nautilus Knowledge Graph, returning top matching documents and snippets",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "The search term or query phrase"
+                    },
+                    "top_k": {
+                        "type": "integer",
+                        "description": "Number of top results to return",
+                        "default": 5
+                    },
+                    "min_score": {
+                        "type": "number",
+                        "description": "Minimum similarity score threshold",
+                        "default": 0.6
+                    }
+                },
+                "required": ["query"]
+            }
+        ),
+        Tool(
+            name="facet_graphrag",
+            description="Perform a GraphRAG synthesis to answer a question using relevant Knowledge Graph document and relationship context",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "question": {
+                        "type": "string",
+                        "description": "The question to synthesize an answer for"
+                    },
+                    "top_k": {
+                        "type": "integer",
+                        "description": "Number of anchor nodes to query",
+                        "default": 5
+                    }
+                },
+                "required": ["question"]
+            }
+        ),
     ]
 
 
@@ -146,6 +208,51 @@ async def call_tool(name: str, arguments: dict) -> ToolResult:
                 content=[TextContent(type="text", text=result.stdout or "All files valid")],
                 isError=False
             )
+        elif name == "facet_ingest":
+            cmd = ["facet", "ingest", arguments["file_path"]]
+            if arguments.get("force"):
+                cmd.append("--force")
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            return ToolResult(
+                content=[TextContent(type="text", text=result.stdout or "Document successfully ingested into the knowledge graph.")],
+                isError=False
+            )
+        elif name == "facet_search":
+            cmd = ["facet", "search", arguments["query"]]
+            if "top_k" in arguments:
+                cmd.extend(["--top-k", str(arguments["top_k"])])
+            if "min_score" in arguments:
+                cmd.extend(["--min-score", str(arguments["min_score"])])
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            return ToolResult(
+                content=[TextContent(type="text", text=result.stdout)],
+                isError=False
+            )
+        elif name == "facet_graphrag":
+            cmd = ["facet", "graphrag", arguments["question"]]
+            if "top_k" in arguments:
+                cmd.extend(["--top-k", str(arguments["top_k"])])
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            return ToolResult(
+                content=[TextContent(type="text", text=result.stdout)],
+                isError=False
+            )
+
         else:
             return ToolResult(
                 content=[TextContent(type="text", text=f"Unknown tool: {name}")],

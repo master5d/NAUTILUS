@@ -10,6 +10,8 @@ from .commands.auto_index import auto_index_cli
 from .commands.current_info import current_info_cli
 from .commands.visualize import visualize
 from .commands.ingest import ingest
+from .commands.search import search
+from .commands.graphrag import graphrag
 
 @click.group()
 def facet():
@@ -27,6 +29,9 @@ facet.add_command(auto_index_cli)
 facet.add_command(current_info_cli)
 facet.add_command(visualize)
 facet.add_command(ingest)
+facet.add_command(search)
+facet.add_command(graphrag)
 
 def main():
     facet()
+
