@@ -2,25 +2,95 @@
 
 Nautilus is deployed in modular, progressive iterations. This allows the Solo Vibe Coder to derive immediate utility from local-first markdown notes before committing to heavier Docker architectures or managed database servers.
 
-```mermaid
-gantt
-    title Nautilus Rollout Lifecycle
-    dateFormat  YYYY-MM-DD
-    section Phase 0: Foundations
-    Local ACE Vault & CUDA Inference   :active, des1, 2026-05-01, 7d
-    Aider & Cline Integrations        :active, des2, 2026-05-03, 5d
-    section Phase 1: Mesh & Ingestion
-    LiteLLM Gateway & free pools      :active, des3, 2026-05-08, 7d
-    facet ingest pipeline             :active, des4, 2026-05-12, 10d
-    section Phase 2: Migration & Cloud
-    Notion & Evernote Data Migration :des5, 2026-05-22, 10d
-    Hetzner Dokploy & SecOps Deploy   :des6, 2026-05-28, 14d
-    section Phase 3: Scaling & Revenue
-    n8n & Astro Affiliate sites       :des7, 2026-06-11, 21d
-    Lead-Generation & TG bots         :des8, 2026-06-25, 14d
-    section Phase 4: Voice & Godot
-    Handy Voice Interface & Godot     :des9, 2026-07-09, 21d
-```
+<div align="center">
+  <svg width="100%" height="auto" viewBox="0 0 850 480" style="max-width: 850px; background: #0b0f19; border: 1px solid #1e293b; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: 'JetBrains Mono', Consolas, monospace;">
+    <defs>
+      <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#111827" stroke-width="0.8"/>
+      </pattern>
+      <marker id="arrow-cyan" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#22d3ee" />
+      </marker>
+    </defs>
+    
+    <!-- Grid Background -->
+    <rect width="100%" height="100%" fill="url(#grid)" />
+    
+    <!-- Title -->
+    <text x="30" y="35" fill="#f8fafc" font-size="14" font-weight="bold" letter-spacing="1">NAUTILUS ROLLOUT LIFECYCLE</text>
+    <text x="30" y="55" fill="#64748b" font-size="10">Phased Execution Roadmap &amp; Deliverables</text>
+    
+    <!-- SECTION 1: PHASE 0 (Cyan) -->
+    <rect x="40" y="80" width="130" height="45" rx="6" fill="rgba(8, 51, 68, 0.3)" stroke="#22d3ee" stroke-width="1.5" />
+    <text x="105" y="106" fill="#22d3ee" font-size="10" font-weight="bold" text-anchor="middle">PHASE 0</text>
+    
+    <rect x="190" y="80" width="300" height="20" rx="4" fill="rgba(8, 51, 68, 0.2)" stroke="#22d3ee" stroke-width="0.8" />
+    <text x="200" y="93" fill="#f8fafc" font-size="8">Local ACE Vault &amp; CUDA Inference</text>
+    
+    <rect x="510" y="80" width="300" height="20" rx="4" fill="rgba(8, 51, 68, 0.2)" stroke="#22d3ee" stroke-width="0.8" />
+    <text x="520" y="93" fill="#f8fafc" font-size="8">Aider &amp; Cline Agent Integrations</text>
+    
+    <!-- SECTION 2: PHASE 1 (Green) -->
+    <rect x="40" y="145" width="130" height="45" rx="6" fill="rgba(6, 78, 59, 0.3)" stroke="#34d399" stroke-width="1.5" />
+    <text x="105" y="171" fill="#34d399" font-size="10" font-weight="bold" text-anchor="middle">PHASE 1</text>
+    
+    <rect x="190" y="145" width="300" height="20" rx="4" fill="rgba(6, 78, 59, 0.2)" stroke="#34d399" stroke-width="0.8" />
+    <text x="200" y="158" fill="#f8fafc" font-size="8">LiteLLM Gateway &amp; Free Pools</text>
+    
+    <rect x="510" y="145" width="300" height="20" rx="4" fill="rgba(6, 78, 59, 0.2)" stroke="#34d399" stroke-width="0.8" />
+    <text x="520" y="158" fill="#f8fafc" font-size="8">facet Ingest pipeline &amp; audit CLI</text>
+    
+    <!-- SECTION 3: PHASE 2 (Amber) -->
+    <rect x="40" y="210" width="130" height="45" rx="6" fill="rgba(120, 53, 15, 0.2)" stroke="#fbbf24" stroke-width="1.5" />
+    <text x="105" y="236" fill="#fbbf24" font-size="10" font-weight="bold" text-anchor="middle">PHASE 2</text>
+    
+    <rect x="190" y="210" width="300" height="20" rx="4" fill="rgba(120, 53, 15, 0.1)" stroke="#fbbf24" stroke-width="0.8" />
+    <text x="200" y="223" fill="#f8fafc" font-size="8">Notion &amp; Evernote Data Migration</text>
+    
+    <rect x="510" y="210" width="300" height="20" rx="4" fill="rgba(120, 53, 15, 0.1)" stroke="#fbbf24" stroke-width="0.8" />
+    <text x="520" y="223" fill="#f8fafc" font-size="8">Hetzner Dokploy &amp; SecOps Deploy</text>
+    
+    <!-- SECTION 4: PHASE 3 (Rose) -->
+    <rect x="40" y="275" width="130" height="45" rx="6" fill="rgba(136, 19, 55, 0.2)" stroke="#fb7185" stroke-width="1.5" />
+    <text x="105" y="301" fill="#fb7185" font-size="10" font-weight="bold" text-anchor="middle">PHASE 3</text>
+    
+    <rect x="190" y="275" width="300" height="20" rx="4" fill="rgba(136, 19, 55, 0.1)" stroke="#fb7185" stroke-width="0.8" />
+    <text x="200" y="288" fill="#f8fafc" font-size="8">n8n, Postiz &amp; Astro Affiliate Sites</text>
+    
+    <rect x="510" y="275" width="300" height="20" rx="4" fill="rgba(136, 19, 55, 0.1)" stroke="#fb7185" stroke-width="0.8" />
+    <text x="520" y="288" fill="#f8fafc" font-size="8">Lead-Gen Crawlers &amp; TG bots</text>
+    
+    <!-- SECTION 5: PHASE 4 (Purple) -->
+    <rect x="40" y="340" width="130" height="45" rx="6" fill="rgba(76, 29, 149, 0.3)" stroke="#a78bfa" stroke-width="1.5" />
+    <text x="105" y="366" fill="#a78bfa" font-size="10" font-weight="bold" text-anchor="middle">PHASE 4</text>
+    
+    <rect x="190" y="340" width="300" height="20" rx="4" fill="rgba(76, 29, 149, 0.2)" stroke="#a78bfa" stroke-width="0.8" />
+    <text x="200" y="353" fill="#f8fafc" font-size="8">Handy Voice Interface &amp; Whisper</text>
+    
+    <rect x="510" y="340" width="300" height="20" rx="4" fill="rgba(76, 29, 149, 0.2)" stroke="#a78bfa" stroke-width="0.8" />
+    <text x="520" y="353" fill="#f8fafc" font-size="8">Interactive Godot 4.x mesh visualizer</text>
+    
+    <!-- TIMELINE AXIS -->
+    <path d="M 190 410 H 810" fill="none" stroke="#1e293b" stroke-width="2" marker-end="url(#arrow-cyan)" />
+    
+    <!-- Axis Ticks & Labels -->
+    <line x1="190" y1="405" x2="190" y2="415" stroke="#1e293b" stroke-width="2" />
+    <text x="190" y="435" fill="#64748b" font-size="8" text-anchor="middle">Week 1 (May 1)</text>
+    
+    <line x1="345" y1="405" x2="345" y2="415" stroke="#1e293b" stroke-width="2" />
+    <text x="345" y="435" fill="#64748b" font-size="8" text-anchor="middle">Week 2-3 (May 8)</text>
+    
+    <line x1="510" y1="405" x2="510" y2="415" stroke="#1e293b" stroke-width="2" />
+    <text x="510" y="435" fill="#64748b" font-size="8" text-anchor="middle">Week 4-6 (May 22)</text>
+    
+    <line x1="670" y1="405" x2="670" y2="415" stroke="#1e293b" stroke-width="2" />
+    <text x="670" y="435" fill="#64748b" font-size="8" text-anchor="middle">Week 7-10 (June 11)</text>
+    
+    <line x1="810" y1="405" x2="810" y2="415" stroke="#1e293b" stroke-width="2" />
+    <text x="810" y="435" fill="#64748b" font-size="8" text-anchor="middle">Week 11+ (July 9)</text>
+    
+  </svg>
+</div>
 
 ## Milestone Breakdown
 
