@@ -59,6 +59,19 @@ export function NodeViewer({ node, onClose }: NodeViewerProps) {
                 >
                   {node.url}
                 </a>
+                {(node.url.startsWith('C:') || node.url.startsWith('E:') || node.url.includes('.md') || node.source === 'obsidian' || node.source === 'file') && (
+                  <div className="mt-2">
+                    <button
+                      onClick={() => {
+                        const obsidianUrl = `obsidian://open?path=${encodeURIComponent(node.url!)}`
+                        window.open(obsidianUrl, '_blank')
+                      }}
+                      className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 rounded text-xs font-mono text-zinc-300 hover:text-white transition-all cursor-pointer shadow-sm"
+                    >
+                      🟣 Open in Obsidian
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 

@@ -12,6 +12,7 @@ from .commands.visualize import visualize
 from .commands.ingest import ingest
 from .commands.search import search
 from .commands.graphrag import graphrag
+from .commands.export_graph import export_graph
 
 @click.group()
 def facet():
@@ -31,6 +32,7 @@ facet.add_command(visualize)
 facet.add_command(ingest)
 facet.add_command(search)
 facet.add_command(graphrag)
+facet.add_command(export_graph)
 
 def main():
     facet()

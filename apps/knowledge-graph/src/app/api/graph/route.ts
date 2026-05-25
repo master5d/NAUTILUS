@@ -1,7 +1,6 @@
 import { runCypher } from '@/lib/neo4j'
 import { GraphData, KnowledgeNode, KnowledgeEdge } from '@/types/knowledge'
-import { walkVault } from '@/lib/sources/obsidian'
-import fs from 'fs'
+import { execSync } from 'child_process'
 
 const CLUSTER_COLORS: Record<string, string> = {
   file: '#4f46e5',
@@ -114,97 +113,30 @@ export async function GET() {
 
     return Response.json(data)
   } catch (err) {
-    console.warn('⚠️ Neo4j offline. Falling back to local Obsidian PARA vault extraction:', err)
+    console.warn('⚠️ Neo4j offline. Falling back to local Python Obsidian extraction:', err)
     
     try {
-      const vaultPath = process.env.OBSIDIAN_VAULT_PATH ?? 'C:\\Users\\sasha\\Downloads\\Notes_ACE'
-      if (!fs.existsSync(vaultPath)) {
-        throw new Error(`Local vault path not found: ${vaultPath}`)
-      }
-
-      const notes = [...walkVault(vaultPath)]
+      const cwd = 'C:\\telo\\Efforts\Ongoing\\NAUTILUS'
+      const pythonPath = 'C:\\telo\\Efforts\\Ongoing\\NAUTILUS\\core\\enerv'
+      const vaultPath = process.env.OBSIDIAN_VAULT_PATH || 'C:\\Users\\sasha\\Downloads\\Notes_ACE'
       
-      const nodes: KnowledgeNode[] = []
-      const links: KnowledgeEdge[] = []
-      const clusterIds = new Set<string>()
-
-      // Index of note titles to their doc IDs for fast target resolution
-      const titleToId = new Map<string, string>()
-
-      for (const note of notes) {
-        const docId = normalizeId(note.filePath, vaultPath)
-        titleToId.set(note.title.toLowerCase(), docId)
-        
-        nodes.push({
-          id: docId,
-          title: note.title,
-          source: 'obsidian' as any,
-          type: 'Document' as const,
-          content: note.content.slice(0, 1000),
-          cluster: note.cluster,
-          color: clusterColor(note.cluster),
-        })
-
-        if (note.cluster && note.cluster !== 'vault-root') {
-          clusterIds.add(note.cluster)
-        }
-      }
-
-      // Add Cluster nodes
-      for (const cluster of clusterIds) {
-        const clusterId = `cluster:${cluster.toLowerCase().replace(/\s+/g, '-')}`
-        nodes.push({
-          id: clusterId,
-          title: cluster,
-          source: 'file' as const,
-          type: 'Cluster' as const,
-          cluster: cluster,
-          color: clusterColor(cluster),
-        })
-      }
-
-      // Build BELONGS_TO links and REFERENCE links from mentions
-      for (const note of notes) {
-        const docId = normalizeId(note.filePath, vaultPath)
-
-        // Cluster belongs link
-        if (note.cluster && note.cluster !== 'vault-root') {
-          const clusterId = `cluster:${note.cluster.toLowerCase().replace(/\s+/g, '-')}`
-          links.push({
-            source: docId,
-            target: clusterId,
-            type: 'BELONGS_TO' as const,
-            score: 0.5,
-          })
-        }
-
-        // Mention reference links
-        if (note.mentions && note.mentions.length) {
-          for (const mention of note.mentions) {
-            const cleanMention = mention.replace(/\\/g, '/').split('/').pop()?.replace(/\.md$/, '') || mention
-            const targetId = titleToId.get(cleanMention.toLowerCase())
-            if (targetId && targetId !== docId) {
-              links.push({
-                source: docId,
-                target: targetId,
-                type: 'SIMILAR_TO' as const, // Render as semantic links in WebGL view
-                score: 0.8,
-              })
-            }
-          }
-        }
-      }
-
-      const data: GraphData = {
-        nodes,
-        links,
-      }
-
+      const cmd = `python -m tools.tools export-graph --vault "${vaultPath}"`
+      
+      const stdout = execSync(cmd, {
+        cwd,
+        env: {
+          ...process.env,
+          PYTHONPATH: pythonPath
+        },
+        maxBuffer: 15 * 1024 * 1024 // 15MB buffer
+      })
+      
+      const data = JSON.parse(stdout.toString('utf-8'))
       return Response.json(data)
-    } catch (fallbackErr) {
-      console.error('❌ Fallback extraction failed:', fallbackErr)
+    } catch (fallbackErr: any) {
+      console.error('❌ Python fallback extraction failed:', fallbackErr)
       return Response.json(
-        { error: 'Failed to connect to Neo4j and local fallback failed' },
+        { error: 'Failed to connect to Neo4j and Python fallback failed', details: fallbackErr?.message },
         { status: 500 }
       )
     }
