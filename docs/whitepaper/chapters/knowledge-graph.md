@@ -62,3 +62,10 @@ A core tenet of the Nautilus architecture is **Sovereignty Under Failure**. If D
 - **Ambient Traversal**: The system automatically executes a fallback Obsidian note traversal sweep (`walkVault`).
 - **Backlink Extraction**: It reads local markdown frontmatter, parses backlinks (e.g., `[[MyOtherNote]]`), and constructs an interactive backlink coordinate network.
 - **Result**: You retain a fully functional, highly interactive local-first knowledge graph, even in a total database blackout.
+
+### Visual Transition: From PARA (Tiago Forte) to ACE/LYT (Nick Milo)
+
+The visual design of the Nooscope 3D force layout represents the conceptual shift from **PARA** to **ACE/LYT**:
+- **Why PARA Fails in 3D Space**: Under Tiago Forte's PARA model, notes are separated into hard vertical subfolders by "Project" or "Area". In a force-directed WebGL canvas, this forces nodes into separate, disconnected clusters that cannot easily build cross-project connections, causing a fragmented, disjointed "scatter-plot" layout.
+- **Why ACE/LYT Thrives in 3D Space**: By structuring notes under Nick Milo's **ACE (Atlas, Calendar, Efforts)** framework, files reside fluidly under unified domains, bridged by **Maps of Content (MOCs)**. On the WebGL canvas, MOCs act as **high-gravity central hub nodes**, beautifully pulling related sub-notes into elegant semantic clusters. This results in an organic, highly interconnected 3D stellar constellation layout, allowing the developer to see holistic conceptual structures emerging naturally.
+
