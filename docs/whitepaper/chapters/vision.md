@@ -72,3 +72,7 @@ The **DeepVista** modular AI capability schema (`type` x `execution` boundaries)
 ### 4. Geoff Charles — Rapid Architect Framing
 Our multi-agent parallel research planning workflow is inspired by the product frameworks developed by **Geoff Charles** (VP of Product at Ramp), enabling solo vibe coders to outline high-fidelity specifications through rapid research sweeps in under two minutes.
 
+---
+
+> [!NOTE]
+> **Citations Disclaimer**: Nautilus thrives on open cooperation and shared learnings. If you find that we have missed or forgotten to formally credit your work or someone else's work that inspired this monorepo, please contact us or open an issue—we will be absolutely delighted to add the appropriate credit!
