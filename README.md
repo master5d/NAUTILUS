@@ -2,29 +2,10 @@
 
 **Nautilus** is a local-first autonomous environment for personal knowledge management, multi-dimensional semantic indexing, and secure AI agent orchestration. It is built upon the **SOVRN Architecture blueprints**—a set of sovereignty-first, zero-telemetry, and highly resilient technical principles.
 
-```mermaid
-flowchart TD
-    Coder[Solo Vibe Coder]
-    
-    subgraph SovereignWorkspace["Sovereign Local Workspace (Offline-First Boundary)"]
-        Compass["Compass Layer (ENERV Indexer)"]
-        Brain["Brain Layer (Knowledge Graph & RAG)"]
-        Pilot["Pilot Layer (Hermes Agent & Skills)"]
-    end
-    
-    subgraph SharedStorage["Sovereign Memory & Storage"]
-        FastMemory["Fast Path (ACE Markdown Vault)"]
-        SlowMemory["Slow Path (FalkorDB / Neo4j Graph)"]
-    end
+<div align="center">
+  <img src="docs/whitepaper/images/concept.svg" alt="Nautilus Concept Flowchart" style="width: 100%; max-width: 800px; background: #0b0f19; border: 1px solid #1e293b; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</div>
 
-    %% Connections
-    Coder <--> |Natural Interface & Code IDE| Pilot
-    Pilot <--> |Faceted Schema Lookup| Compass
-    Pilot <--> |Semantic Search & GraphRAG| Brain
-    Compass <--> |Scan & Audit| FastMemory
-    Brain <--> |Query & Embed| SlowMemory
-    FastMemory --> |Daily Fact Consolidation| SlowMemory
-```
 
 ---
 
