@@ -166,7 +166,7 @@ description: Review PR for security and code quality issues.
 | **`hf-models`** | **tool** | **stateful** | **HF Model Manager — `hf status/check/download/pin`; пишет в models.yaml** |
 ---
 ## 7. Memory — двухступенчатая (ACE fast path → graphiti slow path)
-**Главное обновление v3.3 (P4):** не строить graphiti с нуля. Сначала фаза 0 — PARA на Markdown.
+**Главное обновление v3.3 (P4):** не строить graphiti с нуля. Сначала фаза 0 — ACE на Markdown.
 ### Фаза 0 — Felix/ACE stack (~30 минут setup)
 Источник: Nat Eliason, "Use OpenClaw to Build a Business That Runs Itself" (22 фев 2026), 3-layer memory:
 ```javascript
@@ -193,8 +193,8 @@ description: Review PR for security and code quality issues.
 
 ```
 **Hermes-skill ****`consolidate_daily`**** (cron 02:00 ежедневно):** читает `Calendar/Logs/<today>.md` → извлекает durable facts → пишет в `Efforts/On/Efforts/Ongoing/resources` с YAML-фронтматтером → пишет ссылки обратно в `Calendar/Logs/`.
-### Фаза 1 — graphiti slow path (запускать только после 1–2 недель PARA, если упирается)
-Только когда PARA перестаёт хватать (multi-hop queries, temporal reasoning, contradictions tracking):
+### Фаза 1 — graphiti slow path (запускать только после 1–2 недель ACE, если упирается)
+Только когда ACE перестаёт хватать (multi-hop queries, temporal reasoning, contradictions tracking):
 | Компонент | Pick | Лицензия |
 | --- | --- | --- |
 | Graph DB | **FalkorDB** (P3 из v3.2) | SSPLv1 (личное использование OK) |

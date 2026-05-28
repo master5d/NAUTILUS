@@ -17,9 +17,9 @@
   - `stateful`: Requires the `dry_run_gate` and human/boss approval.
 - **Persona vs Tool vs Workflow**: Clear semantic separation between background context, atomic tools, and ordered sequences.
 
-## 4. Bitemporal Memory (PARA -> Graphiti)
-- **Fast Path (PARA Phase 0)**: Obsidian-based Markdown (Projects, Areas, Resources, Archives) for daily capture and tacit knowledge.
-- **Slow Path (Graphiti Phase 1)**: Vector + Graph hybrid (FalkorDB + Qdrant) for multi-hop reasoning, contradiction tracking, and temporal context. Activated only when PARA hits scale limits.
+## 4. Bitemporal Memory (ACE -> Graphiti)
+- **Fast Path (ACE Phase 0)**: Obsidian-based Markdown (Atlas, Calendar, Efforts) for daily capture and tacit knowledge.
+- **Slow Path (Graphiti Phase 1)**: Vector + Graph hybrid (FalkorDB + Qdrant) for multi-hop reasoning, contradiction tracking, and temporal context. Activated only when ACE hits scale limits.
 - **Consolidation**: Daily automated migration of 'durable facts' from capture (Daily docs) to long-term memory.
 
 ## 5. Model Agnosticism & Resilience

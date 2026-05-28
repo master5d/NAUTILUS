@@ -17,4 +17,4 @@ We reject the "Data Lake" model of dumping raw files.
 Hermes is the gatekeeper of memory. Sub-agents (Coders, Researchers) interact with data only through Hermes-provided context windows, preventing tool/context sprawl and protecting the user's ACE framework.
 
 ## 4. Federated Ownership
-Data "Ownership" is assigned to specific ENERV domains (e.g., `tech/enerv`, `knowledge/para`). Cross-domain dependencies are managed via Federated Links in Graphiti (Phase 1).
+Data "Ownership" is assigned to specific ENERV domains (e.g., `tech/enerv`, `knowledge/ace`). Cross-domain dependencies are managed via Federated Links in Graphiti (Phase 1).
