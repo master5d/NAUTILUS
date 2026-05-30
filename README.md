@@ -61,6 +61,14 @@ The Python-powered `facet` CLI provides a unified control interface:
 
 ---
 
+## 🎙 Echo Voice Capture
+
+[Echo](https://github.com/master5d/Echo) — the local-first dictation app — can drop voice notes straight into the mesh. Echo is the **sensory audio bridge**: you speak, and your words become a note Nautilus ingests.
+
+In Echo's **Settings → Advanced**, set the **Voice capture folder** to a Nautilus/Obsidian inbox directory and add a **trigger phrase** (e.g. `запиши в наутилус`). Saying *"&lt;phrase&gt; …"* writes a timestamped markdown note (with `source: echo` frontmatter) into that folder instead of typing it into the active app. The normal `facet ingest` / n8n pipeline then consumes it — no extra wiring, fully local and sovereign.
+
+---
+
 ## 📖 Deeper Reading
 The full system architecture, bitemporal memory designs, and multi-phase rollout lifecycles are documented in the **[Nautilus White Paper](docs/whitepaper/README.md)**:
 
