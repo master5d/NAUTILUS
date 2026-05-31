@@ -40,6 +40,18 @@ htmlcov/
 .facets/.last-index
 .facets/journal.jsonl
 
+# Local Infrastructure (Sovereign)
+.claude
+.antigravitycli
+.firecrawl
+.superpowers
+.venv
+.hermes
+.antigravity
+.facets
+database.sqlite
+gmail_ingest_workflow.json
+
 # OS & Editors
 .DS_Store
 Thumbs.db

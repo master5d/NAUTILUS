@@ -23,6 +23,16 @@ Nautilus is divided into modular directory boundaries:
 
 ---
 
+## 📂 Sovereign File System Recommendations
+
+Nautilus enforces a **Zero-Clutter Root Policy** to minimize "Folder Tax" and maximize focus. For a canonical **Solo Vibe Coder** setup:
+
+1.  **ACE Core**: The project root (`C:\telo`) must only contain the three ACE pillars (**Atlas**, **Calendar**, **Efforts**), essential logs, and minimal system configs (`.env`, `.mcp.json`).
+2.  **Agent Redirection**: All agent-specific working files (keche, configs, persistent state) must be relocated to a centralized `C:\agents\<AgentName>` directory and mapped back via hidden **Symbolic Junctions**.
+3.  **STIER Dimension**: Efforts should be tagged with **⚡ Drive** or **🛠️ Duty** prefixes to enable the **Resonance Audit** and maintain energy balance.
+
+---
+
 ## 🧠 Sovereignty-First Principles
 
 1. **Autonomy Under Failure**: The stack is designed to operate 100% offline on your local hardware (Surface Studio/WSL2) if every cloud goes dark. Local GGUF (`llama-server`) and local Obsidian directories serve as the guaranteed baseline floor.
