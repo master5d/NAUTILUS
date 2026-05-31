@@ -17,7 +17,9 @@ Nautilus is divided into modular directory boundaries:
 * **`/core/enerv` (ENERV Indexer)**: A fast, schema-first environmental compass (Python CLI). Validates project directories against strict JSON contracts (`.facets/meta.json`) and powers the local `facet ingest` pipeline.
 * **`/config` (Shared Service Configs)**: Houses LiteLLM provider configurations and holds the dynamic service registry updated by the Port Broker.
 * **`/scripts` (Lifecycle & Port Broker Automation)**: Prevents port collisions on local Windows hosts via socket availability sweeps, automatically synchronizing dynamic ports across envs (`.env`, `.env.local`, `.hermes/config.yaml`).
-* **`/hermes` (Orchestration & Skills)**: The central AI pilot gateway. Listens to Telegram bot directives, manages cumulative dry-runs, and dispatches tasks to specialist coding agents (Aider, Cline).
+* **`C:\telo\Efforts\Simmering`**: The back-burner zone for active ideas fermentation.
+* **`/hermes/skills` (Orchestration & Skills)**: The central AI pilot gateway. Listens to Telegram bot directives, manages cumulative dry-runs, and dispatches tasks to specialist coding agents (Aider, Cline). Includes the **Resonance Audit** skill for cognitive bandwidth management.
+* **`/Atlas/Maps/Interests MOC.md`**: The central index for high-resonance "Drive" projects.
 
 ---
 
