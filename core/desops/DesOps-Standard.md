@@ -12,16 +12,13 @@ We "borrow taste" from seasoned designers by installing expert logic directly in
 - **Reflection & Self-Correction (Ch. 4):** Agents MUST perform a 5-angle self-audit based on 20+ design principles. The agent acts as its own harshest critic before human review.
 - **Anti-Generic Layer & Anti-Slop:** Use specialized skills to eliminate "AI-slop."
 - **Anti-Pattern Guardrails & Safety (Ch. 18):** Automated linting MUST include accessibility (WCAG) and neuro-inclusive checks to prevent "design hallucinations."
-  - ❌ **No Pure Blacks:** Avoid `#000000`. Use deep system grays/blues defined in tokens.
-  - ❌ **No Gray-on-Color:** Strictly enforce WCAG contrast.
-  - ❌ **No Nested Cards:** Simplify hierarchy.
 - **Expert Commands:** `/audit`, `/polish`, `/delight`.
 
 ### Layer 2: Agent Canvas (The Surface)
 Design occurs on agent-native surfaces using the **Model Context Protocol (MCP, Ch. 10)** to ensure seamless interoperability between tools.
+- **Onlook:** The "Unified Code-Design Interface." A visual editor for live React/Next.js apps that performs AST-based surgical edits directly on the source code. **Kills the Handoff.**
 - **Paper:** Real HTML/CSS canvas for direct component logic.
-- **Pencil / OpenPencil:** JSON-based formats for vector precision.
-- **Parallelization (Ch. 3):** We leverage concurrent agent teams (via OpenPencil) to design Hero sections, tokens, and layouts in parallel.
+- **Pencil / OpenPencil:** JSON-based formats for vector precision and Git-integrated concurrent design (Ch. 3).
 
 ### Layer 3: The Eye (Visual DNA)
 We train our "eye" and the agent's "taste" by absorbing visual DNA from curated sources.
@@ -31,6 +28,7 @@ We train our "eye" and the agent's "taste" by absorbing visual DNA from curated 
 - **Asset Orchestration (Illustrations):** Prioritize modular, SVG-based libraries.
 
 ## 2. Tools & Workflow
+- **Onlook:** For visual production editing and bidirectional sync (The "Cursor for Designers").
 - **Stitch / Open-Codesign:** For high-level generative UI and multi-model (BYOK) variations.
 - **UI UX Pro Max:** For automated Design System generation.
 - **Pencil / OpenPencil:** For vector precision and Git-integrated concurrent design.
@@ -46,11 +44,12 @@ The Hub follows a progressive disclosure workflow to catch errors early:
 3.  **Sketch:** Iterate on low-fidelity wireframes with placeholders.
 4.  **Sync (Layer 1):** Apply `GLOBAL_DESIGN.md` tokens.
 5.  **Draft (Layer 2):** Fill with real content using `Stitch` or `Paper`.
-6.  **Variations:** Generate 3+ variations (Proactive Orchestration).
-7.  **Refine (Skills):** Run `/audit` and `/polish` to eliminate slop.
-8.  **Codify:** Sync to React/Tailwind components via `Paper`.
-9.  **Live Sync:** Use `Impeccable Live Mode` for final browser-based tuning.
-10. **Verify:** Execute `Impeccable /audit` (high-performance reflection).
+6.  **Visual Production:** Use **Onlook** for real-time visual refinement of the live application.
+7.  **Variations:** Generate 3+ variations (Proactive Orchestration).
+8.  **Refine (Skills):** Run `/audit` and `/polish` to eliminate slop.
+9.  **Codify:** Sync back any remaining fragments to React/Tailwind via `Paper`.
+10. **Live Sync:** Use `Impeccable Live Mode` for final browser-based tuning.
+11. **Verify:** Execute `Impeccable /audit` (high-performance reflection).
 
 ## 4. File Organization
 - Every project MUST have a `DESIGN.md` in its root.
@@ -64,11 +63,12 @@ Use `sync-global-tokens.ps1` in `Atlas\Scripts\DesOps`.
 - **Orchestration over Creation (Mutagens):** Designing "genetic code" instead of pages.
 - **Living Systems Thinking:** Performance informs the `GLOBAL_DESIGN.md`.
 - **Zero-Redesign Mandate (Longevity):** Stability is the ultimate aesthetic.
+- **Code-is-Design (Onlook):** We eliminate the gap between the mockup and the realization. The production code is the canvas.
 
 ## 7. Meta-Designer Philosophy
 The ultimate goal is to transition from "Designing Things" to **"Designing the Systems that Design Things."**
 
-- **Zero-GUI Imperative:** Prioritize terminal-based design workflows.
+- **Zero-GUI Imperative:** Prioritize terminal-based design workflows where possible.
 - **Human-in-the-Loop (Ch. 13):** The Meta-Designer calibrates human intent with machine execution.
 - **AI as an Extension:** Freeing the human to focus on strategy and "Visual DNA."
 - **Design as a Skill:** Loading expertise as standardized **Agentic Skills**.
