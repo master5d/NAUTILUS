@@ -37,14 +37,17 @@ We train our "eye" and the agent's "taste" by absorbing visual DNA from curated 
 - **Presenton:** For automated "Presentation Orchestration" (Markdown to `.pptx`).
 - **Impeccable:** For visual regression testing in CI/CD.
 
-## 3. Workflow
+## 3. Workflow (Junior Designer Loop)
+The Hub follows a progressive disclosure workflow to catch errors early:
 1.  **Extract (The Eye):** Use `Variant` or similar tools to capture "Visual DNA" into `DESIGN.md`.
-2.  **Sync (Layer 1):** Ensure `GLOBAL_DESIGN.md` tokens are loaded.
-3.  **Draft (Layer 2):** Iterate on screens using `Stitch` or `Paper`.
-4.  **Communicate (Orchestration):** Use `Presenton` to generate strategic decks from `DESIGN.md` rationales.
-5.  **Refine (Skills):** Run `/audit` and `/polish` commands to eliminate anti-patterns.
-6.  **Codify:** Sync to React/Tailwind components via `Paper`.
-7.  **Verify:** Execute `Impeccable` visual regression tests.
+2.  **Verify (Rule Zero):** Perform Fact Verification and execute the **Core Asset Protocol**.
+3.  **Sketch:** Iterate on low-fidelity wireframes or sketches with placeholders.
+4.  **Sync (Layer 1):** Ensure `GLOBAL_DESIGN.md` tokens are applied to the sketch.
+5.  **Draft (Layer 2):** Fill with real content and branding using `Stitch` or `Paper`.
+6.  **Variations:** Proactively generate 3+ variations (Proactive Orchestration).
+7.  **Refine (Skills):** Run `/audit` and `/polish` commands to eliminate slop.
+8.  **Codify:** Sync to React/Tailwind components via `Paper`.
+9.  **Verify:** Execute `Impeccable` visual regression tests.
 
 ## 4. File Organization
 - Every project MUST have a `DESIGN.md` in its root.
@@ -66,9 +69,10 @@ Inspired by the evolving landscape of global design (IDEO, Microsoft, MIT), NAUT
 ## 7. Meta-Designer Philosophy
 The ultimate goal of DesOps is to transition from "Designing Things" to **"Designing the Systems that Design Things."**
 
+- **Zero-GUI Imperative:** We prioritize terminal-based design workflows where the GUI layer disappears. An 80-point agentic skill in the terminal beats a 100-point browser-based product for high-end engineering efficiency.
 - **Managing Complexity:** As design permeates every aspect of the Sovereign Mesh, the Meta-Designer ensures total consistency and coherence across all project touchpoints.
 - **AI as an Extension:** We don't just use AI; we integrate it. The Meta-Designer builds the harness that enables AI to automate the mundane, freeing the human to focus on strategy and "Visual DNA."
-- **Design as a Skill:** We move from "Design as a Profession" to **"Design as a Loadable Skill."** Our agents (Claude Code, Cursor) load design-specific expertise (via `open-design`) on-demand, rendering "we have no designer" a legacy constraint.
+- **Design as a Skill:** We move from "Design as a Profession" to **"Design as a Loadable Skill."** Our agents (Claude Code, Cursor) load design-specific expertise (via `open-design` or `huashu-design`) on-demand, rendering "we have no designer" a legacy constraint.
 - **Future-Proofing:** Anticipating shifts in technology (like the move to Hypermedia or Text-First Layouts) and proactively adapting the system's objectives.
 - **Cross-Disciplinary Unity:** The Meta-Designer acts as the bridge between Engineering, Art, and Strategy, ensuring a unified and user-centered Sovereign experience.
 
