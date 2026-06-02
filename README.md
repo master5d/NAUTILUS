@@ -15,6 +15,7 @@ Nautilus is divided into modular directory boundaries:
 
 * **`/apps/knowledge-graph` (Nooscope UI)**: A WebGL-powered 3D force-directed node visualization dashboard (Next.js 16 + React + Three.js). Features custom GraphRAG searches and supports a robust offline fallback (`walkVault`) sweeping local Obsidian directories when database servers are offline.
 * **`/core/enerv` (ENERV Indexer)**: A fast, schema-first environmental compass (Python CLI). Validates project directories against strict JSON contracts (`.facets/meta.json`) and powers the local `facet ingest` pipeline.
+* **`/core/desops` (DesOps Hub)**: Centralized design governance using the `design.md` specification. Manages `GLOBAL_DESIGN.md` (master tokens) and provides templates for project-level UI consistency.
 * **`/config` (Shared Service Configs)**: Houses LiteLLM provider configurations and holds the dynamic service registry updated by the Port Broker.
 * **`/scripts` (Lifecycle & Port Broker Automation)**: Prevents port collisions on local Windows hosts via socket availability sweeps, automatically synchronizing dynamic ports across envs (`.env`, `.env.local`, `.hermes/config.yaml`).
 * **`C:\telo\Efforts\Simmering`**: The back-burner zone for active ideas fermentation.
