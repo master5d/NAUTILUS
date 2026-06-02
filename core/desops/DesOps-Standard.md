@@ -39,6 +39,7 @@ We train our "eye" and the agent's "taste" by absorbing visual DNA from curated 
 - **Pencil / OpenPencil:** For vector precision and Git-integrated concurrent design.
 - **Paper:** For direct React/Tailwind component synchronization.
 - **Diagram-Design:** For automated, publishing-grade HTML+SVG charts and data-dense visuals.
+- **Impeccable v3.5:** For professional design quality enforcement. Features 41+ anti-pattern rules, tool-specific rule compilation (e.g., targeted fixes for Codex vs. GPT flaws), and **Live Mode** for browser-to-code synchronization.
 - **Presenton:** For automated "Presentation Orchestration" (Markdown to `.pptx`).
 - **Impeccable:** For visual regression testing in CI/CD.
 
@@ -52,7 +53,8 @@ The Hub follows a progressive disclosure workflow to catch errors early:
 6.  **Variations:** Proactively generate 3+ variations (Proactive Orchestration).
 7.  **Refine (Skills):** Run `/audit` and `/polish` commands to eliminate slop.
 8.  **Codify:** Sync to React/Tailwind components via `Paper`.
-9.  **Verify:** Execute `Impeccable` visual regression tests.
+9.  **Live Sync:** Use `Impeccable Live Mode` for final browser-based tuning; changes sync back to source code automatically.
+10. **Verify:** Execute `Impeccable /audit` (high-performance, 20x speedup) to ensure 41+ rules are met.
 
 ## 4. File Organization
 - Every project MUST have a `DESIGN.md` in its root.
