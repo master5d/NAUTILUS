@@ -6,6 +6,8 @@ Following the "Design Without Designing" framework, we don't aim to become tradi
 ### Layer 1: Skills (The Expertise)
 We "borrow taste" from seasoned designers by installing expert logic directly into our AI agents' context.
 - **Design Protocols:** We load specific methodologies (e.g., `huashu-design`) as agentic skills. This forces the AI to operate with systemic, "protocol-level" precision instead of generic prompting.
+- **Self-Correction Loop:** Agents MUST perform a 5-angle self-audit based on 20+ design principles (governance, contrast, hierarchy, density, alignment) before delivering output. The agent acts as its own harshest critic.
+- **Anti-Generic Layer:** Use specialized skills (e.g., `web-design-skill`) to transition from "functional but boring" templates to "exciting and high-density" layouts.
 - **Anti-Pattern Guardrails:**
   - ❌ **No Pure Blacks:** Avoid `#000000`. Use deep system grays/blues defined in tokens.
   - ❌ **No Gray-on-Color:** Strictly enforce WCAG contrast for legibility.
@@ -28,9 +30,10 @@ We train our "eye" and the agent's "taste" by absorbing visual DNA from curated 
 - **Asset Orchestration (Illustrations):** We avoid static, non-customizable assets. We prioritize modular, SVG-based libraries (e.g., Humaaans, UnDraw, Ouch!) that allow AI agents to programmatically adjust colors and compositions to match the project's tokens.
 
 ## 2. Tools & Workflow
-- **Stitch:** For high-level generative UI and screen variations.
-- **Pencil:** For low-level node manipulation and vector precision.
+- **Stitch / Open-Codesign:** For high-level generative UI and multi-model (BYOK) screen variations.
+- **Pencil / OpenPencil:** For vector precision and Git-integrated concurrent design.
 - **Paper:** For direct React/Tailwind component synchronization.
+- **Diagram-Design:** For automated, publishing-grade HTML+SVG charts and data-dense visuals.
 - **Presenton:** For automated "Presentation Orchestration" (Markdown to `.pptx`).
 - **Impeccable:** For visual regression testing in CI/CD.
 
