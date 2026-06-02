@@ -9,6 +9,11 @@ We "borrow taste" from seasoned designers by installing expert logic directly in
 - **Automated System Generation:** Use specialized skills (e.g., `ui-ux-pro-max`) to generate complete design systems in seconds.
 - **Core Asset Protocol:** To eliminate brand hallucination, agents MUST gather 6 types of assets (logo, product photos, UI screenshots, palette, fonts, guidelines) via official sources before designing.
 - **Design Protocols:** We load specific methodologies (e.g., `huashu-design`) as agentic skills.
+- **Cognitive Visualization (PaperBanana):** Raw methodology text is transformed into publication-ready diagrams using a 5-agent creative loop:
+  - **The Retriever:** Scans elite academic sources (e.g., NeurIPS) for visual "skeletons."
+  - **The Planner:** Translates raw text into visual blueprints.
+  - **The Stylist:** Extracts color palettes and typography from high-end publications.
+  - **The Visualizer + Critic:** Generates and refines the diagram through 3 rounds of iteration.
 - **Reflection & Self-Correction (Ch. 4):** Agents MUST perform a 5-angle self-audit based on 20+ design principles. The agent acts as its own harshest critic before human review.
 - **Anti-Generic Layer & Anti-Slop:** Use specialized skills to eliminate "AI-slop."
 - **Anti-Pattern Guardrails & Safety (Ch. 18):** Automated linting MUST include accessibility (WCAG) and neuro-inclusive checks to prevent "design hallucinations."
@@ -28,6 +33,7 @@ We train our "eye" and the agent's "taste" by absorbing visual DNA from curated 
 - **Asset Orchestration (Illustrations):** Prioritize modular, SVG-based libraries.
 
 ## 2. Tools & Workflow
+- **PaperBanana:** For publication-ready academic diagrams and complex mindmapping from raw text.
 - **Onlook:** For visual production editing and bidirectional sync (The "Cursor for Designers").
 - **Stitch / Open-Codesign:** For high-level generative UI and multi-model (BYOK) variations.
 - **UI UX Pro Max:** For automated Design System generation.
@@ -41,19 +47,21 @@ We train our "eye" and the agent's "taste" by absorbing visual DNA from curated 
 The Hub follows a progressive disclosure workflow to catch errors early:
 1.  **Extract (The Eye):** Capture "Visual DNA" into `DESIGN.md`.
 2.  **Verify (Rule Zero):** Perform Fact Verification and execute the **Core Asset Protocol**.
-3.  **Sketch:** Iterate on low-fidelity wireframes with placeholders.
-4.  **Sync (Layer 1):** Apply `GLOBAL_DESIGN.md` tokens.
-5.  **Draft (Layer 2):** Fill with real content using `Stitch` or `Paper`.
-6.  **Visual Production:** Use **Onlook** for real-time visual refinement of the live application.
-7.  **Variations:** Generate 3+ variations (Proactive Orchestration).
-8.  **Refine (Skills):** Run `/audit` and `/polish` to eliminate slop.
-9.  **Codify:** Sync back any remaining fragments to React/Tailwind via `Paper`.
-10. **Live Sync:** Use `Impeccable Live Mode` for final browser-based tuning.
-11. **Verify:** Execute `Impeccable /audit` (high-performance reflection).
+3.  **Visualization:** Generate publication-ready diagrams or mindmaps (via **PaperBanana**) to anchor the project's conceptual architecture.
+4.  **Sketch:** Iterate on low-fidelity wireframes with placeholders.
+5.  **Sync (Layer 1):** Apply `GLOBAL_DESIGN.md` tokens.
+6.  **Draft (Layer 2):** Fill with real content using `Stitch` or `Paper`.
+7.  **Visual Production:** Use **Onlook** for real-time visual refinement of the live application.
+8.  **Variations:** Generate 3+ variations (Proactive Orchestration).
+9.  **Refine (Skills):** Run `/audit` and `/polish` to eliminate slop.
+10. **Codify:** Sync back any remaining fragments to React/Tailwind via `Paper`.
+11. **Live Sync:** Use `Impeccable Live Mode` for final browser-based tuning.
+12. **Verify:** Execute `Impeccable /audit` (high-performance reflection).
 
 ## 4. File Organization
 - Every project MUST have a `DESIGN.md` in its root.
 - Every project MUST store `.pen` or `.op` files in a `design/` subdirectory.
+- Every project MUST store diagrams and mindmaps in `design/diagrams/`.
 - Every project MUST keep visual test logs in `logs/desops.log`.
 
 ## 5. Global Token Sync
@@ -63,7 +71,8 @@ Use `sync-global-tokens.ps1` in `Atlas\Scripts\DesOps`.
 - **Orchestration over Creation (Mutagens):** Designing "genetic code" instead of pages.
 - **Living Systems Thinking:** Performance informs the `GLOBAL_DESIGN.md`.
 - **Zero-Redesign Mandate (Longevity):** Stability is the ultimate aesthetic.
-- **Code-is-Design (Onlook):** We eliminate the gap between the mockup and the realization. The production code is the canvas.
+- **Code-is-Design (Onlook):** We eliminate the gap between the mockup and the realization.
+- **Cognitive Fidelity:** Diagrams are not "decor"; they are the interface for perceiving system complexity. We aim for academic, "publication-ready" clarity.
 
 ## 7. Meta-Designer Philosophy
 The ultimate goal is to transition from "Designing Things" to **"Designing the Systems that Design Things."**
@@ -84,6 +93,7 @@ The ultimate goal is to transition from "Designing Things" to **"Designing the S
 - **AI Design Strategist:** The Intelligence Optimizer.
 - **Proactive Orchestrator:** Anticipates needs (presentations, variants, audits).
 - **Agentic Designer (via Open-Design):** Interchangeable skill-set.
+- **Visual Intelligence Officer (PaperBanana):** Specializes in systemic visualization, diagram architecture, and mindmapping.
 - **Cybernetic Director:** Automates visual brand governance.
 - **Sim Designer:** Generates "Synthetic Users" for UX friction detection.
 - **Fusionist (Bridge):** Maintains `DESIGN.md` as the unified source of truth.
@@ -99,6 +109,7 @@ The ultimate goal is to transition from "Designing Things" to **"Designing the S
 
 ## 12. Foundational Reading
 - **Agentic Design Patterns:** antonio Gulli (Google).
+- **PaperBanana Research:** Automated diagram generation (Google).
 - **Hypermedia Systems:** Htmx, pure REST.
 - **Type Color:** LaTeX-grade justify.
 
