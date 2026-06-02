@@ -5,9 +5,12 @@ Following the "Design Without Designing" framework, we don't aim to become tradi
 
 ### Layer 1: Skills (The Expertise)
 We "borrow taste" from seasoned designers by installing expert logic directly into our AI agents' context.
+- **Rule Zero: Fact Verification First:** If a task mentions a specific product, brand, or technology, the agent MUST perform a web search to verify existence, versions, and official specifications before starting.
+- **Automated System Generation:** Use specialized skills (e.g., `ui-ux-pro-max`) to generate complete design systems in seconds. This includes 161+ industry-specific design rules, 67+ UI styles, and conversion-optimized patterns.
+- **Core Asset Protocol:** To eliminate brand hallucination, agents MUST gather 6 types of assets (logo, product photos, UI screenshots, palette, fonts, guidelines) via official sources before designing. Findings must be documented in `brand-spec.md`.
 - **Design Protocols:** We load specific methodologies (e.g., `huashu-design`) as agentic skills. This forces the AI to operate with systemic, "protocol-level" precision instead of generic prompting.
 - **Self-Correction Loop:** Agents MUST perform a 5-angle self-audit based on 20+ design principles (governance, contrast, hierarchy, density, alignment) before delivering output. The agent acts as its own harshest critic.
-- **Anti-Generic Layer:** Use specialized skills (e.g., `web-design-skill`) to transition from "functional but boring" templates to "exciting and high-density" layouts.
+- **Anti-Generic Layer & Anti-Slop:** Use specialized skills to eliminate "AI-slop" (generic purple gradients, emoji icons, Inter-only typography). Transition from "functional but boring" templates to "exciting and high-density" layouts.
 - **Anti-Pattern Guardrails:**
   - ❌ **No Pure Blacks:** Avoid `#000000`. Use deep system grays/blues defined in tokens.
   - ❌ **No Gray-on-Color:** Strictly enforce WCAG contrast for legibility.
@@ -21,16 +24,18 @@ We "borrow taste" from seasoned designers by installing expert logic directly in
 ### Layer 2: Agent Canvas (The Surface)
 Design occurs on agent-native surfaces where the AI is the kernel, ensuring no translation layer or handoff.
 - **Paper:** Real HTML/CSS canvas for direct component logic.
-- **Pencil:** JSON-based `.pen` format for git-diffable, agent-manipulable vector precision.
+- **Pencil / OpenPencil:** JSON-based formats for git-diffable, agent-manipulable vector precision.
 
 ### Layer 3: The Eye (Visual DNA)
 We train our "eye" and the agent's "taste" by absorbing visual DNA from curated sources.
+- **Industry Intelligence:** We leverage databases of 161+ color palettes and 57+ font pairings matched to specific industries (SaaS, Crypto, Healthcare, etc.) to ensure immediate contextual relevance.
 - **Style Dropping:** Use AI to extract color palettes, typographic rhythm, and spatial density from references like Mobbin, Awwwards, and Cosmos.
 - **Brand Injection:** Use pre-validated `DESIGN.md` archetypes (e.g., from `awesome-claude-design`) to instantly adopt the visual identity of top-tier products like Stripe, Linear, or Vercel. This eliminates the "generic AI look" and ensures high-end personality from day one.
 - **Asset Orchestration (Illustrations):** We avoid static, non-customizable assets. We prioritize modular, SVG-based libraries (e.g., Humaaans, UnDraw, Ouch!) that allow AI agents to programmatically adjust colors and compositions to match the project's tokens.
 
 ## 2. Tools & Workflow
 - **Stitch / Open-Codesign:** For high-level generative UI and multi-model (BYOK) screen variations.
+- **UI UX Pro Max:** For automated, professional-grade Design System generation and industry-specific rule-set enforcement.
 - **Pencil / OpenPencil:** For vector precision and Git-integrated concurrent design.
 - **Paper:** For direct React/Tailwind component synchronization.
 - **Diagram-Design:** For automated, publishing-grade HTML+SVG charts and data-dense visuals.
@@ -51,7 +56,7 @@ The Hub follows a progressive disclosure workflow to catch errors early:
 
 ## 4. File Organization
 - Every project MUST have a `DESIGN.md` in its root.
-- Every project MUST store `.pen` files in a `design/` subdirectory.
+- Every project MUST store `.pen` or `.op` files in a `design/` subdirectory.
 - Every project MUST keep visual test logs in `logs/desops.log`.
 
 ## 5. Global Token Sync
@@ -72,7 +77,7 @@ The ultimate goal of DesOps is to transition from "Designing Things" to **"Desig
 - **Zero-GUI Imperative:** We prioritize terminal-based design workflows where the GUI layer disappears. An 80-point agentic skill in the terminal beats a 100-point browser-based product for high-end engineering efficiency.
 - **Managing Complexity:** As design permeates every aspect of the Sovereign Mesh, the Meta-Designer ensures total consistency and coherence across all project touchpoints.
 - **AI as an Extension:** We don't just use AI; we integrate it. The Meta-Designer builds the harness that enables AI to automate the mundane, freeing the human to focus on strategy and "Visual DNA."
-- **Design as a Skill:** We move from "Design as a Profession" to **"Design as a Loadable Skill."** Our agents (Claude Code, Cursor) load design-specific expertise (via `open-design` or `huashu-design`) on-demand, rendering "we have no designer" a legacy constraint.
+- **Design as a Skill:** We move from "Design as a Profession" to **"Design as a Loadable Skill."** Our agents (Claude Code, Cursor) load design-specific expertise (via `open-design`, `huashu-design`, or `ui-ux-pro-max`) on-demand, rendering "we have no designer" a legacy constraint.
 - **Future-Proofing:** Anticipating shifts in technology (like the move to Hypermedia or Text-First Layouts) and proactively adapting the system's objectives.
 - **Cross-Disciplinary Unity:** The Meta-Designer acts as the bridge between Engineering, Art, and Strategy, ensuring a unified and user-centered Sovereign experience.
 
