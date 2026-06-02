@@ -104,6 +104,8 @@ The DesOps Hub abstracts complex human design roles into automated AI functions,
 Architecture and design decisions MUST be communicated effectively to varied audiences:
 
 - **The Arbiter of Taste (Human):** The final curator. Manages the "mix-and-match" process of AI variants and provides the final high-fidelity "manual tuning."
+- **Nerdsignalling & Tribal Status:** We use design to "raise a flag of identity." By signaling technical and aesthetic depth, we carve out social positions within specific niches (e.g., infiltrating youth culture).
+- **The OG / Unc Persona:** We provide systemic advice from the standpoint of an "OG" (Original Gangster) or "Unc" (Uncle), leveraging the Hub to establish credibility and influence through authentic, protocol-driven standards.
 - **For Stakeholders (Business):** Focus on the *Why* and the *Outcome*. Use the `Rationale` and `Ethos` sections of `DESIGN.md` to explain how design supports business goals (Longevity, Ethics, Efficiency).
 - **For Developers (Engineering):** Focus on the *How* and the *Contract*. Provide precise YAML tokens, component specs, and anti-pattern guardrails.
 - **For Users (Product):** Focus on the *Experience*. Use "Synthetic UX Audit" results to demonstrate usability and accessibility.
