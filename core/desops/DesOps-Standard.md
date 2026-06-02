@@ -9,14 +9,11 @@ We "borrow taste" from seasoned designers by installing expert logic directly in
 - **Automated System Generation:** Use specialized skills (e.g., `ui-ux-pro-max`) to generate complete design systems in seconds.
 - **Core Asset Protocol:** To eliminate brand hallucination, agents MUST gather 6 types of assets (logo, product photos, UI screenshots, palette, fonts, guidelines) via official sources before designing.
 - **Design Protocols:** We load specific methodologies (e.g., `huashu-design`) as agentic skills.
-- **Cognitive Visualization (PaperBanana):** Raw methodology text is transformed into publication-ready diagrams using a 5-agent creative loop:
-  - **The Retriever:** Scans elite academic sources (e.g., NeurIPS) for visual "skeletons."
-  - **The Planner:** Translates raw text into visual blueprints.
-  - **The Stylist:** Extracts color palettes and typography from high-end publications.
-  - **The Visualizer + Critic:** Generates and refines the diagram through 3 rounds of iteration.
-- **Reflection & Self-Correction (Ch. 4):** Agents MUST perform a 5-angle self-audit based on 20+ design principles. The agent acts as its own harshest critic before human review.
+- **Cognitive Visualization (PaperBanana):** Raw methodology text is transformed into publication-ready diagrams using a 5-agent creative loop.
+- **DataViz Intelligence (Data-Dense Visualization):** We integrate elite information design principles (Tufte, RAWGraphs) to ensure visuals are numerically precise and cognitively clear.
+- **Reflection & Self-Correction (Ch. 4):** Agents MUST perform a 5-angle self-audit based on 20+ design principles.
 - **Anti-Generic Layer & Anti-Slop:** Use specialized skills to eliminate "AI-slop."
-- **Anti-Pattern Guardrails & Safety (Ch. 18):** Automated linting MUST include accessibility (WCAG) and neuro-inclusive checks to prevent "design hallucinations."
+- **Anti-Pattern Guardrails & Safety (Ch. 18):** Automated linting MUST include accessibility (WCAG) and neuro-inclusive checks.
 - **Expert Commands:** `/audit`, `/polish`, `/delight`.
 
 ### Layer 2: Agent Canvas (The Surface)
@@ -28,18 +25,21 @@ Design occurs on agent-native surfaces using the **Model Context Protocol (MCP, 
 ### Layer 3: The Eye (Visual DNA)
 We train our "eye" and the agent's "taste" by absorbing visual DNA from curated sources.
 - **Industry Intelligence:** Leverage databases of 161+ color palettes and 57+ font pairings.
+- **DataViz DNA Sources:**
+    - **Methodology:** Edward Tufte (Information Design), DataViz Project (Chart Selection), RAWGraphs (Data-to-SVG).
+    - **Inspiration:** Ward Shelley (Visual Narratives), Tableau Discover, Venngage, Visualizing.org.
 - **Style Dropping:** Extract visual DNA from Mobbin, Awwwards, and Cosmos.
 - **Brand Injection:** Use pre-validated `DESIGN.md` archetypes (e.g., `awesome-claude-design`).
 - **Asset Orchestration (Illustrations):** Prioritize modular, SVG-based libraries.
 
 ## 2. Tools & Workflow
 - **PaperBanana:** For publication-ready academic diagrams and complex mindmapping from raw text.
+- **RAWGraphs / Diagram-Design:** For transforming data into complex, custom SVG/HTML visualizations.
 - **Onlook:** For visual production editing and bidirectional sync (The "Cursor for Designers").
 - **Stitch / Open-Codesign:** For high-level generative UI and multi-model (BYOK) variations.
 - **UI UX Pro Max:** For automated Design System generation.
 - **Pencil / OpenPencil:** For vector precision and Git-integrated concurrent design.
 - **Paper:** For direct React/Tailwind component synchronization.
-- **Diagram-Design:** For automated, publishing-grade HTML+SVG charts.
 - **Impeccable v3.5:** For professional design quality enforcement and **Live Mode** sync.
 - **Presenton:** For automated "Presentation Orchestration."
 
@@ -47,7 +47,7 @@ We train our "eye" and the agent's "taste" by absorbing visual DNA from curated 
 The Hub follows a progressive disclosure workflow to catch errors early:
 1.  **Extract (The Eye):** Capture "Visual DNA" into `DESIGN.md`.
 2.  **Verify (Rule Zero):** Perform Fact Verification and execute the **Core Asset Protocol**.
-3.  **Visualization:** Generate publication-ready diagrams or mindmaps (via **PaperBanana**) to anchor the project's conceptual architecture.
+3.  **Visualization:** Generate publication-ready diagrams or mindmaps (via **PaperBanana**) and data-dense charts (via **DataViz Intelligence**) to anchor the project's conceptual architecture.
 4.  **Sketch:** Iterate on low-fidelity wireframes with placeholders.
 5.  **Sync (Layer 1):** Apply `GLOBAL_DESIGN.md` tokens.
 6.  **Draft (Layer 2):** Fill with real content using `Stitch` or `Paper`.
@@ -62,6 +62,7 @@ The Hub follows a progressive disclosure workflow to catch errors early:
 - Every project MUST have a `DESIGN.md` in its root.
 - Every project MUST store `.pen` or `.op` files in a `design/` subdirectory.
 - Every project MUST store diagrams and mindmaps in `design/diagrams/`.
+- Every project MUST store data visualizations in `design/dataviz/`.
 - Every project MUST keep visual test logs in `logs/desops.log`.
 
 ## 5. Global Token Sync
@@ -93,7 +94,7 @@ The ultimate goal is to transition from "Designing Things" to **"Designing the S
 - **AI Design Strategist:** The Intelligence Optimizer.
 - **Proactive Orchestrator:** Anticipates needs (presentations, variants, audits).
 - **Agentic Designer (via Open-Design):** Interchangeable skill-set.
-- **Visual Intelligence Officer (PaperBanana):** Specializes in systemic visualization, diagram architecture, and mindmapping.
+- **Visual Intelligence Officer (PaperBanana + DataViz):** Specializes in systemic visualization, diagram architecture, mindmapping, and data narrative design.
 - **Cybernetic Director:** Automates visual brand governance.
 - **Sim Designer:** Generates "Synthetic Users" for UX friction detection.
 - **Fusionist (Bridge):** Maintains `DESIGN.md` as the unified source of truth.
@@ -110,6 +111,7 @@ The ultimate goal is to transition from "Designing Things" to **"Designing the S
 ## 12. Foundational Reading
 - **Agentic Design Patterns:** antonio Gulli (Google).
 - **PaperBanana Research:** Automated diagram generation (Google).
+- **The Visual Display of Quantitative Information:** Edward Tufte.
 - **Hypermedia Systems:** Htmx, pure REST.
 - **Type Color:** LaTeX-grade justify.
 
