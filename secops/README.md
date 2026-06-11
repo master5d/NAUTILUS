@@ -6,7 +6,7 @@ Merged from `C:\telo\Efforts\Ongoing\SecOps` on **2026-06-11** (old project dir 
 
 | Path | What |
 |---|---|
-| `guides/` | Living security docs: plugin inventory (security lens), semgrep SAST setup, GenAI best-practices cheat-sheet, crypto-asset protection playbook |
+| `guides/` | Living security docs: plugin inventory (security lens), semgrep SAST setup, GenAI best-practices cheat-sheet, crypto-asset protection playbook, **ai-chat-guard-playbook.md** (runtime-защита продуктовых LLM-чатов: whitelist guard, safe/attack/unclear, layered context, промпты в БД) |
 | `guides/SecOps Notes/` | Webpage snapshot archive (~1.5 MB) — **gitignored**, disk-only |
 | `infra/` | Docker stack (CrowdSec + Cloudflare bouncer, Falco + Falcosidekick), Wazuh installer, n8n retaliation playbook — **Hetzner/Linux-target, not deployed locally** |
 | `infra/scripts/` | Bitwarden CLI integration (DORMANT, see `infra/BITWARDEN.md`) + `bw.exe` (gitignored, 122 MB) |
@@ -37,6 +37,7 @@ Closes the **agent-config-injection** + **memory-poisoning** classes (status `co
 - **PostToolUse** Write/Edit (blocks via exit 2 on HIGH only): scans the written agent-context file; high-confidence injection → Claude gets a blocking error.
 - **Tiers** — HIGH: invisible Unicode (zero-width / bidi override / Unicode-Tag smuggling), exfil/remote-exec command patterns (`curl|bash`, `iwr|iex`, private-key→network), imperative override hidden in an HTML comment. MED (advisory, fenced-code-exempt): visible override phrases (`ignore previous instructions`, `do not tell the user`, `reveal your system prompt`, …).
 - **False-positive controls** — fenced code blocks exempt from the MED tier; `agent-guard:allow` suppresses a line; `agent-guard:ignore-file` skips a whole file (used on 3 security memory docs that legitimately quote payloads). Verified clean against the full 68-file real corpus 2026-06-11.
+- **Selftest** — `python hooks/agent-config-guard.py selftest`: embedded fixture corpus, 24 cases (one per detection family + one per FP control). Run after ANY regex/tier change; non-zero exit = a detector regressed. 24/24 green 2026-06-11.
 
 Wired in `~/.claude/settings.json` (SessionStart `startup|resume|clear` + PostToolUse `Write|Edit`). Registered, not yet exercised by a live restart — takes effect next session.
 
@@ -49,4 +50,4 @@ Closes the **mcp-supply-chain** + **excessive-agency** classes (status `covered`
 
 `accepted` array in the baseline suppresses acknowledged finding ids (logged, not surfaced). Re-approve a deliberate config change with `python hooks/claude-posture-audit.py baseline`. Manual one-off: `… report`.
 
-**Two live findings on first run** (tracked in `posture.json` → `open_posture_findings`, shown on the dashboard): `defaultMode = bypassPermissions` (HIGH — contradicts the hardening policy of `acceptEdits`) and `skipDangerousModePermissionPrompt = true` (MED). Both are USER decisions: revert in settings.json, or add the id to `baseline.accepted` if deliberate.
+**Two findings surfaced on first run, ACCEPTED 2026-06-11 as intentional** (`defaultMode = bypassPermissions` + `skipDangerousModePermissionPrompt = true` — enables prompt-free autonomous agent runs). Both ids live in `baseline.accepted` (audit silent, still logged) and in `posture.json` → `accepted_risks`; `open_posture_findings` is empty.
