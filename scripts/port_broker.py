@@ -20,8 +20,9 @@ def get_free_port(start_port):
     while port < 65535:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             try:
-                # Set reuse address so we can bind immediately
-                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                # NO SO_REUSEADDR: on Windows it lets bind() succeed on a port
+                # that is already LISTENing — the probe would report busy ports
+                # as free (root cause of duplicate service instances).
                 s.bind(("127.0.0.1", port))
                 return port
             except socket.error:

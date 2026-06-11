@@ -59,13 +59,17 @@ if (-not $def) {
 }
 $def = $def.Value
 
-$taskText = ($Task -join ' ') -replace '"', "'"   # strip double quotes — they break cmd-level templates
-$cmdLine = $def.launch -replace '\{task\}', $taskText
+# Native invocation — args идут массивом без шелл-интерполяции (нет cmd /c,
+# нет injection через & | % "). {task} подставляется строковым Replace —
+# никакой regex-магии с $-подстановками.
+$taskText = $Task -join ' '
+$argv = @($def.args | ForEach-Object { $_.Replace('{task}', $taskText) })
 
-Write-Host "🚀 [$name] $cmdLine" -ForegroundColor DarkGray
+Write-Host "🚀 [$name] $($def.exe) $($argv -join ' ')" -ForegroundColor DarkGray
 Push-Location $def.cwd
 try {
-    cmd /c $cmdLine
+    # $null | — закрывает stdin (headless CLI вроде codex иначе виснут)
+    $null | & $def.exe @argv
     if ($LASTEXITCODE -ne 0) { Write-Warning "[$name] exited with code $LASTEXITCODE" }
 }
 finally {

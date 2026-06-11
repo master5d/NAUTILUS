@@ -37,10 +37,12 @@ Read-SecureKey -Prompt "Cerebras API key"   -EnvVar "CEREBRAS_API_KEY"
 Read-SecureKey -Prompt "Groq API key"       -EnvVar "GROQ_API_KEY"
 Read-SecureKey -Prompt "NIM API key"        -EnvVar "NIM_API_KEY"
 Read-SecureKey -Prompt "OpenRouter API key" -EnvVar "OPENROUTER_API_KEY"
+Read-SecureKey -Prompt "Google AI Studio (Gemini) API key" -EnvVar "GEMINI_API_KEY"
+Read-SecureKey -Prompt "HuggingFace token (HF fallback tier)" -EnvVar "HF_TOKEN"
 
 Write-Host ""
 Write-Host "Done. Now set Langfuse keys for LiteLLM tracing."
-Write-Host "Open http://localhost:3000 → Settings → API Keys → Create."
+Write-Host "Open http://localhost:3002 → Settings → API Keys → Create."
 Write-Host ""
 
 Read-SecureKey -Prompt "Langfuse Public key"  -EnvVar "LANGFUSE_PUBLIC_KEY"
@@ -49,5 +51,5 @@ Read-SecureKey -Prompt "Langfuse Secret key"  -EnvVar "LANGFUSE_SECRET_KEY"
 Write-Host ""
 Write-Host "All keys saved. Start LiteLLM with:" -ForegroundColor Cyan
 Write-Host '  pip install "litellm[proxy]==1.57.4"'
-Write-Host '  litellm --config "C:\telo\Efforts\Ongoing\SOVRN\config\litellm-config.yaml" --port 4000'
+Write-Host '  pwsh -File C:\telo\Efforts\Ongoing\NAUTILUS\scripts\launch-litellm.ps1'
 Write-Host ""
