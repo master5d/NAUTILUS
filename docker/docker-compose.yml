@@ -1,6 +1,10 @@
 # docker-compose.yml
 # Agentic AI v3.3 — Sovereignty Stack (Langfuse + Web Intake + Memory)
 # Usage: docker compose up -d
+#
+# Secrets: docker/.env (gitignored) — required, no defaults. See .env.example.
+# Hardening (audit 2026-06-11): all ports bound to 127.0.0.1, images pinned,
+# passwords required from env (compose fails loudly if .env missing).
 
 services:
   # --- Observability ---
@@ -11,7 +15,7 @@ services:
     environment:
       POSTGRES_DB: langfuse
       POSTGRES_USER: langfuse
-      POSTGRES_PASSWORD: ${LANGFUSE_DB_PASSWORD:-changeme-local}
+      POSTGRES_PASSWORD: ${LANGFUSE_DB_PASSWORD:?set in docker/.env}
     volumes:
       - langfuse-db-data:/var/lib/postgresql/data
     healthcheck:
@@ -28,12 +32,12 @@ services:
       langfuse-db:
         condition: service_healthy
     ports:
-      - "3002:3000" # Shifted from 3000 to avoid conflict with LangGraph
+      - "127.0.0.1:3002:3000" # Shifted from 3000 to avoid conflict with LangGraph
     environment:
-      DATABASE_URL: postgresql://langfuse:${LANGFUSE_DB_PASSWORD:-changeme-local}@langfuse-db:5432/langfuse
-      NEXTAUTH_SECRET: ${LANGFUSE_NEXTAUTH_SECRET:-changeme-local-secret}
+      DATABASE_URL: postgresql://langfuse:${LANGFUSE_DB_PASSWORD:?set in docker/.env}@langfuse-db:5432/langfuse
+      NEXTAUTH_SECRET: ${LANGFUSE_NEXTAUTH_SECRET:?set in docker/.env}
       NEXTAUTH_URL: http://localhost:3002
-      SALT: ${LANGFUSE_SALT:-changeme-local-salt}
+      SALT: ${LANGFUSE_SALT:?set in docker/.env}
       TELEMETRY_ENABLED: "false"
 
   # --- Knowledge Graph: Neo4j ---
@@ -42,10 +46,10 @@ services:
     container_name: sovrn-neo4j
     restart: unless-stopped
     ports:
-      - "7474:7474" # HTTP
-      - "7687:7687" # Bolt
+      - "127.0.0.1:7474:7474" # HTTP
+      - "127.0.0.1:7687:7687" # Bolt
     environment:
-      - NEO4J_AUTH=neo4j/sovrn-local-pass
+      - NEO4J_AUTH=neo4j/${NEO4J_PASSWORD:?set in docker/.env}
       - NEO4J_PLUGINS=["apoc"]
     volumes:
       - neo4j-data:/data
@@ -58,7 +62,7 @@ services:
     environment:
       POSTGRES_DB: karakeep
       POSTGRES_USER: karakeep
-      POSTGRES_PASSWORD: ${KARAKEEP_DB_PASSWORD:-changeme-local}
+      POSTGRES_PASSWORD: ${KARAKEEP_DB_PASSWORD:?set in docker/.env}
     volumes:
       - karakeep-db-data:/var/lib/postgresql/data
     healthcheck:
@@ -68,16 +72,16 @@ services:
       retries: 5
 
   karakeep:
-    image: ghcr.io/karakeep-app/karakeep:latest
+    image: ghcr.io/karakeep-app/karakeep:0.32.0
     container_name: karakeep
     restart: unless-stopped
     ports:
-      - "8081:8080"
+      - "127.0.0.1:8081:8080"
     environment:
-      - DATABASE_URL=postgresql://karakeep:${KARAKEEP_DB_PASSWORD:-changeme-local}@karakeep-db:5432/karakeep
-      - NEXTAUTH_SECRET=${KARAKEEP_NEXTAUTH_SECRET:-karakeep-v33-secret-99}
+      - DATABASE_URL=postgresql://karakeep:${KARAKEEP_DB_PASSWORD:?set in docker/.env}@karakeep-db:5432/karakeep
+      - NEXTAUTH_SECRET=${KARAKEEP_NEXTAUTH_SECRET:?set in docker/.env}
       - NEXTAUTH_URL=http://localhost:8081
-      - AUTH_SECRET=${KARAKEEP_NEXTAUTH_SECRET:-karakeep-v33-secret-99}
+      - AUTH_SECRET=${KARAKEEP_NEXTAUTH_SECRET:?set in docker/.env}
       - OLLAMA_HOST=http://host.docker.internal:4000
       - DISABLE_WORKERS=true # ПРИНУДИТЕЛЬНО отключаем воркеры на первый запуск для миграции
     depends_on:
@@ -88,24 +92,24 @@ services:
 
   # --- Web Intake: ArchiveBox ---
   archivebox:
-    image: archivebox/archivebox:latest
+    image: archivebox/archivebox:0.9.35rc24 # upstream ships rc tags only; pinned > :latest
     container_name: archivebox
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - archivebox-data:/data
     environment:
-      - ALLOWED_HOSTS=*
+      - ALLOWED_HOSTS=localhost,127.0.0.1
       - MEDIA_MAX_SIZE=750m
 
   # --- Workflow: n8n ---
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:2.26.3 # local DB was empty on pin date — fresh init, no 1.x migration risk
     container_name: n8n
     restart: unless-stopped
     ports:
-      - "5678:5678"
+      - "127.0.0.1:5678:5678"
     environment:
       - N8N_HOST=localhost
       - N8N_PORT=5678

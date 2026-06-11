@@ -7,7 +7,10 @@
 secrets/
 config/credentials.json
 config/token.json
-config/*.json
+# Runtime/dynamic state (regenerated) — not secret but not source either
+config/services.json
+config/shadow_ingest_state.json
+# NOTE: config/orchestrator.json IS tracked (agent dispatch schema, no secrets)
 
 # Node.js
 node_modules/
@@ -56,6 +59,9 @@ gmail_ingest_workflow.json
 *.exe
 secops/guides/SecOps Notes/
 labwatch/usage.db
+
+# Generated work product (dry-run outputs, ingest artifacts) — 40MB+
+data/
 
 # OS & Editors
 .DS_Store

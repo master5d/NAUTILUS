@@ -3,6 +3,22 @@
   "note": "Manually-maintained SecOps posture register. Feeds Labwatch SecOps panel. Update statuses here when actions are completed.",
   "pending_rotations": [
     {
+      "id": "hf-token-public-repo",
+      "label": "HuggingFace token (public GitHub leak)",
+      "why": "Live hf_ token committed in docs/superpowers/plans/2026-05-08-huggingface-ab-integration.md, pushed to PUBLIC master5d/NAUTILUS (commit e237004, 2026-05-20). Masked in working tree 2026-06-11, history still contains it.",
+      "action": "huggingface.co/settings/tokens → Revoke + create new → setup-litellm-keys.ps1 (HF_TOKEN). Optionally git filter-repo to purge history.",
+      "severity": "urgent",
+      "status": "pending"
+    },
+    {
+      "id": "github-pat-finegrained-remote",
+      "label": "GitHub fine-grained PAT (was embedded in git remote URL)",
+      "why": "PAT stored plaintext in .git/config remote URL; printed to terminal/session transcript during 2026-06-11 audit.",
+      "action": "github.com/settings/personal-access-tokens → Revoke. Remote already cleaned to plain https + gh credential helper.",
+      "severity": "urgent",
+      "status": "pending"
+    },
+    {
       "id": "gh-cli-oauth",
       "label": "GitHub CLI OAuth token (master5d)",
       "why": "Leaked to stdout 2026-05-30 (env-var dup of keyring token)",
@@ -49,12 +65,25 @@
       "action": "`cscli bouncers add` on (re)deploy of the stack",
       "severity": "low",
       "status": "pending"
+    },
+    {
+      "id": "docker-local-passwords",
+      "label": "Local docker stack passwords (langfuse/neo4j/karakeep)",
+      "why": "Volumes initialized with weak defaults (changeme-local, sovrn-local-pass); now required via docker/.env but values unchanged. Ports rebound to 127.0.0.1 as mitigation.",
+      "action": "docker compose up → ALTER USER/cypher password change in each DB → update docker/.env",
+      "severity": "low",
+      "status": "pending"
     }
   ],
   "infra_stack": {
     "status": "designed",
     "target": "Hetzner node (Linux)",
-    "components": ["crowdsec + cloudflare-bouncer", "falco + falcosidekick", "wazuh SIEM", "n8n retaliation playbook"],
+    "components": [
+      "crowdsec + cloudflare-bouncer",
+      "falco + falcosidekick",
+      "wazuh SIEM",
+      "n8n retaliation playbook"
+    ],
     "note": "Never deployed; Docker absent locally. Pre-deploy code fixes done 2026-06-11 (wazuh config dupe, retaliation input validation); regenerate LAPI key via cscli on deploy."
   },
   "agent_attack_classes": {
