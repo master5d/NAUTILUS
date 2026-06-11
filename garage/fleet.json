@@ -1,0 +1,86 @@
+{
+  "as_of": "2026-06-11",
+  "module": "garage",
+  "purpose": "Canonical hardware fleet registry (CMDB) for NAUTILUS — every compute unit, its specs, role, network, power, and onboarding status. Superset of labwatch/hardware.json (which is the inference-cost subset: the 3 Mac Minis only).",
+  "tiers": {
+    "workstation": "dev-only, MUST host zero always-on services",
+    "local_always_on": "headless local nodes that never sleep — the sovereign floor",
+    "cloud": "public-facing production (Hetzner + Cloudflare)"
+  },
+  "units": [
+    {
+      "id": "surface",
+      "label": "Surface Laptop Studio 2",
+      "tier": "workstation",
+      "specs": { "cpu": "Intel i7-13800H", "ram_gb": 64, "gpu": "RTX 4060 Laptop 8GB VRAM", "disk": "1TB NVMe", "os": "Windows 11 Pro 25H2" },
+      "net": { "role": "primary dev workstation", "static": false },
+      "power": { "always_on": false, "note": "battery wear, Win update reboots, thermal throttling — NEVER a production/always-on server (SOVRN principle)" },
+      "status": "active",
+      "role_now": "primary dev + ALL local servers (llama-server 30B, LiteLLM, labwatch, vault_watcher, docker stack, Hermes, Ollama)",
+      "role_target": "pure dev workstation + OPTIONAL on-demand 30B power tier (llama-server) when powered on; zero always-on dependencies",
+      "cost_usd": null
+    },
+    {
+      "id": "m4-16gb",
+      "label": "Mac Mini M4 16GB",
+      "tier": "local_always_on",
+      "specs": { "cpu": "Apple M4 (10-core)", "ram_gb": 16, "bandwidth_gbs": 120, "os": "macOS" },
+      "net": { "ip": null, "mac": null, "static": false, "note": "NOT yet onboarded as a node — needs IP reservation + SSH key + harden (follow SOVERN-01 pattern)" },
+      "power": { "always_on": true, "load_w": 30, "idle_w": 4 },
+      "status": "acquired-not-onboarded",
+      "role_now": "spare / not in service",
+      "role_target": "ALWAYS-ON LOCAL BRAIN — LiteLLM gateway + small local LLM (8-14B Q4) floor + labwatch + Hermes. The node the whole stack depends on.",
+      "cost_usd": 650,
+      "tok_s": 23,
+      "model_class": "8B q4 ~23 tok/s; 14B q4 ~12 tok/s. CANNOT host the 30B-A3B floor (30B Q4 ≈ 16-18GB > 16GB unified + macOS)."
+    },
+    {
+      "id": "sovern-01",
+      "label": "Mac Mini M2 8GB #1 (SOVERN-01)",
+      "tier": "local_always_on",
+      "specs": { "cpu": "Apple M2 (8-core 4P+4E)", "ram_gb": 8, "bandwidth_gbs": 100, "disk": "460GB SSD", "os": "macOS 26.5 Tahoe (25F71)", "model": "Mac14,3 / MMFK3LL/A", "serial": "C6624WR4GW" },
+      "net": { "ip": "192.168.1.123", "mac": "18:4a:53:1e:4a:9b", "static": false, "hostname_mdns": "SOVERN-01s-Mac-mini.local", "user": "sovern-01", "ssh_key": "~/.ssh/id_ed25519_sovern", "note": "needs router DHCP reservation" },
+      "power": { "always_on": true, "load_w": 25, "idle_w": 7, "note": "idle already ~7.4GB/8GB used (FileVault+Spotlight+daemons) — memory-tight" },
+      "status": "onboarded",
+      "role_now": "onboarded edge node (light)",
+      "role_target": "ALWAYS-ON EDGE DAEMON — STT (Parakeet/Whisper for Echo), KG ingest worker, healthchecks, cron, build cache. NOT LLM/Ollama (8GB too tight).",
+      "cost_usd": 375
+    },
+    {
+      "id": "sovern-02",
+      "label": "Mac Mini M2 8GB #2 (SOVERN-02)",
+      "tier": "local_always_on",
+      "specs": { "cpu": "Apple M2 (8-core)", "ram_gb": 8, "os": "macOS" },
+      "net": { "ip": "192.168.1.154", "mac": "6c:96:cf:da:5a:f7", "static": false, "user": "sovern-02 (verify via DHCP hostname)", "note": "ports 22/5900/3283 CLOSED" },
+      "power": { "always_on": true, "load_w": 25, "idle_w": 7 },
+      "status": "blocked",
+      "blocker": "Stuck at FileVault pre-boot login screen — no kernel/network → SSH/VNC/ARD unavailable. Unblock: HDMI display + USB keyboard (or MS2109 HDMI capture ~$15) to type FileVault password once, then enable Remote Login.",
+      "role_now": "blocked — not in service",
+      "role_target": "ALWAYS-ON EDGE DAEMON (redundancy / second STT or ingest node), same class as SOVERN-01. Or first resale candidate if edge load stays light.",
+      "cost_usd": 375
+    },
+    {
+      "id": "hetzner-sovern-hub",
+      "label": "Hetzner CX22 (SOVERN-HUB)",
+      "tier": "cloud",
+      "specs": { "cpu": "2 vCPU x86", "ram_gb": 4, "disk": "40GB", "os": "Ubuntu 6.8.0-71", "docker": "28.5.0" },
+      "net": { "ip": "91.99.62.63", "hostname": "SOVERN-HUB", "user": "root", "ssh_key": "WSL /root/.ssh/id_ed25519 (sasha-sovern-v3.3)", "fronted_by": "Cloudflare Tunnel ENERV-HUB (synergify.com)" },
+      "power": { "always_on": true, "note": "true 24/7 production; €3.79/mo" },
+      "status": "active",
+      "role_now": "public prod: n8n, Langfuse v2, Dokploy, CF tunnel, Postgres",
+      "role_target": "PUBLIC CLOUD TIER — n8n prod, Langfuse, Dokploy, CF tunnel; candidate host for KG Neo4j IF upgraded (CX22 4GB has no headroom; Neo4j+APOC needs ~2GB → consider CX32/CX42).",
+      "cost_eur_mo": 3.79,
+      "upgrade_note": "4GB RAM nearly full (n8n+Langfuse+PG+Dokploy+tunnel). Langfuse v3 (+ClickHouse) and Neo4j both need more — size up before adding either."
+    }
+  ],
+  "peripherals": [
+    { "id": "sandisk-4tb", "label": "SanDisk 4TB Extreme portable SSD", "role": "mirrored vault / graphiti dumps / model weights" },
+    { "id": "yubikey", "label": "2× YubiKey 5C NFC", "role": "FIDO2/identity" },
+    { "id": "pixel", "label": "Pixel 10 Pro XL + 6 Pro XL", "role": "mobile" }
+  ],
+  "cross_refs": {
+    "inference_cost": "labwatch/hardware.json (Mac Mini subset, $/Mtok calculator)",
+    "node_onboarding": "memory project_sovern_macmini_nodes",
+    "cloud_infra": "memory project_sovern_infra"
+  }
+}
