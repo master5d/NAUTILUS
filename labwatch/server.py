@@ -198,6 +198,7 @@ def secops_state():
         "rotations_done": sum(1 for r in rotations if r.get("status") == "done"),
         "infra_stack": posture.get("infra_stack") or {},
         "agent_attack_classes": posture.get("agent_attack_classes") or {},
+        "open_posture_findings": posture.get("open_posture_findings") or [],
         "deploy_targets": posture.get("deploy_targets") or [],
         "accepted_risks": posture.get("accepted_risks") or [],
     }

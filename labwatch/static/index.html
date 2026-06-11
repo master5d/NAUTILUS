@@ -224,6 +224,19 @@ async function refresh() {
         <td><span class="pill" style="color:var(--${sevColor[r.severity] || 'dim'})">${r.severity}</span></td></tr>`)
       .join('') || '<tr><td colspan="4" style="color:var(--ok)">Все ротации выполнены ✓</td></tr>';
 
+    const opf = sec.open_posture_findings || [];
+    if (opf.length) {
+      const sevc = { HIGH: 'bad', MED: 'warn', INFO: 'dim' };
+      document.getElementById('sec-egress').insertAdjacentHTML('afterend',
+        `<div class="card" style="margin-top:14px;border-color:var(--bad)">
+          <h3>⚠ Open posture findings <span class="pill" style="color:var(--bad)">${opf.length}</span></h3>
+          ${opf.map(f => `<div class="meta" style="border:none;margin-top:6px">
+            <span class="pill" style="color:var(--${sevc[f.severity] || 'dim'})">${f.severity}</span>
+            <b style="color:var(--text)">${f.id}</b><br>${f.what}<br>
+            <span style="color:var(--accent)">→ ${f.decision || ''}</span></div>`).join('')}
+        </div>`);
+    }
+
     const ac = (sec.agent_attack_classes || {}).classes || [];
     const detColor = { manual: 'bad', open: 'bad', partial: 'warn', automated: 'ok', covered: 'ok' };
     document.querySelector('#sec-agentclasses tbody').innerHTML = ac.map(k => {

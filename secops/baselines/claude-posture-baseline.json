@@ -1,0 +1,71 @@
+{
+  "as_of": "2026-06-11",
+  "accepted": [],
+  "marketplaces": [
+    "claude-plugins-official",
+    "cli-anything",
+    "compound-engineering-plugin",
+    "impeccable",
+    "sasha-design-skills",
+    "sasha-personal-skills"
+  ],
+  "mcp_servers_user": [
+    "notionApi",
+    "pencil",
+    "posthog-key",
+    "sequential-thinking"
+  ],
+  "mcp_servers_desktop": [
+    "pencil"
+  ],
+  "mcp_enabled_jsonservers": [
+    "stitch"
+  ],
+  "mcp_denied": [
+    "puppeteer"
+  ],
+  "hooks": [
+    "bash \"/c/Users/sasha/.claude/hooks/hook-debugger.sh\" Notification",
+    "bash \"/c/Users/sasha/.claude/hooks/hook-debugger.sh\" PostToolUse",
+    "bash \"/c/Users/sasha/.claude/hooks/hook-debugger.sh\" PreToolUse",
+    "bash \"/c/Users/sasha/.claude/hooks/hook-debugger.sh\" SessionEnd",
+    "bash \"/c/Users/sasha/.claude/hooks/hook-debugger.sh\" SessionStart",
+    "bash \"/c/Users/sasha/.claude/hooks/litellm-code-review.sh\"",
+    "bash \"C:\\Users\\sasha\\.claude\\hooks\\chrome-credentials-prompt.sh\"",
+    "bash \"C:\\Users\\sasha\\.claude\\hooks\\egress-guard.sh\"",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\sasha\\.claude\\hooks\\ollama-lifecycle.ps1\" ensure-running",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\sasha\\.claude\\hooks\\serena-orphan-reaper.ps1\"",
+    "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\sasha\\.claude\\hooks\\start-ollama-monitor.ps1\"",
+    "powershell -c \"[console]::beep(600,200); New-BurntToastNotification -Text 'Claude ждёт'\"",
+    "python \"C:\\telo\\Efforts\\Ongoing\\NAUTILUS\\secops\\hooks\\agent-config-guard.py\" posttooluse",
+    "python \"C:\\telo\\Efforts\\Ongoing\\NAUTILUS\\secops\\hooks\\agent-config-guard.py\" sessionstart",
+    "python \"C:\\telo\\Efforts\\Ongoing\\NAUTILUS\\secops\\hooks\\claude-posture-audit.py\" audit"
+  ],
+  "plugins": {
+    "skill-creator@claude-plugins-official": "61c0597779bd2d670dcd4fbbf37c66aa19eb2ce6",
+    "firecrawl@claude-plugins-official": "684b975c8cc6bd0fcfa96f787900bf87fffeef57",
+    "impeccable@impeccable": "b913668ba4d25b95c4a62278d3637837e9d2c6d9",
+    "personal-skills@sasha-personal-skills": "3a8aab3cab0ddd4398f5ffbe0770e9c275437524",
+    "notion@claude-plugins-official": "9847f2aa1a15f25df35ed1fb7b4557dbb60cd651",
+    "frontend-design@claude-plugins-official": "unknown",
+    "chrome-devtools-mcp@claude-plugins-official": "c2d8009ff75f76bce1ec4cf79c2467b50d81725e",
+    "agent-sdk-dev@claude-plugins-official": "unknown",
+    "superpowers@claude-plugins-official": "917e5f53b16b115b70a3a355ed5f4993b9f8b73d",
+    "cli-anything@cli-anything": "7862c920c9950a0883326ba4ca9dd9ffdbcb5596",
+    "compound-engineering@compound-engineering-plugin": "85987d496fdfdc8a18faf592fd53329e23266537",
+    "rust-analyzer-lsp@claude-plugins-official": "1.0.0",
+    "atomic-agents@claude-plugins-official": "324399402b9b5965313de6a34ea09d6bb149a200",
+    "code-modernization@claude-plugins-official": "unknown",
+    "context7@claude-plugins-official": "unknown",
+    "playwright@claude-plugins-official": "unknown",
+    "posthog@claude-plugins-official": "a487311487bc369ee75e70c893d0a0c5ed478ba8",
+    "cloudflare@claude-plugins-official": "60147cbb773649eadca89cee92b4e0caf02234b4",
+    "typescript-lsp@claude-plugins-official": "1.0.0",
+    "claude-md-management@claude-plugins-official": "1.0.0",
+    "serena@claude-plugins-official": "unknown",
+    "telegram@claude-plugins-official": "0.0.6",
+    "playground@claude-plugins-official": "unknown",
+    "figma@claude-plugins-official": "a742f0a700a7772ff5ed85f7c9fc1dad5afa9fcc",
+    "semgrep@claude-plugins-official": "274846f6f9da5f56be53b19170bc008d357142a7"
+  }
+}

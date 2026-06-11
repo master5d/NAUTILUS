@@ -80,17 +80,17 @@
         "id": "mcp-supply-chain",
         "label": "MCP / plugin supply chain",
         "what": "Tool poisoning, typosquatting, unpinned versions, unsigned manifests, shadow MCP configs",
-        "surface": "enabledPlugins, claude_desktop_config.json, plugin cache",
-        "detection": "partial — manual plugin pins + inventory (guides/claude-code-plugins-secops.md); no automated attestation",
-        "status": "partial"
+        "surface": "enabledPlugins, installed_plugins.json pins, ~/.claude.json + claude_desktop_config.json MCP servers, marketplaces",
+        "detection": "automated — claude-posture-audit hook: attestation vs committed baseline (baselines/claude-posture-baseline.json); flags new plugin/marketplace/MCP-server (HIGH), pin change (MED). Manual pins + inventory back it.",
+        "status": "covered"
       },
       {
         "id": "excessive-agency",
         "label": "Excessive agency / always-allow",
         "what": "always_allow tool policies, unrestricted networking, over-privileged CI agents (ASI-03..07)",
-        "surface": "settings.json permissions, hooks, agent tool grants",
-        "detection": "partial — permission deny list + egress-guard; no policy linter",
-        "status": "partial"
+        "surface": "settings.json permissions/hooks",
+        "detection": "automated — claude-posture-audit hook: absolute policy rules (bypassPermissions, dangerous allow wildcards, deny-list gaps, skip-dangerous-prompt) + hook-command drift vs baseline. Backed by deny list + egress-guard.",
+        "status": "covered"
       }
     ]
   },
@@ -120,5 +120,21 @@
   "accepted_risks": [
     "read_only:true not set on crowdsec/bouncer containers (write to volumes) — revisit with tmpfs at deploy",
     "infra/.env holds live secrets on disk — gitignored + read-denied; migrate to vault on Bitwarden revival"
+  ],
+  "open_posture_findings": [
+    {
+      "id": "agency:bypass-permissions",
+      "severity": "HIGH",
+      "what": "settings.json defaultMode = bypassPermissions — contradicts hardening policy (was set to acceptEdits 2026-04-20 per reference_secops_hardening). Surfaced by claude-posture-audit.",
+      "decision": "USER: revert to acceptEdits, OR add id to baseline.accepted if deliberate for autonomous sessions",
+      "status": "open"
+    },
+    {
+      "id": "agency:skip-dangerous-prompt",
+      "severity": "MED",
+      "what": "skipDangerousModePermissionPrompt = true — dangerous-mode confirmation suppressed",
+      "decision": "USER: set false, OR accept in baseline",
+      "status": "open"
+    }
   ]
 }

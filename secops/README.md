@@ -10,8 +10,9 @@ Merged from `C:\telo\Efforts\Ongoing\SecOps` on **2026-06-11** (old project dir 
 | `guides/SecOps Notes/` | Webpage snapshot archive (~1.5 MB) — **gitignored**, disk-only |
 | `infra/` | Docker stack (CrowdSec + Cloudflare bouncer, Falco + Falcosidekick), Wazuh installer, n8n retaliation playbook — **Hetzner/Linux-target, not deployed locally** |
 | `infra/scripts/` | Bitwarden CLI integration (DORMANT, see `infra/BITWARDEN.md`) + `bw.exe` (gitignored, 122 MB) |
-| `hooks/` | `agent-config-guard.py` — Claude Code hook (SessionStart + PostToolUse) scanning agent-context files for prompt-injection / memory-poisoning |
-| `posture.json` | Manually-maintained posture register (rotations, accepted risks, agent attack classes, deploy targets) — feeds the Labwatch SecOps panel |
+| `hooks/` | `agent-config-guard.py` (injection/memory scan) + `claude-posture-audit.py` (supply-chain + agency lint) — SessionStart/PostToolUse hooks |
+| `baselines/` | `claude-posture-baseline.json` — approved plugin/MCP/marketplace/hook snapshot for drift attestation |
+| `posture.json` | Manually-maintained posture register (rotations, accepted risks, agent attack classes, deploy targets, open findings) — feeds the Labwatch SecOps panel |
 
 ## Audit 2026-06-11 — findings & dispositions
 
@@ -38,3 +39,14 @@ Closes the **agent-config-injection** + **memory-poisoning** classes (status `co
 - **False-positive controls** — fenced code blocks exempt from the MED tier; `agent-guard:allow` suppresses a line; `agent-guard:ignore-file` skips a whole file (used on 3 security memory docs that legitimately quote payloads). Verified clean against the full 68-file real corpus 2026-06-11.
 
 Wired in `~/.claude/settings.json` (SessionStart `startup|resume|clear` + PostToolUse `Write|Edit`). Registered, not yet exercised by a live restart — takes effect next session.
+
+## claude-posture-audit (hooks/claude-posture-audit.py)
+
+Closes the **mcp-supply-chain** + **excessive-agency** classes (status `covered`). SessionStart advisory, stdlib, read-only. Two families:
+
+- **Absolute policy rules** (history-independent): `defaultMode == bypassPermissions` (HIGH), dangerous `allow` wildcards (`Bash(*)`, `Read(**)`, …), `deny`-list gaps (missing `.ssh`/`.env`/`.aws`/key coverage), `skipDangerousModePermissionPrompt`.
+- **Drift vs committed baseline** (`baselines/claude-posture-baseline.json`): new plugin / marketplace / user-MCP-server / Desktop-MCP-server / enabled `.mcp.json` server (HIGH = trust extension), plugin pin (gitCommitSha) change (MED), hook-command add/change (HIGH = new auto-exec).
+
+`accepted` array in the baseline suppresses acknowledged finding ids (logged, not surfaced). Re-approve a deliberate config change with `python hooks/claude-posture-audit.py baseline`. Manual one-off: `… report`.
+
+**Two live findings on first run** (tracked in `posture.json` → `open_posture_findings`, shown on the dashboard): `defaultMode = bypassPermissions` (HIGH — contradicts the hardening policy of `acceptEdits`) and `skipDangerousModePermissionPrompt = true` (MED). Both are USER decisions: revert in settings.json, or add the id to `baseline.accepted` if deliberate.
