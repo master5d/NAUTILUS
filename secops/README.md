@@ -21,8 +21,8 @@ Merged from `C:\telo\Efforts\Ongoing\SecOps` on **2026-06-11** (old project dir 
 | 3 | `bw.exe` 122 MB binary in `infra/scripts/` | Repo hygiene | **Contained** — `*.exe` gitignored. Note: `BITWARDEN.md` claimed `C:\telo\scripts\bw.exe` — that path never existed anymore; this copy is the only one. Doc updated. |
 | 4 | Bouncer container lacked `no-new-privileges` | Low | **Fixed** — added `security_opt` to both services (semgrep CWE-732). |
 | 5 | `read_only: true` not set on crowdsec/bouncer containers | Info | **Accepted** — both write to volumes/logs; revisit at deploy time with tmpfs. |
-| 6 | Infra stack (CrowdSec/Falco/Wazuh) designed 2026-05-11..13, never deployed (Docker absent locally; targets Hetzner) | Info | **Documented** — status `designed`, tracked in `posture.json`. Wazuh `config.yml` has a duplicated `nodes:` line — fix before any deploy. |
-| 7 | `retaliation_protocol.sh` interpolates `$ATTACKER_IP`/`$CONTAINER_NAME` unquoted from webhook input | Medium (at deploy) | **Documented** — quote vars + validate IP format before wiring to n8n webhook. Not exploitable while undeployed. |
-| 8 | Stale path references after merge (`C:\telo\secops\`, `C:\telo\scripts\`) | Info | **Documented** — `start-secops.ps1` and bw-scripts carry historical paths; update on revival. |
+| 6 | Infra stack (CrowdSec/Falco/Wazuh) designed 2026-05-11..13, never deployed (Docker absent locally; targets Hetzner) | Info | **Documented** — status `designed`, tracked in `posture.json`. Wazuh `config.yml` duplicate `nodes:` line **fixed 2026-06-11**. |
+| 7 | `retaliation_protocol.sh` interpolated `$ATTACKER_IP`/`$CONTAINER_NAME` unquoted from webhook input | Medium (at deploy) | **Fixed 2026-06-11** — vars quoted, `set -euo pipefail`, IP-format + container-name validation before docker/cscli. |
+| 8 | Stale path references after merge (`C:\telo\secops\`, `C:\telo\scripts\`) | Info | **Fixed 2026-06-11** — `start-secops.ps1` uses `$PSScriptRoot`-relative hook path; bw-scripts headers stay historical (dormant), canonical paths in `BITWARDEN.md` banner. |
 
 Live controls на машине (проверяются дашбордом автоматически): gitleaks (scoop) + `~/.claude/gitleaks.toml`, semgrep 1.165.0 (pipx) + login, egress-guard hook + `egress.jsonl`, permission deny list. Полная картина: `guides/claude-code-plugins-secops.md` и memory `reference_secops_hardening`.

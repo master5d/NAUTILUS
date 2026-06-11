@@ -1,5 +1,5 @@
-# C:\telo\secops\start-secops.ps1
-# Sources BW secrets then starts secops stack
+# NAUTILUS\secops\infra\start-secops.ps1
+# Sources BW secrets then starts secops stack (Bitwarden integration DORMANT — see ..\BITWARDEN.md)
 
 $sessionFile = "$env:USERPROFILE\.claude\bw-session.ps1"
 if (Test-Path $sessionFile) {
@@ -8,7 +8,7 @@ if (Test-Path $sessionFile) {
 } else {
     # Fallback: run the unlock hook manually
     Write-Host "[secops] No session file — running bw-unlock-hook..."
-    pwsh -NoProfile -ExecutionPolicy Bypass -File "C:\telo\scripts\bw-unlock-hook.ps1"
+    pwsh -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "scripts\bw-unlock-hook.ps1")
     if (Test-Path $sessionFile) { . $sessionFile }
 }
 

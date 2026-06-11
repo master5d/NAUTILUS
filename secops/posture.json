@@ -55,7 +55,7 @@
     "status": "designed",
     "target": "Hetzner node (Linux)",
     "components": ["crowdsec + cloudflare-bouncer", "falco + falcosidekick", "wazuh SIEM", "n8n retaliation playbook"],
-    "note": "Never deployed; Docker absent locally. Fix wazuh config.yml duplicate 'nodes:' + quote vars in retaliation_protocol.sh before deploy."
+    "note": "Never deployed; Docker absent locally. Pre-deploy code fixes done 2026-06-11 (wazuh config dupe, retaliation input validation); regenerate LAPI key via cscli on deploy."
   },
   "accepted_risks": [
     "read_only:true not set on crowdsec/bouncer containers (write to volumes) — revisit with tmpfs at deploy",
