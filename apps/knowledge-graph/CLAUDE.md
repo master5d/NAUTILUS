@@ -19,12 +19,13 @@ Core loop: ingest any content → embed with Google AI → store in Neo4j graph 
 ## Next sprint: Sprint 2
 - Readwise highlights import (Readwise API)
 - Browser extension web clipper
-- Multimodal embeddings (images, video, audio via gemini-embedding-2-preview)
+- Multimodal embeddings — **sovereign jina-embeddings-v4** (self-hosted, NOT Gemini Embedding 2). Forces dim 768→1024 + full graph re-embed. See `SPRINT2_EMBEDDINGS_ADR.md` before touching embeddings.
 - Auto-Brainwriting per cluster
 - Dynamic cluster emergence (Louvain algorithm)
 
 ## Tech decisions to preserve
-- **Embeddings**: `gemini-embedding-001` (stable GA, 768-dim via `outputDimensionality`; NOT the `-exp-*` previews — Google pulls exp models without notice, NOT text-embedding-004 — deprecated Aug 2025)
+- **Embeddings (Sprint 1, current)**: `gemini-embedding-001` (stable GA, 768-dim via `outputDimensionality`; NOT the `-exp-*` previews — Google pulls exp models without notice, NOT text-embedding-004 — deprecated Aug 2025)
+- **Embeddings (Sprint 2, decided)**: migrate to sovereign `jina-embeddings-v4` (local, multimodal, 1024-dim) — see `SPRINT2_EMBEDDINGS_ADR.md`
 - **LLM**: `gemini-2.5-flash` (stable, free tier 15 RPM; NOT `-preview-*` snapshots)
 - **Graph**: Neo4j AuraDB free, Cypher, `MERGE` not `CREATE`
 - **3D graph**: imperative API via `ForceGraph3D as any` — the TS types lie, the factory pattern is correct

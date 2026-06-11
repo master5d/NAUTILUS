@@ -64,10 +64,11 @@ The runtime code was **already** on stable models — only the docs lagged:
   the KG `CLAUDE.md` + `README.md` so future agents don't regress to exp models
   (Google pulls `exp`/`preview` snapshots without notice; an embedding-model
   change forces a full graph re-embed — vector space differs).
-- Remaining (real, future): Sprint 2 multimodal will need
-  `gemini-embedding-2-preview` — move to it only once it reaches GA. Sovereign
-  fallback option: local embeddings via `llama-server` or Cloudflare Workers AI
-  `bge-*` to drop the Google dependency entirely.
+- Remaining (real, future): Sprint 2 multimodal embeddings — **decided
+  2026-06-11 to go sovereign with self-hosted `jina-embeddings-v4`** (not Gemini
+  Embedding 2, which is now GA but deepens Google dependency). Removes the
+  Google embedding dependency entirely. Full decision +
+  constraints: `apps/knowledge-graph/SPRINT2_EMBEDDINGS_ADR.md`.
 
 ## Checklist
 

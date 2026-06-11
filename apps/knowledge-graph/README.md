@@ -112,7 +112,7 @@ src/
 
 **Why Neo4j AuraDB**: Graph-native queries (multi-hop traversal, shortest path), native vector index in 5.x, free tier is generous enough for personal use, Cypher is the standard language for graph queries.
 
-**Why gemini-embedding-001**: Stable GA Google embedding model (768-dim via `outputDimensionality`), free via AI Studio. Chosen over `-exp-*` previews on purpose — Google retires experimental embedding models without notice, and changing the embedding model forces a full graph re-embed (vector space differs). `text-embedding-004` was deprecated August 2025. Sprint 2 multimodal (images/video/audio) will move to `gemini-embedding-2-preview` when it reaches GA.
+**Why gemini-embedding-001**: Stable GA Google embedding model (768-dim via `outputDimensionality`), free via AI Studio. Chosen over `-exp-*` previews on purpose — Google retires experimental embedding models without notice, and changing the embedding model forces a full graph re-embed (vector space differs). `text-embedding-004` was deprecated August 2025. Sprint 2 multimodal (images/visual docs) migrates to sovereign self-hosted `jina-embeddings-v4` (1024-dim, removes the Google dependency) — decided 2026-06-11, see `SPRINT2_EMBEDDINGS_ADR.md`.
 
 **Why react-force-graph-3d**: Three.js-based, matches the Obsidian/Google Earth 3D vision from PRD, imperative API gives full control. Must be `dynamic(() => import(...), { ssr: false })` — uses WebGL + window.
 
