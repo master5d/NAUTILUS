@@ -57,6 +57,43 @@
     "components": ["crowdsec + cloudflare-bouncer", "falco + falcosidekick", "wazuh SIEM", "n8n retaliation playbook"],
     "note": "Never deployed; Docker absent locally. Pre-deploy code fixes done 2026-06-11 (wazuh config dupe, retaliation input validation); regenerate LAPI key via cscli on deploy."
   },
+  "agent_attack_classes": {
+    "note": "Agent-specific threat classes — the gap classic SAST (semgrep) + secrets (gitleaks) do NOT cover. Taxonomy adopted from ship-safe trial 2026-06-11 (see memory reference_shipsafe_trial). Detection currently MANUAL/none unless noted.",
+    "classes": [
+      {
+        "id": "agent-config-injection",
+        "label": "Agent-config prompt injection",
+        "what": "Hidden/override instructions in CLAUDE.md, AGENTS.md, .cursorrules, MCP manifests — read by the agent as trusted context",
+        "surface": "~/.claude/CLAUDE.md, project CLAUDE.md, memory/MEMORY.md, .mcp.json",
+        "detection": "manual",
+        "status": "open"
+      },
+      {
+        "id": "memory-poisoning",
+        "label": "Memory poisoning",
+        "what": "Instruction injection + hidden Unicode payloads in persistent agent memory files (ASI-01/ASI-05)",
+        "surface": "~/.claude/projects/*/memory/*.md",
+        "detection": "manual",
+        "status": "open"
+      },
+      {
+        "id": "mcp-supply-chain",
+        "label": "MCP / plugin supply chain",
+        "what": "Tool poisoning, typosquatting, unpinned versions, unsigned manifests, shadow MCP configs",
+        "surface": "enabledPlugins, claude_desktop_config.json, plugin cache",
+        "detection": "partial — manual plugin pins + inventory (guides/claude-code-plugins-secops.md); no automated attestation",
+        "status": "partial"
+      },
+      {
+        "id": "excessive-agency",
+        "label": "Excessive agency / always-allow",
+        "what": "always_allow tool policies, unrestricted networking, over-privileged CI agents (ASI-03..07)",
+        "surface": "settings.json permissions, hooks, agent tool grants",
+        "detection": "partial — permission deny list + egress-guard; no policy linter",
+        "status": "partial"
+      }
+    ]
+  },
   "deploy_targets": [
     {
       "id": "apparmor",

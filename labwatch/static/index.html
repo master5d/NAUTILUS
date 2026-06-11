@@ -107,6 +107,9 @@
   <table id="sec-rotations" style="margin-top:14px"><thead><tr>
     <th>Pending rotation</th><th>Почему</th><th>Действие</th><th>Severity</th>
   </tr></thead><tbody></tbody></table>
+  <table id="sec-agentclasses" style="margin-top:14px"><thead><tr>
+    <th>Agent attack class</th><th>Что</th><th>Surface</th><th>Detection</th>
+  </tr></thead><tbody></tbody></table>
   <footer id="sec-meta"></footer>
 </section>
 
@@ -220,6 +223,17 @@ async function refresh() {
         <td class="meta" style="border:none">${r.action}</td>
         <td><span class="pill" style="color:var(--${sevColor[r.severity] || 'dim'})">${r.severity}</span></td></tr>`)
       .join('') || '<tr><td colspan="4" style="color:var(--ok)">Все ротации выполнены ✓</td></tr>';
+
+    const ac = (sec.agent_attack_classes || {}).classes || [];
+    const detColor = { manual: 'bad', open: 'bad', partial: 'warn', automated: 'ok', covered: 'ok' };
+    document.querySelector('#sec-agentclasses tbody').innerHTML = ac.map(k => {
+      const st = (k.status || '').toLowerCase();
+      const dc = detColor[st] || 'dim';
+      return `<tr><td><b>${k.label}</b> <span class="pill" style="color:var(--${dc})">${k.status}</span></td>
+        <td class="meta" style="border:none">${k.what}</td>
+        <td class="meta" style="border:none"><code>${k.surface || ''}</code></td>
+        <td class="meta" style="border:none">${k.detection}</td></tr>`;
+    }).join('');
 
     document.getElementById('sec-meta').textContent =
       `posture.json as of ${sec.posture_as_of || '?'} · pending: ${(sec.rotations_pending || []).length} · done: ${sec.rotations_done} · accepted risks: ${(sec.accepted_risks || []).length} · реестр: NAUTILUS/secops/posture.json`;
