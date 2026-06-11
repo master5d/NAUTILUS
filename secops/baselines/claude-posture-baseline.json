@@ -1,6 +1,9 @@
 {
   "as_of": "2026-06-11",
-  "accepted": [],
+  "accepted": [
+    "agency:bypass-permissions",
+    "agency:skip-dangerous-prompt"
+  ],
   "marketplaces": [
     "claude-plugins-official",
     "cli-anything",
