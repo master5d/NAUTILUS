@@ -197,6 +197,7 @@ def secops_state():
         "rotations_pending": [r for r in rotations if r.get("status") != "done"],
         "rotations_done": sum(1 for r in rotations if r.get("status") == "done"),
         "infra_stack": posture.get("infra_stack") or {},
+        "deploy_targets": posture.get("deploy_targets") or [],
         "accepted_risks": posture.get("accepted_risks") or [],
     }
     with _secops_lock:

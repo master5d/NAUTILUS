@@ -208,8 +208,11 @@ async function refresh() {
       : '<span style="color:var(--bad)">egress.jsonl не найден</span>';
 
     const inf = sec.infra_stack || {};
+    const targets = (sec.deploy_targets || [])
+      .map(t => `<div style="margin-top:5px" title="${t.what} — ${t.how}"><span class="pill" style="color:var(--${t.status === 'deployed' ? 'ok' : 'warn'})">${t.status}</span> <b style="color:var(--text)">${t.label}</b></div>`).join('');
     document.getElementById('sec-infra').innerHTML =
-      `<span class="pill" style="color:var(--warn)">${inf.status || '?'}</span> → ${inf.target || ''}<br>${(inf.components || []).join(' · ')}<br><span style="font-size:10px">${inf.note || ''}</span>`;
+      `<span class="pill" style="color:var(--warn)">${inf.status || '?'}</span> → ${inf.target || ''}<br>${(inf.components || []).join(' · ')}<br><span style="font-size:10px">${inf.note || ''}</span>` +
+      (targets ? `<div style="margin-top:8px;border-top:1px dashed var(--border);padding-top:6px"><b style="color:var(--text);font-size:11px">DEPLOY TARGETS</b>${targets}</div>` : '');
 
     const sevColor = { urgent: 'bad', high: 'warn', low: 'dim' };
     document.querySelector('#sec-rotations tbody').innerHTML = (sec.rotations_pending || [])

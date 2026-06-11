@@ -57,6 +57,29 @@
     "components": ["crowdsec + cloudflare-bouncer", "falco + falcosidekick", "wazuh SIEM", "n8n retaliation playbook"],
     "note": "Never deployed; Docker absent locally. Pre-deploy code fixes done 2026-06-11 (wazuh config dupe, retaliation input validation); regenerate LAPI key via cscli on deploy."
   },
+  "deploy_targets": [
+    {
+      "id": "apparmor",
+      "label": "AppArmor MAC profiles",
+      "what": "Mandatory access control for agent/container processes on the Hetzner node (confine docker, n8n, agent runtimes)",
+      "how": "aa-status → profile per service in enforce mode; docker --security-opt apparmor=<profile>",
+      "status": "planned"
+    },
+    {
+      "id": "falco",
+      "label": "Falco runtime detection",
+      "what": "eBPF runtime alerts incl. custom rules (prompt-injection patterns in n8n/qdrant logs, vault tampering) → Falcosidekick → n8n/Telegram",
+      "how": "infra/docker-compose.falco.yml + infra/falco/falco_rules.local.yaml (already designed)",
+      "status": "planned"
+    },
+    {
+      "id": "wazuh-fim",
+      "label": "Wazuh FIM (file integrity monitoring)",
+      "what": "24/7 FIM on configs, vault dirs, agent configs; SIEM correlation",
+      "how": "infra/wazuh/deploy_wazuh.sh (fix WSL path first); enable syscheck on /root/sovern + /etc",
+      "status": "planned"
+    }
+  ],
   "accepted_risks": [
     "read_only:true not set on crowdsec/bouncer containers (write to volumes) — revisit with tmpfs at deploy",
     "infra/.env holds live secrets on disk — gitignored + read-denied; migrate to vault on Bitwarden revival"
