@@ -13,7 +13,7 @@
     {
       "id": "github-pat-finegrained-remote",
       "label": "GitHub fine-grained PAT (was embedded in git remote URL)",
-      "why": "PAT stored plaintext in .git/config remote URL; printed to terminal/session transcript during 2026-06-11 audit.",
+      "why": "PAT stored plaintext in TWO git remote URLs (.git/config): NAUTILUS origin + github-pages submodule → master5d/SOVRN. Printed to session transcript during 2026-06-11 audit. Both remotes cleaned to plain https + gh credential helper.",
       "action": "github.com/settings/personal-access-tokens → Revoke. Remote already cleaned to plain https + gh credential helper.",
       "severity": "urgent",
       "status": "pending"
