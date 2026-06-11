@@ -1,0 +1,4 @@
+# Linux-target scripts must keep LF — CRLF breaks shebang/heredocs on deploy
+*.sh text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
