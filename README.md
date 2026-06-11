@@ -19,7 +19,7 @@ Nautilus is divided into modular directory boundaries:
 * **`/config` (Shared Service Configs)**: Houses LiteLLM provider configurations and holds the dynamic service registry updated by the Port Broker.
 * **`/scripts` (Lifecycle & Port Broker Automation)**: Prevents port collisions on local Windows hosts via socket availability sweeps, automatically synchronizing dynamic ports across envs (`.env`, `.env.local`, `.hermes/config.yaml`).
 * **`C:\telo\Efforts\Simmering`**: The back-burner zone for active ideas fermentation.
-* **`/hermes/skills` (Orchestration & Skills)**: The central AI pilot gateway. Listens to Telegram bot directives, manages cumulative dry-runs, and dispatches tasks to specialist coding agents (Claude Code, Codex, Hermes, Gemini — see `config/orchestrator.json`, switch via Labwatch `:4002` or `swarm -Switch`). Includes the **Resonance Audit** skill for cognitive bandwidth management.
+* **`/hermes/skills` (Orchestration & Skills)**: The central AI pilot gateway. Listens to Telegram bot directives, manages cumulative dry-runs, and dispatches tasks to specialist coding agents (Claude Code, Codex, Hermes — see `config/orchestrator.json`, switch via Labwatch `:4002` or `swarm -Switch`). Includes the **Resonance Audit** skill for cognitive bandwidth management.
 * **`/Atlas/Maps/Interests MOC.md`**: The central index for high-resonance "Drive" projects.
 
 ---

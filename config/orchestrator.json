@@ -21,14 +21,7 @@
       "exe": "python",
       "args": ["C:\\agents\\Hermes\\cli.py", "-p", "{task}"],
       "cwd": "C:\\agents\\Hermes",
-      "notes": "Требует LiteLLM up (порт из config/services.json). Брейн: google/gemini-3-flash-preview."
-    },
-    "gemini": {
-      "label": "Gemini CLI",
-      "exe": "gemini",
-      "args": ["-p", "{task}"],
-      "cwd": "C:\\telo",
-      "notes": "⚠ Free tier отключают 2026-06-18 — не делать оркестратором надолго."
+      "notes": "Требует LiteLLM up (порт из config/services.json). Брейн: google/gemini-3-flash-preview (API key выживает после 06-18; Gemini Flash теперь доступен ТОЛЬКО через hermes). Gemini CLI agent удалён 2026-06-11 — см. docs/gemini-cli-sunset-plan.md."
     }
   }
 }
