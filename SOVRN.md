@@ -4,13 +4,13 @@
 > **Дата:** 28 апреля 2026 · **Статус:** consolidated source of truth · **Заменяет:** v3.0 (Loop 1), v3.1 (Loop 2), v3.2 (Loop 3) · **Loop:** 4 (Gmail AI Ingest synthesis applied)
 ---
 ## TL;DR в одном абзаце
-**SOVRN** — это sovereignty-first персональная AI-организация для Solo Vibe Coder на Surface Laptop Studio 2 (RTX 4060 8GB / 64GB RAM / Win11): локальный harness **Hermes Agent через ****`ollama launch hermes`** управляет sub-агентами **Aider + Cline + Compound Engineering plugin**; модельный gateway **LiteLLM** маршрутизирует между локальным **Qwen3-Coder-30B-A3B (MoE) на llama.cpp + CUDA 13.1** и тремя бесплатными облаками **Cerebras + Groq + NVIDIA NIM**; память — **двухступенчатая (PARA fast path → graphiti+FalkorDB+Qdrant slow path)**; skills — **DeepVista schema (type × execution)** с обязательным `--dry-run` для stateful; ingest — **Gmail AI Ingest → Hermes → graphiti**; хостинг — **Cloudflare + Hetzner CX22**; observability — **OpenLLMetry → Langfuse self-hosted**. Бюджет: $0 PoC / $20 (Claude Pro) / $30–60 (Anthropic API pay-as-you-go). Заменяемость каждого слоя — дни, не недели.
+**SOVRN** — это sovereignty-first персональная AI-организация для Solo Vibe Coder на Surface Laptop Studio 2 (RTX 4060 8GB / 64GB RAM / Win11): локальный harness **Hermes Agent через ****`ollama launch hermes`** управляет sub-агентами **Aider + Cline + Compound Engineering plugin**; модельный gateway **LiteLLM** маршрутизирует между локальным **Qwen3-Coder-30B-A3B (MoE) на llama.cpp + CUDA 13.1** и тремя бесплатными облаками **Cerebras + Groq + NVIDIA NIM**; память — **двухступенчатая (PARA fast path → graphiti+FalkorDB+Qdrant slow path)**; skills — **DeepVista schema (type × execution)** с обязательным `--dry-run` для stateful; ingest — **Gmail AI Ingest → Hermes → graphiti**; хостинг — **Cloudflare + Hetzner CX23**; observability — **OpenLLMetry → Langfuse self-hosted**. Бюджет: $0 PoC / $20 (Claude Pro) / $30–60 (Anthropic API pay-as-you-go). Заменяемость каждого слоя — дни, не недели.
 ---
 ## Линейка изменений
 | Версия | Loop | Что добавлено | Главные удаления |
 | --- | --- | --- | --- |
-| v3.0 | 1 | Hermes-as-boss; CrewAI; Qwen3.6-27B; NIM; Bluehost; custom Next.js dash | — |
-| v3.1 | 2 | Pydantic AI; Aider+Cline; Qwen3-Coder-30B-A3B (MoE); rotating pool; graphiti+Neo4j+Qdrant; Cloudflare+Hetzner; Grafana+Streamlit; Handy | CrewAI как primary; Bluehost; OpenClaw как продукт |
+| v3.0 | 1 | Hermes-as-boss; CrewAI; Qwen3.6-27B; NIM; custom Next.js dash | — |
+| v3.1 | 2 | Pydantic AI; Aider+Cline; Qwen3-Coder-30B-A3B (MoE); rotating pool; graphiti+Neo4j+Qdrant; Cloudflare+Hetzner; Grafana+Streamlit; Handy | CrewAI как primary; OpenClaw как продукт |
 | v3.2 | 3 | `--n-cpu-moe`; CUDA 13.1; FalkorDB; LiteLLM `fallbacks:`; `effort` parameter | Vulkan default; `thinking_budget_tokens`; Neo4j JVM на ноуте |
    14|| **v3.3** | **4** | **Hermes в Linux-оболочке (WSL2/Native); Compound Engineering plugin; DeepVista skill schema; PARA фаза-0 памяти; Ramp PM skill; NotebookLM as pipeline; Apify; Substack для digital-goods** | **Ollama-нативный Hermes; custom evo-loop; 1-фазная graphiti с нуля** |
    15|---
@@ -48,7 +48,7 @@
 ├─────────────────────────────────────────────────────────────────────┤
 │  HOSTING FABRIC                                                      │
 │    Edge: Cloudflare Pages + Workers + R2 + D1 ($0)                   │
-│    Compute: Hetzner CX22 + Dokploy + n8n + Postiz (€3.79/mo)         │
+│    Compute: Hetzner CX23 + Dokploy + n8n + Postiz (€3.79/mo)         │
 │    Mail: Fastmail ($5/mo)                                            │
 │    Local-only: Surface Laptop (никогда production server)            │
 └─────────────────────────────────────────────────────────────────────┘
@@ -58,7 +58,7 @@
 ## 2. Hardware tier
 **Целевое железо:** Surface Laptop Studio 2 · Intel i7-13800H · 64GB DDR5 · RTX 4060 Laptop 8GB VRAM · 1TB NVMe (430GB used) · Win11 Pro 25H2.
 **Доп.:** Pixel 10 Pro XL + Pixel 6 Pro XL · SanDisk 4TB Extreme portable SSD · 2× YubiKey 5C NFC.
-**Принципы.** Surface Laptop = primary dev + local inference. **Никогда не production server** (residential ISP, dynamic IP, battery wear, Win update reboots, thermal throttling). Production = Hetzner CX22 + Cloudflare. SanDisk 4TB = mirrored vault для Obsidian + graphiti dumps + model weights.
+**Принципы.** Surface Laptop = primary dev + local inference. **Никогда не production server** (residential ISP, dynamic IP, battery wear, Win update reboots, thermal throttling). Production = Hetzner CX23 + Cloudflare. SanDisk 4TB = mirrored vault для Obsidian + graphiti dumps + model weights.
 ---
 ## 3. Local inference — llama.cpp + Qwen3-Coder-30B-A3B (MoE)
 **Primary daily driver.** Qwen3-Coder-30B-A3B-Instruct (UD-Q4_K_XL, MoE, 3B active params), запускается через `llama-server`. **Не Ollama as primary** (Ollama — convenience wrapper).
@@ -169,7 +169,7 @@ description: Review PR for security and code quality issues.
 Источник: Nat Eliason, "Use OpenClaw to Build a Business That Runs Itself" (22 фев 2026), 3-layer memory:
 ```javascript
 ~/life/                                  # Obsidian vault
-├── projects/                            # PARA Layer 1: knowledge graph
+├── Efforts/On/                            # PARA Layer 1: knowledge graph
 │   ├── 01-knowledge-graph-foundation/
 │   ├── 02-affiliate-agency/
 │   ├── 03-digital-goods/
@@ -177,20 +177,20 @@ description: Review PR for security and code quality issues.
 │   ├── 05-yt-social/
 │   ├── 06-game-defi/
 │   └── 07-native-windows-apps/
-├── areas/                               # ongoing responsibilities
-├── resources/                           # reference material
+├── Efforts/Ongoing/                               # ongoing responsibilities
+├── Atlas/References/                           # reference material
 │   └── AI-Ingest/                       # см. §11
-├── archives/
-├── daily/                               # Layer 2: per-date markdown
+├── Atlas/Archives/
+├── Calendar/Logs/                               # Layer 2: per-date markdown
 │   └── 2026-04-28.md
-└── tacit/                               # Layer 3: tacit knowledge
+└── Atlas/Workflows/                               # Layer 3: tacit knowledge
     ├── communication-preferences.md
     ├── workflow-habits.md
     ├── hard-rules.md
     └── lessons-from-past-mistakes.md
 
 ```
-**Hermes-skill ****`consolidate_daily`**** (cron 02:00 ежедневно):** читает `daily/<today>.md` → извлекает durable facts → пишет в `projects/areas/resources` с YAML-фронтматтером → пишет ссылки обратно в `daily/`.
+**Hermes-skill ****`consolidate_daily`**** (cron 02:00 ежедневно):** читает `Calendar/Logs/<today>.md` → извлекает durable facts → пишет в `Efforts/On/Efforts/Ongoing/resources` с YAML-фронтматтером → пишет ссылки обратно в `Calendar/Logs/`.
 ### Фаза 1 — graphiti slow path (запускать только после 1–2 недель PARA, если упирается)
 Только когда PARA перестаёт хватать (multi-hop queries, temporal reasoning, contradictions tracking):
 | Компонент | Pick | Лицензия |
@@ -279,7 +279,7 @@ router_settings:
 **Конвейер:**
 ```javascript
 Gmail watch() → Pub/Sub → Cloudflare Worker webhook
-   → n8n workflow on Hetzner CX22
+   → n8n workflow on Hetzner CX23
    → filter labelIds CONTAINS "AI Ingest"
    → readability/markdown extract → canonical URL strip → SHA-256 dedup
    → Hermes skill: ingest_email
@@ -309,7 +309,7 @@ Gmail watch() → Pub/Sub → Cloudflare Worker webhook
 ```
 **Sender-ranking** (новая идея v3.3): signal_rate = реальные действия / письма от sender'а. Сейчас Neo4j: 2/12 = 0.17, остальные 0/N. Фишка станет рабочей через 90 дней.
 **Реализация в 3 фазы:**
-1. **Phase I (4 часа):** разовый дамп текущих 211 писем → `~/life/resources/AI-Ingest/` PARA-структура с YAML-фронтматтером. Без графити.
+1. **Phase I (4 часа):** разовый дамп текущих 211 писем → `~/life/Atlas/References/AI-Ingest/` PARA-структура с YAML-фронтматтером. Без графити.
 2. **Phase II (1 weekend):** Cloudflare Worker + n8n + графити episodes для нового incoming потока. Старые 211 — пакетно через тот же conveyer.
 3. **Phase III (1 weekend):** Hermes weekly-digest skill в Telegram.
 ---
@@ -331,15 +331,14 @@ Gmail watch() → Pub/Sub → Cloudflare Worker webhook
 - D1 (5GB + 5M rows read/day)
 - Cloudflare DNS как authority для всех доменов
 **Compute (€3.79/mo):**
-- Hetzner CX22 (2 vCPU / 4GB / 40GB)
+- Hetzner CX23 (2 vCPU / 4GB / 40GB)
 - Dokploy as PaaS (~350MB RAM idle)
 - Docker: n8n + Karakeep + ArchiveBox + Postiz + Langfuse + FalkorDB + Qdrant + LearnDash WordPress
-**Mail ($5/mo):**
+| Mail ($5/mo) |
 - Fastmail Standard для branded email
 - Альтернатива: Migadu Mini ($1.58/mo)
-- **Cancel Bluehost-bundled Workspace** при рefresh.
 **Static affiliate sites:** Astro 5 + Pagefind + MDX → Cloudflare Pages.
-**WordPress (когда client demands):** на той же Hetzner CX22, фронтированный Cloudflare proxy.
+**WordPress (когда client demands):** на той же Hetzner CX23, фронтированный Cloudflare proxy.
 **GCP $300 free credit:** активировать на день 1 конкретного эксперимента (Vertex AI fine-tune или Neo4j AuraDB managed для priority-#6), бюджет-алёрт $250, walk away день 90.
 **Никогда:** Surface Laptop как production server.
 ---
@@ -391,12 +390,11 @@ Gmail watch() → Pub/Sub → Cloudflare Worker webhook
 | Google AI Studio | DEPRECATE | OpenRouter / Gemini CLI |
 | Wispr Flow | **PARALLEL TEST 2 weeks** (Loop 4 contradiction) | Handy + Whispering |
 | Telegram | KEEP — primary control plane | — |
+| **enerv-telegram-librarian** | **ACTIVATED (v3.3 integration)** | Двухэтапный конвейер импорта из Telegram в ENERV с ИИ-маршрутизацией и Groq-резервированием |
 | Stitch (Google) | DEPRECATE | Claude Design / Paper.design |
 | Paper.design | KEEP try | — |
 | **Pencil.dev** | **WATCH** (Code on Canvas, P6) | — |
 | Claude Design | ACTIVATE — research preview | — |
-| Bluehost hosting | DEPRECATE at renewal | Cloudflare Pages + Hetzner CX22 |
-| Google Workspace via Bluehost | REPLACE | Fastmail $5/mo |
 | **Apify (или Crawlee local)** | **NEW v3.3 (P11)** | — |
 | **Neo4j AuraDB managed** | **NEW v3.3** (только для priority-#6) | — |
 | FalkorDB local | ACTIVATE для graphiti | — |
@@ -434,14 +432,14 @@ ollama launch hermes
 ### Phase 1 — Sovereign cloud + ingest pipeline (Weeks 2–3, ~$0–$10)
 - Sign up Cerebras + Groq + NIM dev tier
 - LiteLLM proxy с rotating pool + explicit `fallbacks:` (P-fix Loop 3)
-- **Phase I ingest (Loop 4): дамп 211 писем → ****`~/life/resources/AI-Ingest/`**** PARA**
+- **Phase I ingest (Loop 4): дамп 211 писем → ****`~/life/Atlas/References/AI-Ingest/`**** PARA**
 - Установка `ingest_email` skill через Hermes (DeepVista schema, --dry-run)
 - LangGraph Postgres checkpointer для DAG workflows
 ### Phase 2 — Migrate data + host (Weeks 4–6, ~$5–10/mo)
 - Notion → Obsidian (1 weekend, Claude Code cleanup pass)
-- Evernote ENEX → Joplin → Markdown → `~/life/archives/evernote/`, cancel
-- Hetzner CX22 + Dokploy provisioning
-- Fastmail migration; cancel Bluehost-bundled Workspace
+- Evernote ENEX → Joplin → Markdown → `~/life/Atlas/Archives/evernote/`, cancel
+- Hetzner CX23 + Dokploy provisioning
+- Fastmail migration
 - Karakeep + ArchiveBox + n8n + Postiz on Hetzner
 - First Astro affiliate site on Cloudflare Pages
 - **Phase II ingest (Loop 4): Cloudflare Worker + n8n + graphiti episodes**
@@ -465,7 +463,7 @@ ollama launch hermes
 - **Caveat:** Claude Code on Pro removed 21 apr 2026 для new subscribers; existing users могут retain temporarily
 ### $30–60/mo (sovereignty-aligned recommended)
 - Fastmail $5
-- Hetzner CX22 €3.79
+- Hetzner CX23 €3.79
 - OpenRouter $10 deposit (1K RPD, 29 free models)
 - Anthropic API pay-as-you-go ~$15–40 через Aider/Cline (variable)
 - (Опционально) Cursor Pro $20 если IDE worth it
