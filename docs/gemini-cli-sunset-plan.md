@@ -52,23 +52,29 @@ Gemini Flash as primary for now: its 1M context beats Cerebras free (8K cap)
 and Groq for long-context ingest. **Trigger to flip primary → `fast-pool`:**
 sustained 429s on Gemini in `labwatch` usage, or a further free-tier cut.
 
-## knowledge-graph — latent embedding risk (separate sprint)
+## knowledge-graph — embeddings already on stable (docs synced 2026-06-11)
 
-Independent of 06-18, but worth flagging:
+The runtime code was **already** on stable models — only the docs lagged:
 
-- **`gemini-embedding-exp-03-07` is an experimental model** — Google retires
-  `exp` models on short notice. Migrate to **stable `gemini-embedding-001`**
-  (drop-in, same API key) before it's force-deprecated. Re-embedding the graph
-  is required on any embedding-model change (vector dims/space differ).
-- Sovereign fallback option: local embeddings via `llama-server` or Cloudflare
-  Workers AI `bge-*` — removes the Google dependency entirely for the KG.
-- This lives with the knowledge-graph app (Sprint 2+), not the gateway.
+- `src/lib/embeddings.ts` uses **`gemini-embedding-001`** (stable GA, 768-dim
+  via `outputDimensionality`), not the `-exp-*` preview. ✓
+- `src/app/api/graphrag/route.ts` uses **`gemini-2.5-flash`** (stable), not a
+  `-preview-*` snapshot. ✓
+- Fixed stale `gemini-embedding-exp-03-07` / `flash-lite-preview` references in
+  the KG `CLAUDE.md` + `README.md` so future agents don't regress to exp models
+  (Google pulls `exp`/`preview` snapshots without notice; an embedding-model
+  change forces a full graph re-embed — vector space differs).
+- Remaining (real, future): Sprint 2 multimodal will need
+  `gemini-embedding-2-preview` — move to it only once it reaches GA. Sovereign
+  fallback option: local embeddings via `llama-server` or Cloudflare Workers AI
+  `bge-*` to drop the Google dependency entirely.
 
 ## Checklist
 
 - [x] Remove `gemini` agent from `config/orchestrator.json`
-- [x] README agent list already lists Claude/Codex/Hermes/Gemini → trim Gemini
+- [x] README agent list trimmed Gemini → Claude/Codex/Hermes
 - [x] Document Hermes fallback as the Gemini-Flash access path
-- [ ] (KG team) migrate `gemini-embedding-exp-03-07` → `gemini-embedding-001`
+- [x] KG embeddings already on stable `gemini-embedding-001`; synced stale docs
+- [x] `.gitmodules` added for github-pages submodule (clone --recursive works)
 - [ ] (watch) flip Hermes brain to `fast-pool` if Gemini API 429s spike in labwatch
 - [ ] (optional) drop `C:\agents\Gemini` CLI install after 06-18 if unused

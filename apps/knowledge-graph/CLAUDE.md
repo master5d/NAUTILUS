@@ -24,8 +24,8 @@ Core loop: ingest any content → embed with Google AI → store in Neo4j graph 
 - Dynamic cluster emergence (Louvain algorithm)
 
 ## Tech decisions to preserve
-- **Embeddings**: `gemini-embedding-exp-03-07` (NOT text-embedding-004 — deprecated Aug 2025)
-- **LLM**: `gemini-2.5-flash-lite-preview-06-17` (free tier, 15 RPM)
+- **Embeddings**: `gemini-embedding-001` (stable GA, 768-dim via `outputDimensionality`; NOT the `-exp-*` previews — Google pulls exp models without notice, NOT text-embedding-004 — deprecated Aug 2025)
+- **LLM**: `gemini-2.5-flash` (stable, free tier 15 RPM; NOT `-preview-*` snapshots)
 - **Graph**: Neo4j AuraDB free, Cypher, `MERGE` not `CREATE`
 - **3D graph**: imperative API via `ForceGraph3D as any` — the TS types lie, the factory pattern is correct
 - **SSR**: graph-3d.tsx must stay `dynamic(..., { ssr: false })` — WebGL requires browser

@@ -44,8 +44,8 @@ Reference UI inspiration: https://www.miromind.ai
 | Layer | Technology | Free tier |
 |-------|-----------|-----------|
 | Framework | Next.js 16 (Turbopack) | — |
-| Embeddings | `gemini-embedding-exp-03-07` via Google AI Studio | 10M tokens/min |
-| LLM | `gemini-2.5-flash-lite-preview-06-17` | 15 RPM, 1000 req/day |
+| Embeddings | `gemini-embedding-001` (stable GA) via Google AI Studio | 10M tokens/min |
+| LLM | `gemini-2.5-flash` (stable) | 15 RPM, 1000 req/day |
 | Graph DB | Neo4j AuraDB | 200k nodes, 400k rels |
 | 3D viz | `react-force-graph-3d` (Three.js) | MIT |
 | UI | shadcn/ui + Geist, dark mode | MIT |
@@ -112,7 +112,7 @@ src/
 
 **Why Neo4j AuraDB**: Graph-native queries (multi-hop traversal, shortest path), native vector index in 5.x, free tier is generous enough for personal use, Cypher is the standard language for graph queries.
 
-**Why gemini-embedding-exp-03-07**: Latest Google embedding model, free via AI Studio, supports multimodal (Sprint 2 will use this for images/video/audio). `text-embedding-004` was deprecated August 2025.
+**Why gemini-embedding-001**: Stable GA Google embedding model (768-dim via `outputDimensionality`), free via AI Studio. Chosen over `-exp-*` previews on purpose — Google retires experimental embedding models without notice, and changing the embedding model forces a full graph re-embed (vector space differs). `text-embedding-004` was deprecated August 2025. Sprint 2 multimodal (images/video/audio) will move to `gemini-embedding-2-preview` when it reaches GA.
 
 **Why react-force-graph-3d**: Three.js-based, matches the Obsidian/Google Earth 3D vision from PRD, imperative API gives full control. Must be `dynamic(() => import(...), { ssr: false })` — uses WebGL + window.
 
