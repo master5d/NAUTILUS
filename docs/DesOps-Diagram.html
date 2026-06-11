@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DesOps Hub — Cybernetic Design Engine</title>
+<style>
+  :root {
+    --bg: #07070a;
+    --panel: #0d0d14;
+    --panel-hover: #141422;
+    --accent-cyan: #00d1ff;
+    --accent-pink: #ff2a6d;
+    --accent-green: #00ff88;
+    --accent-purple: #9a00e0;
+    --text-primary: #e8e8f0;
+    --text-secondary: #8a8a9e;
+    --border: #1c1c2e;
+    --border-glow: rgba(0, 209, 255, 0.2);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    padding: 3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Typography */
+  h1 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2.2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(90deg, var(--accent-pink), var(--accent-cyan), var(--accent-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 15px rgba(0, 209, 255, 0.15));
+  }
+
+  .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--accent-green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent-green);
+    display: inline-block;
+  }
+
+  /* Grid Layout */
+  .container {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .dashboard-section {
+    background-color: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .dashboard-section:hover {
+    border-color: rgba(0, 209, 255, 0.3);
+    box-shadow: 0 0 25px rgba(0, 209, 255, 0.03);
+  }
+
+  .dashboard-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-pink), var(--accent-cyan));
+    opacity: 0.8;
+  }
+
+  .section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent-cyan);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Interactive SVG Diagram styles */
+  .svg-diagram {
+    width: 100%;
+    height: auto;
+    max-height: 650px;
+    border-radius: 6px;
+    background: #09090f;
+    border: 1px solid #141422;
+  }
+
+  .node-group {
+    cursor: pointer;
+    transition: opacity 0.3s;
+  }
+
+  .node-group:hover rect {
+    fill: var(--panel-hover) !important;
+    stroke-width: 2px !important;
+  }
+
+  /* Details Panel */
+  .details-panel {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 2rem;
+    margin-top: 1.5rem;
+  }
+
+  @media (max-width: 900px) {
+    .details-panel {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .info-sidebar {
+    border-right: 1px solid var(--border);
+    padding-right: 2rem;
+  }
+
+  @media (max-width: 900px) {
+    .info-sidebar {
+      border-right: none;
+      padding-right: 0;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+  }
+
+  .info-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+
+  .info-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+
+  .pill.cyan { border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(0, 209, 255, 0.02); }
+  .pill.pink { border-color: var(--accent-pink); color: var(--accent-pink); background: rgba(255, 42, 109, 0.02); }
+  .pill.green { border-color: var(--accent-green); color: var(--accent-green); background: rgba(0, 255, 136, 0.02); }
+
+  /* Master Cycle Flowchart */
+  .flowchart-horizontal {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+  }
+
+  .flow-step {
+    flex: 1;
+    min-width: 130px;
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem;
+    text-align: center;
+    position: relative;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .flow-step:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent-cyan);
+    background: rgba(0, 209, 255, 0.01);
+  }
+
+  .flow-step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent-pink);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+
+  .flow-step-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+  }
+
+  .flow-step-desc {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    line-height: 1.4;
+  }
+
+  /* Tokens Area */
+  .tokens-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .token-card {
+    background: rgba(255,255,255,0.01);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem;
+  }
+
+  .token-card-header {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .token-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .color-preview {
+    width: 24px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .token-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-primary);
+  }
+
+  .footer {
+    margin-top: 4rem;
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+  <h1>DesOps Hub Architecture</h1>
+  <div class="subtitle">
+    <span class="status-dot"></span> SOVRN v3.3 Dynamic Blueprint · Solo Vibe Coder Specs
+  </div>
+
+  <div class="container">
+
+    <!-- SECTION 1: CYBERNETIC ENGINE INTERACTIVE -->
+    <div class="dashboard-section">
+      <div class="section-title">
+        <span>⚡</span> INTERACTIVE CYBERNETIC ENGINE (3-LAYER HARNESS)
+      </div>
+
+      <!-- Vector SVG Spec -->
+      <svg viewBox="0 0 1000 600" class="svg-diagram" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00d1ff" />
+            <stop offset="100%" stop-color="#05d9e8" />
+          </linearGradient>
+          <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ff2a6d" />
+            <stop offset="100%" stop-color="#9a00e0" />
+          </linearGradient>
+          <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00ff88" />
+            <stop offset="100%" stop-color="#00aa50" />
+          </linearGradient>
+          <filter id="svgGlowCyan" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          <filter id="svgGlowMagenta" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        <!-- Star field -->
+        <circle cx="80" cy="90" r="1" fill="rgba(255,255,255,0.06)" />
+        <circle cx="280" cy="180" r="1" fill="rgba(255,255,255,0.06)" />
+        <circle cx="820" cy="140" r="1" fill="rgba(255,255,255,0.06)" />
+        <circle cx="120" cy="460" r="1" fill="rgba(255,255,255,0.06)" />
+        <circle cx="780" cy="510" r="1" fill="rgba(255,255,255,0.06)" />
+        <circle cx="920" cy="280" r="1" fill="rgba(255,255,255,0.06)" />
+
+        <!-- Grid Lines -->
+        <line x1="0" y1="90" x2="1000" y2="90" stroke="rgba(255, 255, 255, 0.015)" />
+        <line x1="0" y1="510" x2="1000" y2="510" stroke="rgba(255, 255, 255, 0.015)" />
+        <line x1="160" y1="0" x2="160" y2="600" stroke="rgba(255, 255, 255, 0.015)" />
+        <line x1="840" y1="0" x2="840" y2="600" stroke="rgba(255, 255, 255, 0.015)" />
+
+        <!-- CENTRAL CORE -->
+        <g transform="translate(500, 270)">
+          <circle cx="0" cy="0" r="75" stroke="rgba(0, 209, 255, 0.12)" stroke-width="1" stroke-dasharray="6 3" />
+          <circle cx="0" cy="0" r="60" stroke="#00d1ff" stroke-width="1" stroke-dasharray="10 4" opacity="0.3" />
+          <circle cx="0" cy="0" r="16" fill="#00d1ff" opacity="0.1" filter="url(#svgGlowCyan)" />
+          <circle cx="0" cy="0" r="6" fill="#00d1ff" />
+          <text x="0" y="-105" fill="#00d1ff" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="900" letter-spacing="2px" filter="url(#svgGlowCyan)">DESOPS CORE KERNEL</text>
+          <text x="0" y="-90" fill="#8a8a9e" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="8" letter-spacing="1px">SOVRN V3.3 ORCHESTRATOR</text>
+        </g>
+
+        <!-- CONNECTIONS -->
+        <!-- Layer 3 -> Core -->
+        <path d="M500 135 L500 165" stroke="#ff2a6d" stroke-width="1.2" stroke-dasharray="3 3" fill="none" />
+        <!-- Core -> Layer 1 -->
+        <path d="M430 270 C300 270 230 310 230 385" stroke="#00d1ff" stroke-width="1.2" fill="none" />
+        <polygon points="230,385 227,378 233,378" fill="#00d1ff" />
+        <!-- Layer 1 -> Layer 2 -->
+        <path d="M400 435 L600 435" stroke="#00ff88" stroke-width="1.2" stroke-dasharray="4 4" fill="none" />
+        <polygon points="600,435 593,431 593,439" fill="#00ff88" />
+        <!-- Layer 2 -> Out -->
+        <path d="M780 385 C780 330 840 300 840 280" stroke="#00ff88" stroke-width="1.2" fill="none" />
+        <polygon points="840,280 835,286 842,288" fill="#00ff88" />
+        <!-- Feedback Loop -->
+        <path d="M890 310 C890 350 880 540 500 540 C230 540 230 510 230 480" stroke="#ff2a6d" stroke-width="1.2" fill="none" opacity="0.6" />
+        <polygon points="230,480 227,487 233,487" fill="#ff2a6d" />
+
+        <!-- GOVERNANCE SYSTEM -->
+        <g transform="translate(10, 180)" class="node-group" onclick="selectNode('governance')">
+          <rect x="0" y="0" width="130" height="140" rx="4" fill="#0c0c14" stroke="#1c1c2e" stroke-width="1" />
+          <text x="10" y="18" fill="#8a8a9e" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="700" letter-spacing="1px">GOVERNANCE</text>
+          <line x1="10" y1="24" x2="120" y2="24" stroke="#1c1c2e" stroke-width="1" />
+          
+          <rect x="10" y="32" width="110" height="34" rx="3" fill="#141422" stroke="rgba(255,255,255,0.03)" />
+          <text x="15" y="44" fill="#e8e8f0" font-family="'JetBrains Mono', monospace" font-size="7" font-weight="700">GLOBAL_DESIGN</text>
+          <text x="15" y="52" fill="#8a8a9e" font-size="6">Master Design Tokens</text>
+
+          <rect x="10" y="74" width="110" height="34" rx="3" fill="#141422" stroke="rgba(255,255,255,0.03)" />
+          <text x="15" y="86" fill="#e8e8f0" font-family="'JetBrains Mono', monospace" font-size="7" font-weight="700">DESIGN.md</text>
+          <text x="15" y="94" fill="#8a8a9e" font-size="6">Project Local Rules</text>
+        </g>
+
+        <!-- OUTPUT CORE -->
+        <g transform="translate(860, 185)" class="node-group" onclick="selectNode('output')">
+          <rect x="0" y="0" width="130" height="120" rx="4" fill="#0c0c14" stroke="#1c1c2e" stroke-width="1" />
+          <text x="10" y="18" fill="#8a8a9e" font-family="'JetBrains Mono', monospace" font-size="8" font-weight="700" letter-spacing="1px">OUTPUT CORE</text>
+          <line x1="10" y1="24" x2="120" y2="24" stroke="#1c1c2e" stroke-width="1" />
+          <circle cx="65" cy="58" r="18" fill="#141424" stroke="#00ff88" stroke-dasharray="3 1.5" />
+          <path d="M60 58 L63 61 L69 54" stroke="#00ff88" stroke-width="1.5" fill="none" />
+          <text x="65" y="92" fill="#00ff88" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="7" font-weight="700" letter-spacing="1px">PRODUCTION CODE</text>
+          <text x="65" y="100" fill="#8a8a9e" text-anchor="middle" font-size="6">Zero Handoff</text>
+        </g>
+
+        <!-- NODE 3: THE EYE (TOP) -->
+        <g transform="translate(360, 40)" class="node-group" onclick="selectNode('eye')">
+          <rect x="0" y="0" width="280" height="90" rx="6" fill="#111118" stroke="url(#pinkGrad)" stroke-width="1.2" filter="url(#svgGlowMagenta)" opacity="0.95" />
+          <rect x="0" y="0" width="280" height="22" rx="6" fill="rgba(255, 42, 109, 0.08)" />
+          <text x="12" y="14" fill="#ff2a6d" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" letter-spacing="1px">LAYER 3: THE EYE (Visual DNA)</text>
+          <text x="12" y="38" fill="#e8e8f0" font-size="8.5">• Visual DNA Extraction → DESIGN.md</text>
+          <text x="12" y="52" fill="#e8e8f0" font-size="8.5">• Archetypes: Linear (density) · Stripe · Vercel</text>
+          <text x="12" y="66" fill="#e8e8f0" font-size="8.5">• Industry Intelligence: 161+ palettes | 57+ fonts</text>
+        </g>
+
+        <!-- NODE 1: SKILLS (BOTTOM LEFT) -->
+        <g transform="translate(40, 385)" class="node-group" onclick="selectNode('skills')">
+          <rect x="0" y="0" width="360" height="110" rx="6" fill="#111118" stroke="url(#cyanGrad)" stroke-width="1.2" filter="url(#svgGlowCyan)" opacity="0.95" />
+          <rect x="0" y="0" width="360" height="22" rx="6" fill="rgba(0, 209, 255, 0.08)" />
+          <text x="12" y="14" fill="#00d1ff" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" letter-spacing="1px">LAYER 1: SKILLS (Expertise Engine)</text>
+          <text x="12" y="38" fill="#e8e8f0" font-size="8.5">• Rule Zero (Fact Verification) &amp; Core Asset Protocol</text>
+          <text x="12" y="52" fill="#e8e8f0" font-size="8.5">• Cognitive Visualization: PaperBanana 5-Agent Loop</text>
+          <text x="12" y="66" fill="#e8e8f0" font-size="8.5">• DataViz Intelligence (Tufte Information Density)</text>
+          <text x="12" y="80" fill="#e8e8f0" font-size="8.5">• Guardrails: Anti-Slop (combats generic rules) &amp; WCAG</text>
+        </g>
+
+        <!-- NODE 2: CANVAS (BOTTOM RIGHT) -->
+        <g transform="translate(600, 385)" class="node-group" onclick="selectNode('canvas')">
+          <rect x="0" y="0" width="360" height="110" rx="6" fill="#111118" stroke="url(#greenGrad)" stroke-width="1.2" filter="url(#svgGlowCyan)" opacity="0.95" />
+          <rect x="0" y="0" width="360" height="22" rx="6" fill="rgba(0, 255, 136, 0.08)" />
+          <text x="12" y="14" fill="#00ff88" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="700" letter-spacing="1px">LAYER 2: CANVAS (Surface Execution)</text>
+          <text x="12" y="38" fill="#e8e8f0" font-size="8.5">• Onlook: Cursor for Designers (Direct AST Edits)</text>
+          <text x="12" y="52" fill="#e8e8f0" font-size="8.5">• Paper: Live HTML / CSS Component Canvas</text>
+          <text x="12" y="66" fill="#e8e8f0" font-size="8.5">• Pencil &amp; OpenPencil: JSON Vector specs (.op / .pen)</text>
+          <text x="12" y="80" fill="#e8e8f0" font-size="8.5">• Interoperability: Model Context Protocol (MCP)</text>
+        </g>
+      </svg>
+
+      <!-- Interactive details display -->
+      <div class="details-panel" id="interactive-details">
+        <div class="info-sidebar">
+          <div class="info-title" id="node-title">Выделите блок на схеме</div>
+          <div class="info-desc" id="node-desc">Кликните по любому из трех слоев дизайн-обвязки (Layer 1, Layer 2, Layer 3) или вспомогательным панелям на схеме выше для отображения детальных спецификаций, задействованных инструментов и метрик.</div>
+        </div>
+        <div>
+          <div class="info-title" style="font-size: 1rem; color: var(--accent-pink);">Связанный инструментарий</div>
+          <div class="pill-container" id="node-pills">
+            <span class="pill">Нажмите на ноду</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: MASTER WORKFLOW CYCLE -->
+    <div class="dashboard-section">
+      <div class="section-title">
+        <span>🔄</span> DESOPS MASTER WORKFLOW CYCLE (ZERO-GUI PIPELINE)
+      </div>
+      
+      <div class="flowchart-horizontal">
+        <div class="flow-step">
+          <div class="flow-step-num">01 / DNA</div>
+          <div class="flow-step-name">EXTRACT</div>
+          <div class="flow-step-desc">Сбор визуального ДНК и концептуального стиля в local DESIGN.md.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">02 / RULE 0</div>
+          <div class="flow-step-name">VERIFY</div>
+          <div class="flow-step-desc">Поиск в вебе и Core Asset Protocol (сбор 6 типов ассетов).</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">03 / SCHEMAS</div>
+          <div class="flow-step-name">VISUALIZE</div>
+          <div class="flow-step-desc">PaperBanana схемы и RAWGraphs структурирование структуры данных.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">04 / CORE</div>
+          <div class="flow-step-name">SKETCH</div>
+          <div class="flow-step-desc">Итерации по черновым макетам без лишней детализации.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">05 / TOKENS</div>
+          <div class="flow-step-name">SYNC</div>
+          <div class="flow-step-desc">Приведение к глобальным дизайн-токенам GLOBAL_DESIGN.md.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">06 / CODE</div>
+          <div class="flow-step-name">PRODUCE</div>
+          <div class="flow-step-desc">Редактирование в Onlook с прямой AST-записью в код React/Next.js.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">07 / ANTI-SLOP</div>
+          <div class="flow-step-name">REFINE</div>
+          <div class="flow-step-desc">Удаление ИИ-шлака при помощи команд /audit и /polish.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-num">08 / QA</div>
+          <div class="flow-step-name">AUDIT</div>
+          <div class="flow-step-desc">Финальный линтинг через Impeccable 3.5 и lint-design.ps1.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: DESIGN TOKENS (GLOBAL_DESIGN) -->
+    <div class="dashboard-section">
+      <div class="section-title">
+        <span>🏛️</span> MASTER DESIGN TOKENS (GLOBAL_DESIGN.MD)
+      </div>
+
+      <div class="tokens-grid">
+        <!-- Colors Light -->
+        <div class="token-card">
+          <div class="token-card-header">
+            <span>BRAND COLORS (DARK MODE)</span>
+            <span class="status-dot"></span>
+          </div>
+          <div class="token-row">
+            <span>Primary (Cyan)</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span class="token-value">#00D1FF</span>
+              <div class="color-preview" style="background: #00d1ff;"></div>
+            </div>
+          </div>
+          <div class="token-row">
+            <span>Secondary (Purple)</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span class="token-value">#5E5CE6</span>
+              <div class="color-preview" style="background: #5e5ce6;"></div>
+            </div>
+          </div>
+          <div class="token-row">
+            <span>Accent Pink</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span class="token-value">#FF2A6D</span>
+              <div class="color-preview" style="background: #ff2a6d;"></div>
+            </div>
+          </div>
+          <div class="token-row">
+            <span>Background</span>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <span class="token-value">#07070A</span>
+              <div class="color-preview" style="background: #07070a;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typography -->
+        <div class="token-card">
+          <div class="token-card-header">
+            <span>TYPOGRAPHY &amp; RHYTHM</span>
+            <span class="status-dot"></span>
+          </div>
+          <div class="token-row">
+            <span>Heading Font</span>
+            <span class="token-value" style="font-size: 0.7rem;">Inter, system-ui</span>
+          </div>
+          <div class="token-row">
+            <span>Body Font</span>
+            <span class="token-value" style="font-size: 0.7rem;">Inter, system-ui</span>
+          </div>
+          <div class="token-row">
+            <span>Mono Font</span>
+            <span class="token-value" style="font-size: 0.7rem;">JetBrains Mono</span>
+          </div>
+          <div class="token-row">
+            <span>Line Height</span>
+            <span class="token-value">1.6 (Prose)</span>
+          </div>
+        </div>
+
+        <!-- Layout Metrics -->
+        <div class="token-card">
+          <div class="token-card-header">
+            <span>SPACING &amp; ROUNDING</span>
+            <span class="status-dot"></span>
+          </div>
+          <div class="token-row">
+            <span>Border Radius SM</span>
+            <span class="token-value">4px</span>
+          </div>
+          <div class="token-row">
+            <span>Border Radius MD</span>
+            <span class="token-value">8px</span>
+          </div>
+          <div class="token-row">
+            <span>Border Radius LG</span>
+            <span class="token-value">12px</span>
+          </div>
+          <div class="token-row">
+            <span>Base Spacing</span>
+            <span class="token-value">4px (Grid-based)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    DESOPS HUB ARCHITECTURAL SPECIFICATION · SOVRN V3.3 · OFF-GRID PERSONAL VAULT CODESIGN
+  </div>
+
+  <!-- INTERACTIVE CONTROLLER SCRIPT -->
+  <script>
+    const nodeData = {
+      eye: {
+        title: "Layer 3: The Eye (Визуальное ДНК)",
+        desc: "Отвечает за сбор визуального ритма, плотности информации и художественной ДНК бренда из лучших мировых образцов (Mobbin, Awwwards, Cosmos). Накапливает правила сочетаемости шрифтов (57+ пар) и палитр (161+). Записывает эти правила в файлы DESIGN.md проектов, внедряя архетипы Linear, Stripe или Vercel для предотвращения дженерик-дизайна.",
+        pills: ["Visual DNA Extraction", "Awesome Design", "Mobbin Sync", "DESIGN.md Archetypes", "Style Dropping", "Color/Font DB"]
+      },
+      skills: {
+        title: "Layer 1: Skills (Набор Экспертных Правил)",
+        desc: "Модуль когнитивного контроля и автоматической проверки. Отвечает за Rule Zero (факт-чекинг перед проектированием) и Core Asset Protocol (сбор лого, шрифтов, палитр). Включает в себя технологию PaperBanana для перевода сырого текста в академические схемы силами 5-агентной группы (Retriever, Planner, Stylist, Visualizer, Critic) и жесткие фильтры качества: Anti-Slop (борьба с фиолетовыми картами и градиентами) и WCAG-линтинг.",
+        pills: ["Rule Zero Check", "Core Asset Protocol", "PaperBanana 5-Agent", "DataViz Intelligence", "Anti-Slop Audit", "/polish Skill", "/audit Command"]
+      },
+      canvas: {
+        title: "Layer 2: Canvas (Поверхности Реализации)",
+        desc: "Точки физического воплощения интерфейса. Ключевым является инструмент Onlook — Cursor для дизайнеров, позволяющий осуществлять хирургические AST-правки продакшн-кода React/Next.js в реальном времени напрямую из редактора, уничтожая фазу 'передачи дизайна'. Включает текстовый HTML/CSS холст Paper и векторный JSON-формат Pencil/OpenPencil (.op / .pen) для Git-совместимого совместного проектирования.",
+        pills: ["Onlook AST Sync", "Paper (Live HTML/CSS)", "Pencil Vector (.op)", "OpenPencil (.pen)", "Model Context Protocol", "Git Conflict Merging"]
+      },
+      governance: {
+        title: "Governance (Система Стандартов)",
+        desc: "Централизованное распределение контроля в DesOps. GLOBAL_DESIGN.md служит единым источником правды для дизайн-токенов всей системы (сетка, шрифты, базовые скругления), от которых наследуются локальные DESIGN.md каждого конкретного проекта. Это исключает смешение глобальных правил и рабочих чертежей, устраняя свалку стилей.",
+        pills: ["GLOBAL_DESIGN.md", "Single Source of Truth", "Design Tokens Sync", "Local Inheritance", "No-Clutter Guardrails"]
+      },
+      output: {
+        title: "Output (Производственный Код)",
+        desc: "Финальный результат работы DesOps-движка. Скомпилированные, проверенные на линтере и оптимизированные файлы проекта, полностью синхронизированные с Git. Использование Onlook исключает ручное кодирование макетов — дизайн И ЕСТЬ рабочий код приложения. Полное отсутствие фазы 'handoff'.",
+        pills: ["Sovereign Code", "AST Integration", "Git Composed", "Impeccable Checked", "Zero-Handoff", "High-Density Production"]
+      }
+    };
+
+    function selectNode(nodeKey) {
+      const data = nodeData[nodeKey];
+      if (!data) return;
+
+      // Update panel
+      document.getElementById('node-title').textContent = data.title;
+      document.getElementById('node-desc').textContent = data.desc;
+
+      // Update pills
+      const pillsContainer = document.getElementById('node-pills');
+      pillsContainer.innerHTML = '';
+      
+      const colors = ['cyan', 'pink', 'green'];
+      data.pills.forEach((pillText, index) => {
+        const pill = document.createElement('span');
+        pill.className = `pill ${colors[index % colors.length]}`;
+        pill.textContent = pillText;
+        pillsContainer.appendChild(pill);
+      });
+
+      // Highlight selected node group in SVG (optional styling can be added)
+      // Smooth scroll to details on mobile if needed
+      if (window.innerWidth <= 900) {
+        document.getElementById('interactive-details').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  </script>
+</body>
+</html>

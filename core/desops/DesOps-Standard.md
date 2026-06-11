@@ -60,8 +60,25 @@ The Hub follows a progressive disclosure workflow to catch errors early:
 - **Zero-Redesign Mandate (Longevity):** Stability is the ultimate aesthetic.
 - **Code-is-Design (Onlook):** We eliminate the gap between the mockup and the realization.
 
-## 6. Meta-Designer Philosophy
-The ultimate goal is to transition from "Designing Things" to **"Designing the Systems that Design Things."**
-- **The New Quotient:** Measurable + Meaningful = Magical.
-- **Aesthetic Responsibility:** Communicating character over mono-aesthetic perfection.
-- **Inclusive Dignity:** Creating spaces that subvert performance-status correlations.
+## 7. Asset Generation (PaperBanana 2.0)
+The KRILYB project utilizes the **PaperBanana 2.0** hybrid pipeline for anatomical consistency:
+
+- **Stage 1: JSON Blueprinting:** Every anatomical pose is first defined as a structured JSON object (limb angles, muscle focus, skeletal alignment).
+- **Stage 2: Model Routing:** 
+    - *Primary:* `gemini-3.1-flash-image` (NanoBanana 2) for structured JSON-to-Image rendering.
+    - *Local Fallback:* **Stable Diffusion Forge** (Local Engine) located in `Atlas/Orchestration/tools/installers/stable-diffusion/`.
+- **Stage 3: DesOps Standards:**
+    - All assets MUST have transparent backgrounds (alpha channel).
+    - Style DNA: Medical-Psychedelic (Alex Grey / AnatomyStuff fusion).
+    - Format: PNG for raw assets, converted to optimized WebP for digital books.
+
+## 9. Ebook Digitization (KRILYB Pipeline)
+The standard for transforming physical/PDF manuals into digital ebooks is the **KRILYB Digitizer Pipeline**:
+
+- **Verbatim Mandate:** All transcriptions MUST be word-for-word identical to the source. No linguistic cleanup of the author's words is permitted.
+- **Workflow:** 
+    1. **Preprocessing:** Convert PDF to 300dpi PNG.
+    2. **Vision Transcription:** Perform manual/automated vision-based extraction to ensure 100% truth.
+    3. **Structural Restoration:** Apply centering, continuous flow, and functional TOC.
+- **Automation:** Orchestrated by `Atlas/Scripts/Scrapers/krilyb_pipeline.py`.
+- **Target:** All Golden Masters reside in `G:\My Drive\KRILYB\markdown`.
