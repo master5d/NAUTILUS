@@ -55,6 +55,24 @@
   .chart .col i { width: 100%; background: var(--purple); border-radius: 3px 3px 0 0; min-height: 2px; }
   .chart .col span { font-size: 9px; color: var(--dim); }
   footer { color: var(--dim); font-size: 11px; margin-top: 10px; }
+  .econ-inputs { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 14px; }
+  .econ-inputs label { font-size: 11px; color: var(--dim); display: flex; flex-direction: column; gap: 3px; }
+  input.ei { background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 5px 8px; font-size: 13px; width: 95px; font-variant-numeric: tabular-nums; }
+  input.ei:focus { outline: none; border-color: var(--accent); }
+  .uin { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 10px 0; }
+  .uin label { font-size: 10px; color: var(--dim); display: flex; flex-direction: column; gap: 2px; }
+  .uin input.ei { width: 100%; }
+  .uout { font-size: 12px; line-height: 1.7; border-top: 1px dashed var(--border); padding-top: 8px; }
+  .uout b { font-variant-numeric: tabular-nums; }
+  .verdict { font-size: 11px; padding: 2px 10px; border-radius: 10px; font-weight: 600; white-space: nowrap; }
+  .verdict.keep { background: rgba(63,185,80,.15); color: var(--ok); }
+  .verdict.border { background: rgba(210,153,34,.15); color: var(--warn); }
+  .verdict.sell { background: rgba(248,81,73,.15); color: var(--bad); }
+  .ghostbtn { background: none; border: 1px solid var(--border); color: var(--dim); border-radius: 6px;
+    padding: 4px 10px; font-size: 11px; cursor: pointer; }
+  .ghostbtn:hover { border-color: var(--accent); color: var(--text); }
+  td.best { color: var(--ok); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -89,6 +107,18 @@
 <section>
   <h2>7 дней — токены через gateway</h2>
   <div class="card"><div class="chart" id="chart"></div></div>
+</section>
+
+<section>
+  <h2>💰 Inference economics — облако vs локальное железо <button class="ghostbtn" id="econ-reset" style="margin-left:8px">сбросить поля</button></h2>
+  <div class="econ-inputs" id="econ-globals"></div>
+  <div class="grid" id="econ-units"></div>
+  <table id="econ-cloud" style="margin-top:14px"><thead><tr>
+    <th>Облачная модель</th><th>Tier</th><th class="num">$/Mtok in</th><th class="num">$/Mtok out</th>
+    <th class="num">Blended $/Mtok</th><th class="num">$/мес при твоём спросе</th>
+  </tr></thead><tbody></tbody></table>
+  <div class="card" id="econ-summary" style="margin-top:14px"></div>
+  <footer id="econ-meta"></footer>
 </section>
 
 <section>
@@ -140,7 +170,7 @@ async function refresh() {
 
   // services
   const llPort = (s.services.litellm_url || '').split(':').pop() || '?';
-  const names = { litellm: `LiteLLM :${llPort}`, llama_server: 'llama :8080', langfuse: 'Langfuse :3000', ollama: 'Ollama :11434' };
+  const names = { litellm: `LiteLLM :${llPort}`, llama_server: 'llama :8080', langfuse: 'Langfuse :3002', ollama: 'Ollama :11434' };
   document.getElementById('dots').innerHTML = Object.entries(s.services.up)
     .map(([k, up]) => `<div class="dot ${up ? 'up' : ''}">${names[k] || k}</div>`).join('');
 
@@ -252,8 +282,121 @@ async function refresh() {
       `posture.json as of ${sec.posture_as_of || '?'} · pending: ${(sec.rotations_pending || []).length} · done: ${sec.rotations_done} · accepted risks: ${(sec.accepted_risks || []).length} · реестр: NAUTILUS/secops/posture.json`;
   }
 
+  initEcon(s);
+
   document.getElementById('meta').textContent =
     `Квоты verified: ${s.quotas.as_of} · записей в usage.db: ${fmt(s.usage.total_rows)} · обновлено: ${new Date(s.generated).toLocaleTimeString('ru-RU')} · автообновление 10с`;
+}
+
+// ===== Inference economics calculator =====
+// Рендерится один раз (auto-refresh не затирает ввод); overrides → localStorage.
+const ECON_LS = 'labwatch_econ_v1';
+let econState = null; // {econ, units} после init
+
+const money = (v, d) => v == null || !isFinite(v) ? '—' : '$' + v.toLocaleString('en-US', { minimumFractionDigits: d ?? 2, maximumFractionDigits: d ?? 2 });
+const smart$ = v => !isFinite(v) ? '∞' : v >= 100 ? money(v, 0) : v >= 1 ? money(v, 2) : money(v, 3);
+const loadOv = () => { try { return JSON.parse(localStorage.getItem(ECON_LS)) || {}; } catch { return {}; } };
+const ev = id => parseFloat(document.getElementById(id)?.value) || 0;
+
+function einput(id, label, val, step) {
+  return `<label>${label}<input class="ei" id="${id}" type="number" step="${step || 'any'}" min="0" value="${val}"></label>`;
+}
+
+function initEcon(s) {
+  if (econState || !s.econ || !s.econ.units) return;
+  const e = s.econ, ov = loadOv(), g = ov.global || {}, d = e.defaults || {};
+  econState = { econ: e };
+
+  // спрос prefill: средние токены/день за неделю × 30 (минимум 1 Mtok чтобы не делить на ноль)
+  const week = s.usage.week || [];
+  const avgDay = week.length ? week.reduce((a, x) => a + x.tokens, 0) / week.length : 0;
+  const demandDef = Math.max(1, Math.round(avgDay * 30 / 1e6 * 10) / 10);
+
+  document.getElementById('econ-globals').innerHTML =
+    einput('eg-kwh', 'Электричество $/kWh', g.kwh ?? d.kwh_rate ?? 0.13, '0.01') +
+    einput('eg-months', 'Амортизация, мес', g.months ?? d.amort_months ?? 24, '1') +
+    einput('eg-share', 'Input-доля трафика %', g.share ?? Math.round((d.input_share ?? 0.85) * 100), '5') +
+    einput('eg-demand', 'Спрос Mtok/мес', g.demand ?? demandDef, '0.5');
+
+  document.getElementById('econ-units').innerHTML = e.units.map(u => {
+    const o = (ov.units || {})[u.id] || {};
+    return `<div class="card" data-unit="${u.id}">
+      <h3>${u.label} <span class="verdict" id="uv-${u.id}">…</span></h3>
+      <div class="models">${u.specs} · ${u.model_class}</div>
+      <div class="uin">
+        ${einput(`u-${u.id}-price`, 'Цена покупки $', o.price ?? u.price_usd, '5')}
+        ${einput(`u-${u.id}-resale`, 'Resale сейчас $', o.resale ?? u.resale_usd, '5')}
+        ${einput(`u-${u.id}-toks`, 'tok/s генерация', o.toks ?? u.tok_s, '1')}
+        ${einput(`u-${u.id}-hours`, 'Часов/день load', o.hours ?? 4, '0.5')}
+        ${einput(`u-${u.id}-pl`, 'Power load W', o.pl ?? u.power_load_w, '1')}
+        ${einput(`u-${u.id}-pi`, 'Power idle W', o.pi ?? u.power_idle_w, '1')}
+      </div>
+      <div class="uout" id="uo-${u.id}"></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('econ-reset').onclick = () => { localStorage.removeItem(ECON_LS); econState = null; initEcon(s); };
+  document.querySelectorAll('#econ-globals input, #econ-units input').forEach(i => i.addEventListener('input', calcEcon));
+  calcEcon();
+}
+
+function calcEcon() {
+  const e = econState.econ;
+  const rate = ev('eg-kwh'), months = Math.max(1, ev('eg-months'));
+  const share = Math.min(100, ev('eg-share')) / 100, demand = ev('eg-demand');
+
+  // persist overrides
+  const ov = { global: { kwh: rate, months, share: share * 100, demand }, units: {} };
+
+  const blend = c => c.in_per_mtok * share + c.out_per_mtok * (1 - share);
+  const cheapest = Math.min(...e.cloud.map(blend));
+
+  let totalPrice = 0, totalResale = 0, sells = 0;
+  e.units.forEach(u => {
+    const p = ev(`u-${u.id}-price`), r = ev(`u-${u.id}-resale`), ts = ev(`u-${u.id}-toks`);
+    const h = Math.min(24, ev(`u-${u.id}-hours`)), pl = ev(`u-${u.id}-pl`), pi = ev(`u-${u.id}-pi`);
+    ov.units[u.id] = { price: p, resale: r, toks: ts, hours: h, pl, pi };
+    totalPrice += p; totalResale += r;
+
+    const powerMo = (pl * h + pi * (24 - h)) * 30 / 1000 * rate;       // kWh→$ при always-on
+    const costMo = p / months + powerMo;                                // бухгалтерский (purchase baseline)
+    const econMo = r / months + powerMo;                                // экономический (opportunity = resale)
+    const mtokMo = ts * 3600 * h * 30 / 1e6;
+    const cpm = mtokMo > 0 ? costMo / mtokMo : Infinity;
+    const floor24 = ts > 0 ? (p / months + pl * 24 * 30 / 1000 * rate) / (ts * 3600 * 24 * 30 / 1e6) : Infinity;
+    const eq = u.eq_cloud_per_mtok || cheapest;
+    const ratio = cpm / eq;
+
+    const v = document.getElementById(`uv-${u.id}`);
+    if (ratio <= 1) { v.textContent = '🟢 держать'; v.className = 'verdict keep'; }
+    else if (floor24 <= eq) { v.textContent = '🟡 окупится при загрузке'; v.className = 'verdict border'; }
+    else { v.textContent = '🔴 как inference — продать'; v.className = 'verdict sell'; sells++; }
+
+    document.getElementById(`uo-${u.id}`).innerHTML =
+      `Стоит <b>${money(costMo)}</b>/мес (capex ${money(p / months)} + ⚡ ${money(powerMo)}) · выдаёт ≤ <b>${mtokMo.toFixed(1)}</b> Mtok/мес<br>` +
+      `→ <b>${smart$(cpm)}</b>/Mtok локально vs <b>${smart$(eq)}</b>/Mtok тот же класс в облаке (<b>×${isFinite(ratio) ? ratio.toFixed(1) : '∞'}</b> дороже)<br>` +
+      `минимум при 24/7 saturation: <b>${smart$(floor24)}</b>/Mtok · экономический взгляд (resale как capex): ${smart$(mtokMo > 0 ? econMo / mtokMo : Infinity)}/Mtok<br>` +
+      `<span style="color:var(--dim)">${u.non_llm_value || ''}</span>`;
+  });
+
+  document.querySelector('#econ-cloud tbody').innerHTML = e.cloud.map(c => {
+    const b = blend(c), best = b === cheapest;
+    return `<tr><td><b>${c.label}</b></td><td><span class="pill">${c.tier}</span></td>
+      <td class="num">${smart$(c.in_per_mtok)}</td><td class="num">${smart$(c.out_per_mtok)}</td>
+      <td class="num ${best ? 'best' : ''}">${smart$(b)}</td><td class="num ${best ? 'best' : ''}">${money(b * demand)}</td></tr>`;
+  }).join('');
+
+  document.getElementById('econ-summary').innerHTML =
+    `<h3>Вердикт по парку</h3><div class="uout" style="border:none;padding-top:4px">
+    Вложено <b>${money(totalPrice, 0)}</b> · вернётся при продаже ≈ <b>${money(totalResale, 0)}</b> · спрос ${demand} Mtok/мес в облаке стоит от <b>${money(cheapest * demand)}</b>/мес<br>
+    ${sells === e.units.length ? 'Как чистые inference-ноды парк не окупается — облако (и free tiers) дешевле. Держать стоит только за non-LLM ценность: STT, embeddings, automation, privacy.'
+      : sells > 0 ? `${sells} из ${e.units.length} машин не окупаются как inference — кандидаты на продажу; остальные держать.`
+      : 'Парк окупается при текущих параметрах загрузки.'}</div>`;
+
+  document.getElementById('econ-meta').textContent =
+    `hardware.json as_of ${e.as_of} · цены облака — reference, правь в hardware.json · blended = in×${(share * 100).toFixed(0)}% + out×${(100 - share * 100).toFixed(0)}% · поля сохраняются в localStorage`;
+
+  localStorage.setItem(ECON_LS, JSON.stringify(ov));
 }
 
 async function setOrch(agent) {

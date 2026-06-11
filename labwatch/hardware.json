@@ -1,0 +1,66 @@
+{
+  "as_of": "2026-06-11",
+  "note": "Inference economics registry. Цены облака — reference defaults (verify before big decisions), всё редактируется в UI (localStorage override). tok/s — generation speed q4 GGUF/MLX, реалистичные для memory-bandwidth этих чипов.",
+  "defaults": {
+    "kwh_rate": 0.13,
+    "kwh_note": "Nashville TN (TVA) ≈ $0.12-0.13/kWh",
+    "amort_months": 24,
+    "input_share": 0.85,
+    "input_share_note": "agent traffic — в основном prompt tokens (usage.db показывает ~90/10)"
+  },
+  "units": [
+    {
+      "id": "m2-8gb-a",
+      "label": "Mac Mini M2 8GB #1 (SOVERN-01)",
+      "specs": "M2 · 8GB unified · ~100 GB/s bandwidth",
+      "price_usd": 375,
+      "price_note": "куплены парой за $750 — если $750 за каждый, поправь поле",
+      "resale_usd": 280,
+      "power_load_w": 25,
+      "power_idle_w": 7,
+      "tok_s": 22,
+      "model_class": "3B q4 (Llama-3.2-3B / Qwen2.5-3B); 7B q4 впритык ~10 tok/s — macOS ест ~3GB из 8",
+      "eq_cloud_per_mtok": 0.05,
+      "eq_cloud_note": "3B-класс в облаке ≈ $0.02-0.06/Mtok blended (DeepInfra/OpenRouter), а free tiers покрывают бесплатно",
+      "non_llm_value": "always-on automation node · STT (Parakeet/Whisper) · embeddings · CI runner — ценность не в LLM inference"
+    },
+    {
+      "id": "m2-8gb-b",
+      "label": "Mac Mini M2 8GB #2",
+      "specs": "M2 · 8GB unified · ~100 GB/s bandwidth",
+      "price_usd": 375,
+      "price_note": "куплены парой за $750",
+      "resale_usd": 280,
+      "power_load_w": 25,
+      "power_idle_w": 7,
+      "tok_s": 22,
+      "model_class": "3B q4; 7B q4 впритык ~10 tok/s",
+      "eq_cloud_per_mtok": 0.05,
+      "eq_cloud_note": "3B-класс в облаке ≈ $0.02-0.06/Mtok blended",
+      "non_llm_value": "второй узел: redundancy / отдельная роль (STT-нода, бэкапы) — или первый кандидат на продажу"
+    },
+    {
+      "id": "m4-16gb",
+      "label": "Mac Mini M4 16GB",
+      "specs": "M4 · 16GB unified · ~120 GB/s bandwidth",
+      "price_usd": 650,
+      "resale_usd": 430,
+      "power_load_w": 30,
+      "power_idle_w": 4,
+      "tok_s": 23,
+      "model_class": "8B q4 (Llama-3.1-8B / Qwen3-8B) ~23 tok/s; 14B q4 ~12 tok/s",
+      "eq_cloud_per_mtok": 0.04,
+      "eq_cloud_note": "8B-класс в облаке ≈ $0.03-0.05/Mtok blended (DeepInfra)",
+      "non_llm_value": "лучший local floor: 8-14B utility + embeddings + Whisper/Parakeet (Echo) + privacy-задачи"
+    }
+  ],
+  "cloud": [
+    { "id": "llama-8b-deepinfra", "label": "Llama-3.1-8B (DeepInfra)", "tier": "local-class", "in_per_mtok": 0.03, "out_per_mtok": 0.05 },
+    { "id": "qwen3-14b", "label": "Qwen3-14B (OpenRouter)", "tier": "local-class", "in_per_mtok": 0.07, "out_per_mtok": 0.24 },
+    { "id": "deepseek-v3", "label": "DeepSeek V3 (API)", "tier": "mid", "in_per_mtok": 0.28, "out_per_mtok": 0.42 },
+    { "id": "gemini-flash", "label": "Gemini 2.5 Flash", "tier": "mid", "in_per_mtok": 0.30, "out_per_mtok": 2.50 },
+    { "id": "groq-llama-70b", "label": "Llama-3.3-70B (Groq paid)", "tier": "mid", "in_per_mtok": 0.59, "out_per_mtok": 0.79 },
+    { "id": "haiku-4-5", "label": "Claude Haiku 4.5", "tier": "premium", "in_per_mtok": 1.00, "out_per_mtok": 5.00 },
+    { "id": "sonnet-4-6", "label": "Claude Sonnet 4.6", "tier": "premium", "in_per_mtok": 3.00, "out_per_mtok": 15.00 }
+  ]
+}

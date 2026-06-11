@@ -22,6 +22,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 NAUTILUS = os.path.dirname(HERE)
 DB_PATH = os.path.join(HERE, "usage.db")
 QUOTAS_PATH = os.path.join(HERE, "quotas.json")
+ECON_PATH = os.path.join(HERE, "hardware.json")
 ORCH_PATH = os.path.join(NAUTILUS, "config", "orchestrator.json")
 SERVICES_PATH = os.path.join(NAUTILUS, "config", "services.json")
 POSTURE_PATH = os.path.join(NAUTILUS, "secops", "posture.json")
@@ -86,7 +87,7 @@ def services_health():
     targets = {
         "litellm": f"{litellm}/health/liveliness",
         "llama_server": "http://localhost:8080/health",
-        "langfuse": "http://localhost:3000/api/public/health",
+        "langfuse": "http://localhost:3002/api/public/health",
         "ollama": "http://localhost:11434/api/tags",
     }
     with ThreadPoolExecutor(max_workers=4) as ex:
@@ -241,6 +242,7 @@ def build_state():
         "secops": secops_state(),
         "orchestrator": _read_json(ORCH_PATH),
         "quotas": quotas,
+        "econ": _read_json(ECON_PATH),
         "usage": usage,
         "budget": {
             "free_tpd_capacity": budget_tpd,
