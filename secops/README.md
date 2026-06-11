@@ -10,7 +10,8 @@ Merged from `C:\telo\Efforts\Ongoing\SecOps` on **2026-06-11** (old project dir 
 | `guides/SecOps Notes/` | Webpage snapshot archive (~1.5 MB) — **gitignored**, disk-only |
 | `infra/` | Docker stack (CrowdSec + Cloudflare bouncer, Falco + Falcosidekick), Wazuh installer, n8n retaliation playbook — **Hetzner/Linux-target, not deployed locally** |
 | `infra/scripts/` | Bitwarden CLI integration (DORMANT, see `infra/BITWARDEN.md`) + `bw.exe` (gitignored, 122 MB) |
-| `posture.json` | Manually-maintained posture register (pending rotations, accepted risks) — feeds the Labwatch SecOps panel |
+| `hooks/` | `agent-config-guard.py` — Claude Code hook (SessionStart + PostToolUse) scanning agent-context files for prompt-injection / memory-poisoning |
+| `posture.json` | Manually-maintained posture register (rotations, accepted risks, agent attack classes, deploy targets) — feeds the Labwatch SecOps panel |
 
 ## Audit 2026-06-11 — findings & dispositions
 
@@ -26,3 +27,14 @@ Merged from `C:\telo\Efforts\Ongoing\SecOps` on **2026-06-11** (old project dir 
 | 8 | Stale path references after merge (`C:\telo\secops\`, `C:\telo\scripts\`) | Info | **Fixed 2026-06-11** — `start-secops.ps1` uses `$PSScriptRoot`-relative hook path; bw-scripts headers stay historical (dormant), canonical paths in `BITWARDEN.md` banner. |
 
 Live controls на машине (проверяются дашбордом автоматически): gitleaks (scoop) + `~/.claude/gitleaks.toml`, semgrep 1.165.0 (pipx) + login, egress-guard hook + `egress.jsonl`, permission deny list. Полная картина: `guides/claude-code-plugins-secops.md` и memory `reference_secops_hardening`.
+
+## agent-config-guard (hooks/agent-config-guard.py)
+
+Closes the **agent-config-injection** + **memory-poisoning** classes (status `covered` in `posture.json`) — the gap semgrep/gitleaks don't touch. Stdlib Python, no network, logs to `~/.claude/semantic-logger/agent-guard.jsonl`.
+
+- **SessionStart** (advisory, never blocks): scans global + project `CLAUDE.md`/`AGENTS.md`/`GEMINI.md` and the project's auto-memory `*.md`; emits a warning block as additionalContext iff findings.
+- **PostToolUse** Write/Edit (blocks via exit 2 on HIGH only): scans the written agent-context file; high-confidence injection → Claude gets a blocking error.
+- **Tiers** — HIGH: invisible Unicode (zero-width / bidi override / Unicode-Tag smuggling), exfil/remote-exec command patterns (`curl|bash`, `iwr|iex`, private-key→network), imperative override hidden in an HTML comment. MED (advisory, fenced-code-exempt): visible override phrases (`ignore previous instructions`, `do not tell the user`, `reveal your system prompt`, …).
+- **False-positive controls** — fenced code blocks exempt from the MED tier; `agent-guard:allow` suppresses a line; `agent-guard:ignore-file` skips a whole file (used on 3 security memory docs that legitimately quote payloads). Verified clean against the full 68-file real corpus 2026-06-11.
+
+Wired in `~/.claude/settings.json` (SessionStart `startup|resume|clear` + PostToolUse `Write|Edit`). Registered, not yet exercised by a live restart — takes effect next session.

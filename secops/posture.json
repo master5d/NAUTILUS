@@ -64,17 +64,17 @@
         "id": "agent-config-injection",
         "label": "Agent-config prompt injection",
         "what": "Hidden/override instructions in CLAUDE.md, AGENTS.md, .cursorrules, MCP manifests — read by the agent as trusted context",
-        "surface": "~/.claude/CLAUDE.md, project CLAUDE.md, memory/MEMORY.md, .mcp.json",
-        "detection": "manual",
-        "status": "open"
+        "surface": "~/.claude/CLAUDE.md, project CLAUDE.md/AGENTS.md/GEMINI.md",
+        "detection": "automated — agent-config-guard hook (SessionStart advisory scan + PostToolUse block on high-confidence write); secops/hooks/agent-config-guard.py",
+        "status": "covered"
       },
       {
         "id": "memory-poisoning",
         "label": "Memory poisoning",
         "what": "Instruction injection + hidden Unicode payloads in persistent agent memory files (ASI-01/ASI-05)",
-        "surface": "~/.claude/projects/*/memory/*.md",
-        "detection": "manual",
-        "status": "open"
+        "surface": "~/.claude/projects/*/memory/*.md, MEMORY.md",
+        "detection": "automated — agent-config-guard hook: zero-width/bidi/Unicode-Tag detection + exfil-pipe + HTML-comment override; same script",
+        "status": "covered"
       },
       {
         "id": "mcp-supply-chain",
