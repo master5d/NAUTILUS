@@ -26,9 +26,16 @@ tightened quota (already reflected: 15 RPM / 1500 RPD in `quotas.json`).
 
 Why remove rather than repoint:
 
-1. **Antigravity CLI (official successor) is TTY-only** — cannot run headless,
-   so it can't be a `swarm`-dispatchable orchestrator agent (per
-   `reference_headless_agent_clis`).
+1. **Antigravity CLI (official successor) doesn't fit the orchestrator
+   contract** — verified `agy.exe` v1.0.7 2026-06-11: it *can* run headless
+   (`-p`/`--print`, exit 0, model responds), but (a) the answer goes to a brain
+   transcript jsonl (`~/.gemini/antigravity-cli/brain/<newest>/.system_generated/
+   logs/transcript.jsonl`), **not stdout**, and (b) headless print does a single
+   planner turn and **halts at an approval gate on multi-step/file-edit tasks**
+   that `--dangerously-skip-permissions` does NOT override (it's model behavior).
+   `swarm` agents (claude/codex/hermes) must execute autonomously and return on
+   stdout — agy does neither. (Earlier "TTY-only" shorthand was imprecise; see
+   `reference_headless_agent_clis`.)
 2. **Gemini Flash is still reachable** — via Hermes, whose brain *is*
    `google/gemini-3-flash-preview` through the LiteLLM API key. Need Gemini's
    1M-context Flash for a task? `swarm -Agent hermes "…"`.
