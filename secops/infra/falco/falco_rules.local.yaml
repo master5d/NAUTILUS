@@ -1,0 +1,21 @@
+# Basic custom rules to protect ENERV and SOVERN infrastructure
+- rule: Detect AI Prompt Injection Attempts in Logs
+  desc: Monitor logs for common prompt injection syntax (ignore previous instructions)
+  condition: >
+    (fd.name startswith "/var/log/n8n" or fd.name startswith "/var/log/qdrant") and
+    (evt.type = write and (evt.arg.data contains "ignore previous instructions" or evt.arg.data contains "system prompt"))
+  output: >
+    Potential Prompt Injection/Jailbreak detected in AI service logs (user=%user.name command=%proc.cmdline file=%fd.name)
+  priority: WARNING
+  tags: [enerv, ai_security, prompt_injection]
+
+- rule: Unauthorized Access to Vault
+  desc: Alert if anything other than authorized processes touches the Obsidian Sync dir
+  condition: >
+    open_write and 
+    fd.filename startswith "/root/sovern/obsidian" and 
+    proc.name != "syncthing" and proc.name != "docker"
+  output: >
+    Unauthorized write attempt to Sovereign Vault detected! (user=%user.name command=%proc.cmdline file=%fd.name)
+  priority: CRITICAL
+  tags: [sovern, vault_security, tampering]

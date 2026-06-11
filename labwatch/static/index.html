@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOVERN Labwatch</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel2: #1c2330; --border: #2d333b;
+    --text: #e6edf3; --dim: #8b949e; --accent: #58a6ff; --ok: #3fb950;
+    --warn: #d29922; --bad: #f85149; --purple: #bc8cff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.5 'Segoe UI', system-ui, sans-serif; padding: 20px; }
+  h1 { font-size: 20px; letter-spacing: .04em; }
+  h1 .sub { color: var(--dim); font-weight: 400; font-size: 13px; margin-left: 10px; }
+  header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+  .dots { display: flex; gap: 14px; }
+  .dot { display: flex; align-items: center; gap: 6px; color: var(--dim); font-size: 12px; }
+  .dot::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--bad); display: inline-block; }
+  .dot.up::before { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .card h3 { font-size: 14px; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: baseline; }
+  .card .models { color: var(--dim); font-size: 11px; margin-bottom: 10px; }
+  .bar-row { margin: 8px 0; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); margin-bottom: 3px; }
+  .bar-label b { color: var(--text); font-weight: 600; }
+  .bar { height: 7px; background: var(--panel2); border-radius: 4px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: var(--accent); border-radius: 4px; transition: width .5s; }
+  .bar > i.warn { background: var(--warn); } .bar > i.bad { background: var(--bad); }
+  .meta { font-size: 11px; color: var(--dim); margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 7px; }
+  .pill { font-size: 11px; padding: 1px 8px; border-radius: 10px; background: var(--panel2); color: var(--dim); }
+  .pill.unlim { color: var(--ok); }
+  section { margin-bottom: 24px; }
+  section > h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); margin-bottom: 10px; }
+  .strip { display: flex; gap: 14px; flex-wrap: wrap; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; min-width: 170px; }
+  .stat .v { font-size: 22px; font-weight: 700; } .stat .k { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .06em; }
+  table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 9px 14px; font-size: 13px; border-bottom: 1px solid var(--border); }
+  th { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; background: var(--panel2); }
+  tr:last-child td { border-bottom: none; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .deadline { color: var(--bad); font-size: 12px; }
+  .orch { display: flex; gap: 8px; flex-wrap: wrap; }
+  .orch button { background: var(--panel); border: 1px solid var(--border); color: var(--text); padding: 7px 16px;
+    border-radius: 8px; cursor: pointer; font-size: 13px; transition: all .15s; }
+  .orch button:hover { border-color: var(--accent); }
+  .orch button.active { background: var(--accent); color: #0d1117; font-weight: 700; border-color: var(--accent); }
+  .orch button .crown { margin-right: 5px; }
+  #err { color: var(--bad); font-size: 12px; }
+  .chart { display: flex; align-items: flex-end; gap: 6px; height: 70px; padding: 8px 4px 0; }
+  .chart .col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .chart .col i { width: 100%; background: var(--purple); border-radius: 3px 3px 0 0; min-height: 2px; }
+  .chart .col span { font-size: 9px; color: var(--dim); }
+  footer { color: var(--dim); font-size: 11px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>⚙️ SOVERN Labwatch<span class="sub">AI Lab — бюджет · usage · оркестрация</span></h1>
+  <div class="dots" id="dots"></div>
+</header>
+
+<section>
+  <h2>Оркестратор <span id="err"></span></h2>
+  <div class="orch" id="orch"></div>
+</section>
+
+<section>
+  <h2>Бюджет сегодня</h2>
+  <div class="strip" id="budget"></div>
+</section>
+
+<section>
+  <h2>Провайдеры (free tiers через LiteLLM gateway)</h2>
+  <div class="grid" id="providers"></div>
+</section>
+
+<section>
+  <h2>Агенты</h2>
+  <table id="agents"><thead><tr>
+    <th>Агент</th><th>Auth / лимиты</th><th class="num">Calls сегодня*</th><th class="num">Токены сегодня*</th>
+  </tr></thead><tbody></tbody></table>
+  <footer>* — только трафик, прошедший через LiteLLM gateway. Подписочные агенты (Claude Code, Codex) считают usage на своей стороне: <code>/usage</code> и <code>/status</code> в их CLI.</footer>
+</section>
+
+<section>
+  <h2>7 дней — токены через gateway</h2>
+  <div class="card"><div class="chart" id="chart"></div></div>
+</section>
+
+<section>
+  <h2>SecOps — security posture</h2>
+  <div class="strip" id="sec-controls" style="margin-bottom:14px"></div>
+  <div class="grid">
+    <div class="card">
+      <h3>Egress monitor</h3>
+      <div id="sec-egress" class="models" style="margin-top:6px"></div>
+    </div>
+    <div class="card">
+      <h3>Infra stack</h3>
+      <div id="sec-infra" class="models" style="margin-top:6px"></div>
+    </div>
+  </div>
+  <table id="sec-rotations" style="margin-top:14px"><thead><tr>
+    <th>Pending rotation</th><th>Почему</th><th>Действие</th><th>Severity</th>
+  </tr></thead><tbody></tbody></table>
+  <footer id="sec-meta"></footer>
+</section>
+
+<footer id="meta"></footer>
+
+<script>
+const fmt = n => n == null ? '—' : Number(n).toLocaleString('ru-RU');
+const pct = (used, lim) => lim ? Math.min(100, used / lim * 100) : 0;
+const cls = p => p >= 90 ? 'bad' : p >= 70 ? 'warn' : '';
+
+function bar(label, used, limit, unit) {
+  if (!limit) return '';
+  const p = pct(used, limit);
+  return `<div class="bar-row">
+    <div class="bar-label"><span>${label}</span><span><b>${fmt(used)}</b> / ${fmt(limit)} ${unit} (${p.toFixed(0)}%)</span></div>
+    <div class="bar"><i class="${cls(p)}" style="width:${p}%"></i></div></div>`;
+}
+
+async function refresh() {
+  let s;
+  try {
+    s = await (await fetch('/api/state')).json();
+    document.getElementById('err').textContent = '';
+  } catch (e) {
+    document.getElementById('err').textContent = ' · сервер недоступен';
+    return;
+  }
+
+  // services
+  const llPort = (s.services.litellm_url || '').split(':').pop() || '?';
+  const names = { litellm: `LiteLLM :${llPort}`, llama_server: 'llama :8080', langfuse: 'Langfuse :3000', ollama: 'Ollama :11434' };
+  document.getElementById('dots').innerHTML = Object.entries(s.services.up)
+    .map(([k, up]) => `<div class="dot ${up ? 'up' : ''}">${names[k] || k}</div>`).join('');
+
+  // orchestrator
+  const active = s.orchestrator.active;
+  document.getElementById('orch').innerHTML = Object.entries(s.orchestrator.agents || {})
+    .map(([k, a]) => `<button class="${k === active ? 'active' : ''}" onclick="setOrch('${k}')">
+      ${k === active ? '<span class="crown">👑</span>' : ''}${a.label}</button>`).join('');
+
+  // budget strip
+  const b = s.budget;
+  document.getElementById('budget').innerHTML = `
+    <div class="stat"><div class="v">${fmt(b.tokens_today)}</div><div class="k">токенов через gateway</div></div>
+    <div class="stat"><div class="v">${fmt(b.calls_today)}</div><div class="k">calls через gateway</div></div>
+    <div class="stat"><div class="v">${fmt(b.free_tpd_capacity)}</div><div class="k">free TPD ёмкость (TPD-капы)</div></div>
+    <div class="stat"><div class="v">${b.free_tpd_capacity ? (b.tokens_today / b.free_tpd_capacity * 100).toFixed(1) : 0}%</div><div class="k">дневного free-бюджета</div></div>`;
+
+  // providers
+  const used = s.usage.today.providers;
+  document.getElementById('providers').innerHTML = Object.entries(s.quotas.providers || {})
+    .map(([k, q]) => {
+      const u = used[k] || { calls: 0, tokens: 0, failures: 0 };
+      const unlim = q.unlimited ? '<span class="pill unlim">∞ безлимит</span>' : '';
+      return `<div class="card">
+        <h3>${q.label} ${unlim}</h3>
+        <div class="models">${(q.models || []).join(' · ')}</div>
+        ${bar('Запросы / день', u.calls, q.rpd, 'RPD')}
+        ${bar('Токены / день', u.tokens, q.tpd, 'TPD')}
+        ${!q.rpd && !q.tpd ? `<div class="bar-label"><span>Сегодня</span><span><b>${fmt(u.calls)}</b> calls · <b>${fmt(u.tokens)}</b> tok</span></div>` : ''}
+        <div class="meta">${q.rpm ? `⏱ ${q.rpm} RPM` : ''}${q.tpm ? ` · ${fmt(q.tpm)} TPM` : ''}${q.context_cap ? ` · ctx ≤ ${fmt(q.context_cap)}` : ''}${u.failures ? ` · <span style="color:var(--bad)">${u.failures} fail</span>` : ''}<br>${q.notes || ''}</div>
+      </div>`;
+    }).join('');
+
+  // agents
+  const au = s.usage.today.agents;
+  document.querySelector('#agents tbody').innerHTML = Object.entries(s.quotas.agents || {})
+    .map(([k, a]) => {
+      const u = au[k] || au[k.replace('-cli', '')] || { calls: 0, tokens: 0 };
+      return `<tr><td><b>${a.label}</b>${k === active ? ' 👑' : ''}</td>
+        <td>${a.limits}${a.deadline ? `<div class="deadline">⚠ ${a.deadline}</div>` : ''}</td>
+        <td class="num">${fmt(u.calls)}</td><td class="num">${fmt(u.tokens)}</td></tr>`;
+    }).join('') + Object.entries(au).filter(([k]) => !s.quotas.agents[k] && !s.quotas.agents[k + '-cli'])
+    .map(([k, u]) => `<tr><td>${k}</td><td class="meta">через gateway</td><td class="num">${fmt(u.calls)}</td><td class="num">${fmt(u.tokens)}</td></tr>`).join('');
+
+  // 7-day chart
+  const week = s.usage.week || [];
+  const max = Math.max(1, ...week.map(d => d.tokens));
+  document.getElementById('chart').innerHTML = week.length
+    ? week.map(d => `<div class="col"><i style="height:${Math.max(2, d.tokens / max * 100)}%" title="${d.day}: ${fmt(d.tokens)} tok / ${fmt(d.calls)} calls"></i><span>${d.day.slice(5)}</span></div>`).join('')
+    : '<span style="color:var(--dim);font-size:12px">Пока нет данных — usage появится после первых запросов через gateway</span>';
+
+  // secops panel
+  const sec = s.secops;
+  if (sec && sec.controls) {
+    const c = sec.controls;
+    const ctl = [
+      ['gitleaks CLI', c.gitleaks_cli], ['gitleaks config', c.gitleaks_config],
+      ['semgrep CLI', c.semgrep_cli], ['semgrep login', c.semgrep_login],
+      ['egress-guard hook', c.egress_guard_hook],
+      [`deny rules: ${c.permission_deny_rules}`, c.permission_deny_rules > 0],
+    ];
+    document.getElementById('sec-controls').innerHTML = ctl.map(([k, ok]) =>
+      `<div class="stat"><div class="v" style="font-size:15px;color:var(--${ok ? 'ok' : 'bad'})">${ok ? '✓' : '✗'} ${k}</div><div class="k">${ok ? 'active' : 'missing'}</div></div>`).join('');
+
+    const e = sec.egress;
+    document.getElementById('sec-egress').innerHTML = e.log_exists
+      ? `Сегодня: <b style="color:var(--text)">${fmt(e.events_today)}</b> outbound events · novel domains: <b style="color:var(--${e.novel_today ? 'warn' : 'ok'})">${fmt(e.novel_today)}</b><br>последнее: ${e.last_event ? new Date(e.last_event).toLocaleString('ru-RU') : '—'}`
+      : '<span style="color:var(--bad)">egress.jsonl не найден</span>';
+
+    const inf = sec.infra_stack || {};
+    document.getElementById('sec-infra').innerHTML =
+      `<span class="pill" style="color:var(--warn)">${inf.status || '?'}</span> → ${inf.target || ''}<br>${(inf.components || []).join(' · ')}<br><span style="font-size:10px">${inf.note || ''}</span>`;
+
+    const sevColor = { urgent: 'bad', high: 'warn', low: 'dim' };
+    document.querySelector('#sec-rotations tbody').innerHTML = (sec.rotations_pending || [])
+      .map(r => `<tr><td><b>${r.label}</b></td><td class="meta" style="border:none">${r.why}</td>
+        <td class="meta" style="border:none">${r.action}</td>
+        <td><span class="pill" style="color:var(--${sevColor[r.severity] || 'dim'})">${r.severity}</span></td></tr>`)
+      .join('') || '<tr><td colspan="4" style="color:var(--ok)">Все ротации выполнены ✓</td></tr>';
+
+    document.getElementById('sec-meta').textContent =
+      `posture.json as of ${sec.posture_as_of || '?'} · pending: ${(sec.rotations_pending || []).length} · done: ${sec.rotations_done} · accepted risks: ${(sec.accepted_risks || []).length} · реестр: NAUTILUS/secops/posture.json`;
+  }
+
+  document.getElementById('meta').textContent =
+    `Квоты verified: ${s.quotas.as_of} · записей в usage.db: ${fmt(s.usage.total_rows)} · обновлено: ${new Date(s.generated).toLocaleTimeString('ru-RU')} · автообновление 10с`;
+}
+
+async function setOrch(agent) {
+  await fetch('/api/orchestrator', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: agent }) });
+  refresh();
+}
+
+refresh();
+setInterval(refresh, 10000);
+</script>
+</body>
+</html>

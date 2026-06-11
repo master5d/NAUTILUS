@@ -4,8 +4,8 @@
   "type": "project",
   "status": "active",
   "created": "2026-05-23",
-  "updated": "2026-05-23",
-  "description": "Core Orchestrator - Nautilus Personal Knowledge Mesh, built on the SOVRN sovereignty-first agentic architecture.",
+  "updated": "2026-06-11",
+  "description": "Core Orchestrator - Nautilus Personal Knowledge Mesh, built on the SOVRN sovereignty-first agentic architecture. Absorbed SecOps project (2026-06-11): security guides, infra stack, posture dashboard.",
   "team": "personal",
   "llm_context_priority": 10
 }

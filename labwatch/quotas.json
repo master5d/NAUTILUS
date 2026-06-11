@@ -1,0 +1,110 @@
+{
+  "as_of": "2026-06-10",
+  "note": "Free-tier limits verified via official docs/announcements on as_of date. Daily resets differ per provider (Google: midnight PT; others: rolling/UTC) — dashboard counts from local midnight as approximation.",
+  "providers": {
+    "cerebras": {
+      "label": "Cerebras",
+      "models": ["qwen-3-235b-a22b-instruct-2507"],
+      "rpm": 30,
+      "rpd": null,
+      "tpm": 60000,
+      "tpd": 1000000,
+      "context_cap": 8192,
+      "notes": "Король free tier: 1M tok/day, ~1000+ TPS. Context порезан до 8K на free.",
+      "source": "https://inference-docs.cerebras.ai/support/rate-limits"
+    },
+    "groq": {
+      "label": "Groq",
+      "models": ["llama-3.3-70b-versatile", "llama-4-scout-17b", "qwen3-32b (reasoning)"],
+      "rpm": 30,
+      "rpd": 1000,
+      "tpm": 12000,
+      "tpd": 100000,
+      "notes": "100K TPD — реальный потолок (≈100 средних вызовов/день, не 1000). Cached tokens не считаются.",
+      "source": "https://console.groq.com/docs/rate-limits"
+    },
+    "nvidia_nim": {
+      "label": "NVIDIA NIM",
+      "models": ["llama-3.3-70b-instruct"],
+      "rpm": 40,
+      "rpd": null,
+      "tpm": null,
+      "tpd": null,
+      "notes": "Credits-based: 1000 кредитов на signup (до 5000 по запросу), без daily token cap. 40 RPM/model.",
+      "source": "https://forums.developer.nvidia.com/t/clarity-on-nim-api-free-tier-rate-limit-increases/369624"
+    },
+    "openrouter": {
+      "label": "OpenRouter :free",
+      "models": ["llama-3.3-70b-instruct:free + 28 others"],
+      "rpm": 20,
+      "rpd": 1000,
+      "tpm": null,
+      "tpd": null,
+      "notes": "1000 RPD разблокировано депозитом $10 (без депозита было бы 50 RPD).",
+      "source": "https://openrouter.ai/docs/api/reference/limits"
+    },
+    "gemini": {
+      "label": "Google AI Studio",
+      "models": ["gemini-3-flash-preview"],
+      "rpm": 15,
+      "rpd": 1500,
+      "tpm": 1000000,
+      "tpd": null,
+      "notes": "Free tier Flash. Google резал квоты в дек-2025 — сверять живые лимиты: aistudio.google.com/rate-limit.",
+      "source": "https://ai.google.dev/gemini-api/docs/rate-limits"
+    },
+    "huggingface": {
+      "label": "HF Inference",
+      "models": ["Llama-3.3-70B", "Qwen2.5-72B"],
+      "rpm": null,
+      "rpd": null,
+      "tpm": null,
+      "tpd": null,
+      "notes": "~$0.10/мес кредитов — копейки, emergency-fallback only.",
+      "source": "https://huggingface.co/docs/inference-providers/pricing"
+    },
+    "local": {
+      "label": "Local floor (llama-server)",
+      "models": ["Qwen3-Coder-30B-A3B @ :8080"],
+      "rpm": null,
+      "rpd": null,
+      "tpm": null,
+      "tpd": null,
+      "unlimited": true,
+      "notes": "Суверенный пол: безлимит, ограничен железом. Должен быть always reachable (SOVRN §1).",
+      "source": "local"
+    }
+  },
+  "agents": {
+    "claude": {
+      "label": "Claude Code",
+      "auth": "subscription",
+      "limits": "5-час rolling window + 2 недельных капа (all-models / Sonnet-only). 2026-05-06: лимиты удвоены. ПРОМО: Fable 5 включён в подписку бесплатно до 2026-06-22, но НЕ безлимит — жжёт лимиты ≈2× быстрее Opus. Численно — /usage в CLI.",
+      "deadline": "2026-06-22 — конец промо Fable 5: с 23 июня модель уходит на usage credits ($10/$50 за Mtok)"
+    },
+    "codex": {
+      "label": "Codex CLI",
+      "auth": "ChatGPT plan",
+      "limits": "Token-based с 2026-04 (не per-message). Остаток — /status в CLI.",
+      "deadline": null
+    },
+    "gemini-cli": {
+      "label": "Gemini CLI",
+      "auth": "Google OAuth (personal)",
+      "limits": "60 RPM / 1000 RPD (Flash only с 2026-03-25)",
+      "deadline": "2026-06-18 — FREE TIER ОТКЛЮЧАЮТ. Миграция на Antigravity (~20 req/day, −98%)."
+    },
+    "antigravity": {
+      "label": "Antigravity (agy)",
+      "auth": "Google",
+      "limits": "~20 req/day (community estimate). TTY-only, не оркестрируется headless.",
+      "deadline": null
+    },
+    "hermes": {
+      "label": "Hermes (NousResearch)",
+      "auth": "via LiteLLM :4001",
+      "limits": "Ограничен квотами provider pool (см. providers) — единственный агент, чьё usage видно в этом дашборде напрямую.",
+      "deadline": null
+    }
+  }
+}

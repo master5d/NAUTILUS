@@ -1,0 +1,11 @@
+nodes:
+nodes:
+  indexer:
+    - name: node-1
+      ip: "127.0.0.1"
+  server:
+    - name: wazuh-1
+      ip: "127.0.0.1"
+  dashboard:
+    - name: dashboard
+      ip: "127.0.0.1"

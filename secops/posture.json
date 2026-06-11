@@ -1,0 +1,64 @@
+{
+  "as_of": "2026-06-11",
+  "note": "Manually-maintained SecOps posture register. Feeds Labwatch SecOps panel. Update statuses here when actions are completed.",
+  "pending_rotations": [
+    {
+      "id": "gh-cli-oauth",
+      "label": "GitHub CLI OAuth token (master5d)",
+      "why": "Leaked to stdout 2026-05-30 (env-var dup of keyring token)",
+      "action": "github.com/settings/applications → Authorized OAuth Apps → GitHub CLI → Revoke, then `gh auth login`",
+      "severity": "urgent",
+      "status": "pending"
+    },
+    {
+      "id": "google-ai-key",
+      "label": "Google AI Studio key",
+      "why": "Was plaintext in embedding-agent .env.local",
+      "action": "aistudio.google.com/app/apikey — regenerate",
+      "severity": "high",
+      "status": "pending"
+    },
+    {
+      "id": "neo4j-aura",
+      "label": "Neo4j AuraDB password (instance ca57cf0f)",
+      "why": "Was plaintext in .env.local",
+      "action": "console.neo4j.io — reset",
+      "severity": "high",
+      "status": "pending"
+    },
+    {
+      "id": "vercel-gateway",
+      "label": "Vercel AI Gateway key",
+      "why": "Was plaintext in .env.local",
+      "action": "vercel.com/dashboard — regenerate",
+      "severity": "high",
+      "status": "pending"
+    },
+    {
+      "id": "github-pat-classic",
+      "label": "GitHub classic PAT (ghp_*)",
+      "why": "Was plaintext in PowerShell profile",
+      "action": "github.com/settings/tokens — revoke",
+      "severity": "high",
+      "status": "pending"
+    },
+    {
+      "id": "crowdsec-lapi",
+      "label": "CrowdSec LAPI bouncer key",
+      "why": "Was hardcoded in cloudflare-bouncer.yaml until 2026-06-11 (never in git)",
+      "action": "`cscli bouncers add` on (re)deploy of the stack",
+      "severity": "low",
+      "status": "pending"
+    }
+  ],
+  "infra_stack": {
+    "status": "designed",
+    "target": "Hetzner node (Linux)",
+    "components": ["crowdsec + cloudflare-bouncer", "falco + falcosidekick", "wazuh SIEM", "n8n retaliation playbook"],
+    "note": "Never deployed; Docker absent locally. Fix wazuh config.yml duplicate 'nodes:' + quote vars in retaliation_protocol.sh before deploy."
+  },
+  "accepted_risks": [
+    "read_only:true not set on crowdsec/bouncer containers (write to volumes) — revisit with tmpfs at deploy",
+    "infra/.env holds live secrets on disk — gitignored + read-denied; migrate to vault on Bitwarden revival"
+  ]
+}

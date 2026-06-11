@@ -1,0 +1,22 @@
+# CrowdSec Cloudflare Bouncer Config
+# Reference: https://docs.crowdsec.net/u/bouncers/cloudflare
+
+crowdsec_lapi_url: http://crowdsec:8080
+crowdsec_lapi_key: ${CROWDSEC_LAPI_KEY}
+update_frequency: 10s
+
+# Cloudflare credentials
+cloudflare_config:
+  accounts:
+    - id: 252b28b0ef2e1866c532e2622060c809
+      token: ${CF_API_TOKEN}
+      default_action: block
+      zones:
+        - zone_id: 2a1bf732aea0bf154c8e0df5ed379227
+          actions:
+            - block
+
+# Logging
+log_mode: file
+log_dir: /var/log/crowdsec/
+log_level: info

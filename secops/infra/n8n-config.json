@@ -1,0 +1,12 @@
+{
+  "userManagement": {
+    "isInstanceOwnerSetUp": true
+  },
+  "auth": {
+    "api": {
+      "rest": {
+        "enabled": true
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    container_name: enerv_crowdsec
+    environment:
+      GID: "${GID-1000}"
+      COLLECTIONS: "crowdsecurity/linux crowdsecurity/sshd crowdsecurity/nginx crowdsecurity/iptables"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./crowdsec/config:/etc/crowdsec
+      - ./crowdsec/data:/var/lib/crowdsec/data
+      - /var/log:/var/log:ro
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  # CrowdSec Cloudflare Bouncer (edge blocklist)
+  crowdsec-cloudflare-bouncer:
+    image: crowdsecurity/cloudflare-bouncer:latest
+    container_name: enerv_cs_cloudflare_bouncer
+    environment:
+      CF_ACCOUNT_ID: ${CF_ACCOUNT_ID}
+      CF_ZONE_ID: ${CF_ZONE_ID}
+      CF_API_TOKEN: ${CF_API_TOKEN}
+      CROWDSEC_LAPI_KEY: ${CROWDSEC_LAPI_KEY}
+    volumes:
+      - ./crowdsec/cloudflare-bouncer.yaml:/etc/crowdsec/bouncers/crowdsec-cloudflare-bouncer.yaml
+    depends_on:
+      - crowdsec
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true

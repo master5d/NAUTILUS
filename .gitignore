@@ -52,6 +52,11 @@ htmlcov/
 database.sqlite
 gmail_ingest_workflow.json
 
+# SecOps (merged 2026-06-11)
+*.exe
+secops/guides/SecOps Notes/
+labwatch/usage.db
+
 # OS & Editors
 .DS_Store
 Thumbs.db

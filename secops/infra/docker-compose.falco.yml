@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  falco:
+    image: falcosecurity/falco:latest
+    container_name: enerv_falco
+    privileged: true # Required for eBPF/Kernel module instrumentation
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock:ro
+      - /dev:/host/dev:ro
+      - /proc:/host/proc:ro
+      - /boot:/host/boot:ro
+      - /lib/modules:/host/lib/modules:ro
+      - /usr:/host/usr:ro
+      - ./falco/falco.yaml:/etc/falco/falco.yaml
+      - ./falco/falco_rules.local.yaml:/etc/falco/falco_rules.local.yaml
+    # Default entrypoint auto-detects driver (kernel module or ebpf)
+    restart: unless-stopped
+
+  # Falcosidekick handles the alerts from Falco and routes them
+  falcosidekick:
+    image: falcosecurity/falcosidekick:latest
+    container_name: enerv_falcosidekick
+    environment:
+      # Route alerts to our n8n instance for immediate retaliation
+      WEBHOOK_ADDRESS: ${N8N_WEBHOOK_URL}
+      # Also send directly to Telegram for critical eyes-on
+      TELEGRAM_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHATID: ${TELEGRAM_CHAT_ID}
+    ports:
+      - "2801:2801"
+    restart: unless-stopped
