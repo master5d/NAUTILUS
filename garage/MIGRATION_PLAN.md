@@ -1,9 +1,10 @@
-# Migration plan — laptop-independence (no-floor variant)
+# Migration plan — laptop-independence (no-floor + Variant-A consolidation)
 
 > **Goal:** zero always-on services on the Surface. The lab survives the laptop
-> being off/asleep/rebooting. **Variant:** no always-on local LLM floor — clouds
-> carry inference now; a capable local floor returns later on a planned 64GB+
-> node. **Status:** plan (2026-06-11), not yet executed.
+> being off/asleep/rebooting. **Variant:** no always-on local LLM floor (clouds
+> carry inference; capable floor returns later on a 64GB+ node) **+ Variant-A
+> consolidation:** all always-on local work runs on the single M4; both M2s are
+> sold. **Status:** plan (2026-06-11), not yet executed.
 
 ## Why no floor
 
@@ -12,12 +13,18 @@ An 8-14B local model is far weaker than the free clouds already in rotation
 mediocre emergency backstop. So we drop it and split the architecture cleanly by
 role instead of forcing a weak model onto a 16GB Mac:
 
-- **Control plane** (gateway, dashboard) — light, always-on → **M4 16GB**.
+- **Single local node** (gateway, dashboard, STT, ingest) — **M4 16GB**. With no
+  local LLM these all fit (~6.5GB steady / ~9GB peak of 16GB).
 - **Inference** — clouds now (free→paid); a *capable* local floor later on a
   **64GB+ node** (30B-A3B / 70B-Q4), never a weak 8B.
-- **Edge** (audio, vault data) — **M2 ×2**.
+- **2× M2 8GB → SOLD** — no role once edge work fits the M4; labwatch verdict says
+  they don't pay off as inference. ~$560 back.
 - **Public** — **Hetzner**.
 - **Dev + on-demand local power** — **Surface** (30B when it's on).
+
+**Accepted cost of consolidation:** the M4 is a single point of failure for the
+local tier. Tolerable — the inference backstop is cloud anyway, and the future
+64GB node adds a second always-on box.
 
 **Accepted tradeoff:** this weakens SOVRN principle #1 ("100% offline if every
 cloud goes dark") to "offline only when the Surface 30B is up" — *until* the
@@ -27,19 +34,19 @@ the interim is **paid cloud**, not free-local.
 ## Target topology
 
 ```
-┌─ workstation ───────────┐   ┌─ control plane (always-on, LAN) ─┐
-│ Surface Studio 2        │   │ Mac Mini M4 16GB                  │
-│  • dev                  │──▶│   LiteLLM gateway + labwatch      │
-│  • on-demand 30B (local │   │   (+ Hermes?)  — NO local model   │
-│    power, when powered) │   │   permanent home; doesn't move    │
-└─────────────────────────┘   └──────────────────────────────────┘
+┌─ workstation ───────────┐   ┌─ single local node (always-on, LAN) ─┐
+│ Surface Studio 2        │   │ Mac Mini M4 16GB                      │
+│  • dev                  │──▶│   LiteLLM gateway + labwatch         │
+│  • on-demand 30B (local │   │   + STT (Parakeet) + KG ingest       │
+│    power, when powered) │   │   (+ Hermes?)  — NO local LLM model  │
+└─────────────────────────┘   └──────────────────────────────────────┘
                                          │ routes to
         ┌────────────────────────────────┼─────────────────────────────┐
         ▼                                 ▼                             ▼
-┌─ inference ─────────┐   ┌─ edge (always-on, LAN) ─┐   ┌─ public (cloud) ────────┐
-│ FREE clouds first   │   │ M2 #1 SOVERN-01: STT    │   │ Hetzner CX22(→32?)      │
-│ (Cerebras/Groq/NIM) │   │ M2 #2 SOVERN-02: ingest │   │  n8n · Langfuse ·       │
-│ → paid cloud backstop│  │  (blocked: FileVault)   │   │  Dokploy · CF tunnel    │
+┌─ inference ─────────┐   ┌─ SOLD ──────────────────┐   ┌─ public (cloud) ────────┐
+│ FREE clouds first   │   │ M2 #1 SOVERN-01 → sell  │   │ Hetzner CX22(→32?)      │
+│ (Cerebras/Groq/NIM) │   │ M2 #2 SOVERN-02 → sell  │   │  n8n · Langfuse ·       │
+│ → paid cloud backstop│  │  (~$560 back)           │   │  Dokploy · CF tunnel    │
 │ → [later] 64GB node  │  └─────────────────────────┘   └─────────────────────────┘
 │   30B-A3B/70B floor  │
 └──────────────────────┘
@@ -51,16 +58,17 @@ the interim is **paid cloud**, not free-local.
 
 1. **Onboard the M4** (not a node yet): static DHCP reservation, SSH key, harden
    (disable sleep, NOPASSWD sudo) per the SOVERN-01 pattern. Record IP/MAC in
-   `fleet.json`.
-2. **Unblock SOVERN-02** (FileVault pre-boot): HDMI + USB keyboard (or ~$15
-   MS2109 capture) to type the FileVault password once, enable Remote Login, set
-   a DHCP reservation.
-3. Static reservations for all three Macs.
+   `fleet.json`. This is now the *only* always-on local box.
+2. **Do NOT unblock SOVERN-02 for service** — it's being sold. Just wipe it
+   (boot to Recovery: power+hold → Disk Utility erase, or DFU-restore via Apple
+   Configurator on another Mac) before resale.
+3. Static DHCP reservation for the M4 only.
 
-## Phase 1 — control plane to the M4 (the critical lift)
+## Phase 1 — stand up the M4 as the single local node (the critical lift)
 
-1. Install on the M4: Python + LiteLLM + labwatch + port_broker. **No
-   llama-server, no model.**
+1. Install on the M4: Python + LiteLLM + labwatch + port_broker + STT (Parakeet)
+   + KG ingest worker. **No llama-server, no LLM model.** Budget check:
+   ~6.5GB steady / ~9GB peak of 16GB — comfortable.
 2. Move provider API keys to the M4 user env (macOS keychain / gitignored env).
 3. Repoint `litellm-config.yaml` for **no floor**:
    - **remove `local-fallback` from `default_fallbacks`**; set it to e.g.
@@ -68,17 +76,18 @@ the interim is **paid cloud**, not free-local.
    - chain tails that pointed at `local-fallback` → `hf-llama-70b` / paid.
    - add `power-local` → Surface 30B, present in fallbacks only (tolerated-down).
 4. Update `config/services.json` to the M4 host:port (gateway + labwatch).
-5. **Cutover test:** start the M4 control plane, **power the Surface off**, and
-   confirm an agent call routes M4 gateway → free clouds (then paid if exhausted);
-   labwatch loads; nothing errors on the absent local floor or 30B.
+5. Point Echo's transcription path at the M4 STT endpoint.
+6. **Cutover test:** start the M4, **power the Surface off**, and confirm: an
+   agent call routes M4 gateway → free clouds (then paid if exhausted); labwatch
+   loads; STT transcribes; nothing errors on the absent local floor or 30B.
 
-## Phase 2 — edge daemons to the M2 fleet
+## Phase 2 — decommission and sell the M2s
 
-1. **SOVERN-01:** STT (Parakeet/Whisper) + healthchecks/cron. Point Echo's
-   transcription at it.
-2. **SOVERN-02** (once unblocked): KG ingest worker (pending the vault question)
-   / redundancy.
-3. Single-process daemons only — 8GB M2s (SOVERN-01 already idles ~7.4/8GB).
+1. Confirm nothing points at SOVERN-01 (192.168.1.123) anymore — remove its
+   `~/.ssh/config` alias + DHCP reservation; migrate any edge job to the M4.
+2. **Wipe both M2s** (Recovery → Disk Utility erase / DFU restore), sign out of
+   iCloud/Find My first so they're sellable (Activation Lock off).
+3. **Sell** (~$280 each, ~$560 total). Update `fleet.json` status → sold.
 
 ## Phase 3 — consolidate cloud, kill local docker
 
@@ -144,16 +153,19 @@ Rule of thumb: **VRAM/unified ≥ model size at Q4 + ~20% headroom.** 30B-A3B Q4
 Power the Surface **off** and verify from the workstation or phone:
 - [ ] agent/LLM calls succeed (M4 gateway → free clouds → paid backstop)
 - [ ] labwatch `:4002` loads
-- [ ] STT works (M2 node)
+- [ ] STT works (M4 node)
 - [ ] n8n / Langfuse / public up (Hetzner — already independent)
+- [ ] both M2s wiped + sold
 - [ ] expected losses only: no always-on local inference, no 30B (until 64GB node)
 
 ## Open decisions for the architect
 
-1. **Hermes 24/7?** yes → M4 with the gateway; no → on-demand.
-2. **KG Neo4j home:** M4 (free, has headroom now) vs Hetzner upgrade?
+1. **Hermes 24/7?** yes → M4 (co-located); no → on-demand.
+2. **KG Neo4j home:** M4 (has headroom: gateway+labwatch+STT+ingest+Neo4j ~2GB
+   still fits 16GB, but getting full) vs Hetzner upgrade. If Sprint 2 also runs
+   jina-v4 embeddings locally (+4-8GB), the M4 gets tight → Neo4j → Hetzner.
 3. **Vault watcher:** (a)/(b)/(c) above.
 4. **64GB node:** Apple Silicon (recommended) vs x86+big-GPU; new vs used.
-5. **M2 #2 / M4 after the 64GB node:** redundancy, repurpose, or sell (labwatch
-   verdict: Macs don't pay off as pure inference, but earn their keep as
-   always-on edge/control-plane).
+5. ~~M2 fate~~ **DECIDED: both M2s sold** (Variant A consolidation). Only
+   re-open if M4 gets memory-tight from local jina-v4 embeddings — then keeping
+   one M2 for ingest could be reconsidered (but ingest is light; unlikely).

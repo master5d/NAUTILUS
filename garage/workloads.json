@@ -1,11 +1,12 @@
 {
   "as_of": "2026-06-11",
-  "variant": "no-floor",
-  "goal": "Remove every always-on service from `surface` so the stack survives the laptop being off. NO always-on local LLM floor: always-on inference = clouds (free→paid). A capable local floor returns later on a planned 64GB+ unified-memory node (not a weak 8B). Control plane (gateway/labwatch) lives on the M4; edge daemons on the M2s; public on Hetzner.",
+  "variant": "no-floor + Variant-A consolidation",
+  "goal": "Remove every always-on service from `surface` so the stack survives the laptop being off. NO always-on local LLM floor: always-on inference = clouds (free→paid). A capable local floor returns later on a planned 64GB+ unified-memory node. ALL always-on local work (gateway, labwatch, STT, ingest) consolidates on the single M4 — with no local model it fits 16GB easily; both M2s are SOLD. Public on Hetzner.",
   "decision_log": {
     "dropped_8_14b_floor": "An 8-14B local model is far weaker than the free clouds (Cerebras 235B, Groq 70B) and only ever served as a mediocre emergency backstop. Removed. Failure backstop is now paid cloud, not free-local.",
     "accepted_tradeoff": "Weakens SOVRN principle #1 (100% offline) to 'offline only when Surface 30B is up' — until the 64GB node lands and restores a proper always-on local floor.",
-    "future_floor": "Always-on local inference returns on a planned 64GB+ Apple-Silicon node running 30B-A3B / 70B-Q4 — see fleet.json planned-64gb-node."
+    "future_floor": "Always-on local inference returns on a planned 64GB+ Apple-Silicon node running 30B-A3B / 70B-Q4 — see fleet.json planned-64gb-node.",
+    "variant_a_consolidation": "With no local LLM on the M4, STT + KG ingest fit alongside gateway+labwatch in 16GB (~6.5GB steady, ~9GB peak). So consolidate ALL always-on local work on the M4 and SELL both M2s (~$560). Accepted cost: M4 is a single point of failure for the local tier — tolerable because the inference backstop is cloud anyway, and the future 64GB node adds a second always-on box."
   },
   "workloads": [
     {
@@ -52,17 +53,17 @@
       "service": "STT (Parakeet / Whisper for Echo)",
       "always_on": true,
       "host_now": "surface / ad-hoc",
-      "host_target": "sovern-01 (M2 8GB)",
-      "why": "Genuinely-local workload (audio) → always-on M2 edge node; offloads the laptop.",
-      "notes": "Echo transcription path calls the M2."
+      "host_target": "m4-16gb",
+      "why": "Genuinely-local workload (audio). Parakeet is tiny (~0.6B); with no local LLM on the M4 it fits alongside the gateway easily (~1-2GB during transcription).",
+      "notes": "Echo transcription path calls the M4. (Consolidated — was M2 in the distributed variant.)"
     },
     {
       "service": "KG ingest worker",
       "always_on": true,
       "host_now": "surface (vault_watcher.py)",
-      "host_target": "sovern-02 (M2) — but blocked on vault location",
-      "why": "Ingest is local-data work → M2. BUT the source vault lives on the laptop (see vault question).",
-      "notes": "See Phase 4 in MIGRATION_PLAN — vault-on-laptop is the blocker for true independence."
+      "host_target": "m4-16gb — but blocked on vault location",
+      "why": "Ingest is light (~0.5GB) → co-locate on the M4. BUT the source vault lives on the laptop (see vault question).",
+      "notes": "Phase 4: vault-on-laptop is the independence blocker. If Sprint 2 runs jina-v4 embeddings LOCALLY on the M4 (+4-8GB), re-check M4 headroom — that's the one case that might argue for keeping an M2."
     },
     {
       "service": "KG Neo4j + knowledge-graph app",

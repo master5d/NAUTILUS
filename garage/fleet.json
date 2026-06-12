@@ -2,10 +2,10 @@
   "as_of": "2026-06-11",
   "module": "garage",
   "purpose": "Canonical hardware fleet registry (CMDB) for NAUTILUS — every compute unit, its specs, role, network, power, and onboarding status. Superset of labwatch/hardware.json (which is the inference-cost subset: the 3 Mac Minis only).",
-  "variant": "no-floor (no always-on local LLM until the planned 64GB node; clouds carry inference in the interim) — see workloads.json + MIGRATION_PLAN.md",
+  "variant": "no-floor + Variant-A consolidation (no always-on local LLM until the planned 64GB node; clouds carry inference; ALL always-on local work consolidated on the M4; both M2s sold) — see workloads.json + MIGRATION_PLAN.md",
   "tiers": {
     "workstation": "dev-only, MUST host zero always-on services",
-    "local_always_on": "headless local nodes that never sleep — control plane (M4) + edge (M2) now; inference floor (64GB node) later",
+    "local_always_on": "the single M4 node (gateway+labwatch+STT+ingest) now; inference floor (64GB node) later",
     "cloud": "public-facing production (Hetzner + Cloudflare)"
   },
   "units": [
@@ -30,7 +30,7 @@
       "power": { "always_on": true, "load_w": 30, "idle_w": 4 },
       "status": "acquired-not-onboarded",
       "role_now": "spare / not in service",
-      "role_target": "ALWAYS-ON CONTROL PLANE — LiteLLM gateway + labwatch (+ Hermes?). NO local model (no-floor variant). Permanent gateway home; does not move when the 64GB node arrives. After the 64GB node, optionally repurpose to on-demand dev inference or resell.",
+      "role_target": "ALWAYS-ON LOCAL NODE (consolidated, Variant A) — LiteLLM gateway + labwatch + STT (Parakeet) + KG ingest worker (+ Hermes?). NO local LLM floor (no-floor variant) so all of this fits 16GB (~6.5GB steady / ~9GB peak). The single always-on local box; the 2× M2 are sold. When the 64GB node arrives it takes the inference floor; the M4 keeps gateway+edge. SINGLE POINT OF FAILURE for the local tier — accepted (cloud backstop covers inference if M4 is down).",
       "cost_usd": 650,
       "tok_s": 23,
       "model_class": "Could run 8-14B on-demand for dev, but is NOT the always-on floor. CANNOT host 30B (30B-A3B Q4 ≈ 18GB > 16GB unified + macOS) — that's the 64GB node's job."
@@ -44,7 +44,8 @@
       "power": { "always_on": true, "load_w": 25, "idle_w": 7, "note": "idle already ~7.4GB/8GB used (FileVault+Spotlight+daemons) — memory-tight" },
       "status": "onboarded",
       "role_now": "onboarded edge node (light)",
-      "role_target": "ALWAYS-ON EDGE DAEMON — STT (Parakeet/Whisper for Echo), KG ingest worker, healthchecks, cron, build cache. NOT LLM/Ollama (8GB too tight).",
+      "role_target": "RESALE (Variant A consolidation). All edge work (STT, KG ingest) fits the M4 alongside the control plane with no local LLM, so the M2s have no role. Sell — labwatch verdict: M2 8GB don't pay off as inference. Wipe + deregister from DHCP/SSH config first.",
+      "resale_usd": 280,
       "cost_usd": 375
     },
     {
@@ -55,9 +56,10 @@
       "net": { "ip": "192.168.1.154", "mac": "6c:96:cf:da:5a:f7", "static": false, "user": "sovern-02 (verify via DHCP hostname)", "note": "ports 22/5900/3283 CLOSED" },
       "power": { "always_on": true, "load_w": 25, "idle_w": 7 },
       "status": "blocked",
-      "blocker": "Stuck at FileVault pre-boot login screen — no kernel/network → SSH/VNC/ARD unavailable. Unblock: HDMI display + USB keyboard (or MS2109 HDMI capture ~$15) to type FileVault password once, then enable Remote Login.",
+      "blocker": "Stuck at FileVault pre-boot login screen — no kernel/network → SSH/VNC/ARD unavailable. To wipe for resale: boot to Recovery (power + hold), Disk Utility erase, or DFU-restore via Apple Configurator on another Mac.",
       "role_now": "blocked — not in service",
-      "role_target": "ALWAYS-ON EDGE DAEMON (redundancy / second STT or ingest node), same class as SOVERN-01. Or first resale candidate if edge load stays light.",
+      "role_target": "RESALE (Variant A). Never needed onboarding — no edge role in the consolidated topology. Don't spend effort unblocking for service; just wipe (Recovery erase) and sell.",
+      "resale_usd": 280,
       "cost_usd": 375
     },
     {

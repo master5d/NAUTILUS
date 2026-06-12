@@ -29,10 +29,13 @@ llama-server, labwatch, vault watcher, a docker stack, Hermes, Ollama). When the
 laptop sleeps or reboots, the lab goes dark. Garage moves that load to the
 always-on local fleet + Hetzner; see `MIGRATION_PLAN.md`.
 
-**Current variant: no-floor.** No always-on local LLM in the interim — clouds
-(free→paid) carry inference; the M4 runs only the control plane (gateway +
-labwatch). A capable local floor (30B-A3B/70B) returns later on a planned 64GB+
-unified-memory node (`fleet.json` → `planned-64gb-node`), not a weak 8B.
+**Current variant: no-floor + Variant-A consolidation.** No always-on local LLM
+in the interim — clouds (free→paid) carry inference. With no model on the M4, ALL
+always-on local work (gateway, labwatch, STT, KG ingest) consolidates onto the
+**single M4**; both M2s are **sold** (~$560). A capable local floor
+(30B-A3B/70B) returns later on a planned 64GB+ unified-memory node (`fleet.json`
+→ `planned-64gb-node`), not a weak 8B. Tradeoff: the M4 is a single point of
+failure for the local tier — accepted (cloud backstop covers inference).
 
 ## Relationship to labwatch
 
