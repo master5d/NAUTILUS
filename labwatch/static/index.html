@@ -230,6 +230,7 @@ async function refresh() {
       ['gitleaks CLI', c.gitleaks_cli], ['gitleaks config', c.gitleaks_config],
       ['semgrep CLI', c.semgrep_cli], ['semgrep login', c.semgrep_login],
       ['egress-guard hook', c.egress_guard_hook],
+      ['trivy CLI (SCA)', c.trivy_cli],
       [`deny rules: ${c.permission_deny_rules}`, c.permission_deny_rules > 0],
     ];
     document.getElementById('sec-controls').innerHTML = ctl.map(([k, ok]) =>
@@ -243,9 +244,13 @@ async function refresh() {
     const inf = sec.infra_stack || {};
     const targets = (sec.deploy_targets || [])
       .map(t => `<div style="margin-top:5px" title="${t.what} — ${t.how}"><span class="pill" style="color:var(--${t.status === 'deployed' ? 'ok' : 'warn'})">${t.status}</span> <b style="color:var(--text)">${t.label}</b></div>`).join('');
+    const scaColor = { open: 'warn', low: 'dim', clean: 'ok', fixed: 'ok' };
+    const scaScans = ((sec.sca || {}).scans || [])
+      .map(x => `<div style="margin-top:5px" title="${x.summary}"><span class="pill" style="color:var(--${scaColor[x.status] || 'dim'})">${x.status}</span> <b style="color:var(--text)">${x.repo}</b> — ${x.critical} crit / ${x.high} high <span style="font-size:10px">(${x.date})</span></div>`).join('');
     document.getElementById('sec-infra').innerHTML =
       `<span class="pill" style="color:var(--warn)">${inf.status || '?'}</span> → ${inf.target || ''}<br>${(inf.components || []).join(' · ')}<br><span style="font-size:10px">${inf.note || ''}</span>` +
-      (targets ? `<div style="margin-top:8px;border-top:1px dashed var(--border);padding-top:6px"><b style="color:var(--text);font-size:11px">DEPLOY TARGETS</b>${targets}</div>` : '');
+      (targets ? `<div style="margin-top:8px;border-top:1px dashed var(--border);padding-top:6px"><b style="color:var(--text);font-size:11px">DEPLOY TARGETS</b>${targets}</div>` : '') +
+      (scaScans ? `<div style="margin-top:8px;border-top:1px dashed var(--border);padding-top:6px"><b style="color:var(--text);font-size:11px">SCA — DEPENDENCY CVEs (${(sec.sca || {}).tool || 'trivy'})</b>${scaScans}</div>` : '');
 
     const sevColor = { urgent: 'bad', high: 'warn', low: 'dim' };
     document.querySelector('#sec-rotations tbody').innerHTML = (sec.rotations_pending || [])

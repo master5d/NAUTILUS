@@ -187,6 +187,7 @@ def secops_state():
         "semgrep_cli": bool(shutil.which("semgrep")),
         "semgrep_login": os.path.exists(os.path.join(HOME, ".semgrep", "settings.yml")),
         "egress_guard_hook": os.path.exists(os.path.join(CLAUDE_HOME, "hooks", "egress-guard.sh")),
+        "trivy_cli": bool(shutil.which("trivy")),
         "permission_deny_rules": len(deny),
     }
     posture = _read_json(POSTURE_PATH)
@@ -202,6 +203,7 @@ def secops_state():
         "open_posture_findings": posture.get("open_posture_findings") or [],
         "deploy_targets": posture.get("deploy_targets") or [],
         "accepted_risks": posture.get("accepted_risks") or [],
+        "sca": posture.get("sca") or {},
     }
     with _secops_lock:
         _secops_cache.update(ts=time.time(), data=data)

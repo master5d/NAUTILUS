@@ -123,6 +123,28 @@
       }
     ]
   },
+  "sca": {
+    "note": "Dependency CVE scanning (`trivy fs <repo>` — vuln DB cached locally). Re-scan per release / periodically; update statuses after fixes.",
+    "tool": "trivy 0.71.0 (scoop)",
+    "scans": [
+      {
+        "repo": "echo (Efforts/On/echo)",
+        "date": "2026-06-11",
+        "critical": 0,
+        "high": 13,
+        "summary": "rust-openssl 0.10.7x → 0.10.79 (5 CVE incl. arbitrary-code-exec CVE-2026-42327) + rustls-webpki/quinn-proto DoS in src-tauri + transcribe-rs-fork lockfiles; fix = cargo update",
+        "status": "open"
+      },
+      {
+        "repo": "mc_hub (Efforts/Ongoing/mc_hub)",
+        "date": "2026-06-11",
+        "critical": 0,
+        "high": 0,
+        "summary": "postcss 8.4.31 MEDIUM (CVE-2026-41305, build-time only) in all 4 apps; fix = bump to 8.5.10 at next dep refresh",
+        "status": "low"
+      }
+    ]
+  },
   "deploy_targets": [
     {
       "id": "apparmor",
@@ -136,6 +158,13 @@
       "label": "Falco runtime detection",
       "what": "eBPF runtime alerts incl. custom rules (prompt-injection patterns in n8n/qdrant logs, vault tampering) → Falcosidekick → n8n/Telegram",
       "how": "infra/docker-compose.falco.yml + infra/falco/falco_rules.local.yaml (already designed)",
+      "status": "planned"
+    },
+    {
+      "id": "trivy-image",
+      "label": "Trivy image scan at deploy",
+      "what": "CVE scan of CrowdSec/Falco/Wazuh/n8n container images + `trivy config` on Dockerfiles before Hetzner deploy (NB: docker-compose misconfig scanning not covered by trivy — stays manual/semgrep)",
+      "how": "trivy image <ref> --severity HIGH,CRITICAL — wire into deploy checklist",
       "status": "planned"
     },
     {

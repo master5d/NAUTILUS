@@ -27,7 +27,11 @@ Merged from `C:\telo\Efforts\Ongoing\SecOps` on **2026-06-11** (old project dir 
 | 7 | `retaliation_protocol.sh` interpolated `$ATTACKER_IP`/`$CONTAINER_NAME` unquoted from webhook input | Medium (at deploy) | **Fixed 2026-06-11** — vars quoted, `set -euo pipefail`, IP-format + container-name validation before docker/cscli. |
 | 8 | Stale path references after merge (`C:\telo\secops\`, `C:\telo\scripts\`) | Info | **Fixed 2026-06-11** — `start-secops.ps1` uses `$PSScriptRoot`-relative hook path; bw-scripts headers stay historical (dormant), canonical paths in `BITWARDEN.md` banner. |
 
-Live controls на машине (проверяются дашбордом автоматически): gitleaks (scoop) + `~/.claude/gitleaks.toml`, semgrep 1.165.0 (pipx) + login, egress-guard hook + `egress.jsonl`, permission deny list. Полная картина: `guides/claude-code-plugins-secops.md` и memory `reference_secops_hardening`.
+Live controls на машине (проверяются дашбордом автоматически): gitleaks (scoop) + `~/.claude/gitleaks.toml`, semgrep 1.165.0 (pipx) + login, egress-guard hook + `egress.jsonl`, trivy 0.71.0 (scoop, SCA), permission deny list. Полная картина: `guides/claude-code-plugins-secops.md` и memory `reference_secops_hardening`.
+
+## SCA — dependency CVEs (Trivy, added 2026-06-11)
+
+Четвёртый слой стека (gitleaks = secrets, semgrep = свой код, agent-hooks = агентский контур, **trivy = чужой код в lockfiles**). `trivy fs <repo>` — бесплатный SCA-скан npm/cargo/uv/bun lockfiles, vuln DB кэшируется локально. Не в hook-loop'е (тяжёлый) — периодический/pre-release прогон, результаты → `posture.json` → `sca.scans` → Labwatch SCA-блок. Первый прогон 2026-06-11: echo — 0 crit / 13 high (rust-openssl → 0.10.79, fix = `cargo update`), mc_hub — только postcss MEDIUM (build-time). На Hetzner-деплое: `trivy image` по образам стека (deploy target `trivy-image`); compose-misconfig он НЕ покрывает — остаётся за semgrep/ручным аудитом.
 
 ## agent-config-guard (hooks/agent-config-guard.py)
 
