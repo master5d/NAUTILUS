@@ -2,9 +2,10 @@
   "as_of": "2026-06-11",
   "module": "garage",
   "purpose": "Canonical hardware fleet registry (CMDB) for NAUTILUS — every compute unit, its specs, role, network, power, and onboarding status. Superset of labwatch/hardware.json (which is the inference-cost subset: the 3 Mac Minis only).",
+  "variant": "no-floor (no always-on local LLM until the planned 64GB node; clouds carry inference in the interim) — see workloads.json + MIGRATION_PLAN.md",
   "tiers": {
     "workstation": "dev-only, MUST host zero always-on services",
-    "local_always_on": "headless local nodes that never sleep — the sovereign floor",
+    "local_always_on": "headless local nodes that never sleep — control plane (M4) + edge (M2) now; inference floor (64GB node) later",
     "cloud": "public-facing production (Hetzner + Cloudflare)"
   },
   "units": [
@@ -17,7 +18,7 @@
       "power": { "always_on": false, "note": "battery wear, Win update reboots, thermal throttling — NEVER a production/always-on server (SOVRN principle)" },
       "status": "active",
       "role_now": "primary dev + ALL local servers (llama-server 30B, LiteLLM, labwatch, vault_watcher, docker stack, Hermes, Ollama)",
-      "role_target": "pure dev workstation + OPTIONAL on-demand 30B power tier (llama-server) when powered on; zero always-on dependencies",
+      "role_target": "pure dev workstation + OPTIONAL on-demand 30B power tier (llama-server) when powered on; zero always-on dependencies. In the no-floor interim the Surface 30B is the ONLY local inference until the 64GB node lands.",
       "cost_usd": null
     },
     {
@@ -29,10 +30,10 @@
       "power": { "always_on": true, "load_w": 30, "idle_w": 4 },
       "status": "acquired-not-onboarded",
       "role_now": "spare / not in service",
-      "role_target": "ALWAYS-ON LOCAL BRAIN — LiteLLM gateway + small local LLM (8-14B Q4) floor + labwatch + Hermes. The node the whole stack depends on.",
+      "role_target": "ALWAYS-ON CONTROL PLANE — LiteLLM gateway + labwatch (+ Hermes?). NO local model (no-floor variant). Permanent gateway home; does not move when the 64GB node arrives. After the 64GB node, optionally repurpose to on-demand dev inference or resell.",
       "cost_usd": 650,
       "tok_s": 23,
-      "model_class": "8B q4 ~23 tok/s; 14B q4 ~12 tok/s. CANNOT host the 30B-A3B floor (30B Q4 ≈ 16-18GB > 16GB unified + macOS)."
+      "model_class": "Could run 8-14B on-demand for dev, but is NOT the always-on floor. CANNOT host 30B (30B-A3B Q4 ≈ 18GB > 16GB unified + macOS) — that's the 64GB node's job."
     },
     {
       "id": "sovern-01",
@@ -71,6 +72,25 @@
       "role_target": "PUBLIC CLOUD TIER — n8n prod, Langfuse, Dokploy, CF tunnel; candidate host for KG Neo4j IF upgraded (CX22 4GB has no headroom; Neo4j+APOC needs ~2GB → consider CX32/CX42).",
       "cost_eur_mo": 3.79,
       "upgrade_note": "4GB RAM nearly full (n8n+Langfuse+PG+Dokploy+tunnel). Langfuse v3 (+ClickHouse) and Neo4j both need more — size up before adding either."
+    },
+    {
+      "id": "planned-64gb-node",
+      "label": "Planned 64GB+ inference node (SHOPPING)",
+      "tier": "local_always_on",
+      "specs": { "ram_gb": 64, "note": "target — see buying criteria below" },
+      "net": { "ip": null, "static": false },
+      "power": { "always_on": true, "note": "must be always-on friendly (low idle, no thermal/battery issues)" },
+      "status": "planned-shopping",
+      "role_now": "not acquired",
+      "role_target": "ALWAYS-ON LOCAL INFERENCE FLOOR — runs a capable model (30B-A3B comfortably, 70B-Q4 feasible). Restores SOVRN principle #1 (offline autonomy) properly. Sits behind the M4 gateway; M4 keeps the control plane.",
+      "buying_criteria": {
+        "what_matters": "For LLM, it's Apple unified memory OR GPU VRAM that runs the model — NOT system RAM next to a small GPU.",
+        "recommended": "Apple Silicon 64GB+ unified — Mac Studio M4 Max 64GB, Mac Mini M4 Pro 64GB, or used M1/M2 Max Studio 64GB. Unified = usable model memory, Metal supported, tiny idle power, fits existing Mac ops. 30B-A3B (MoE, 3B active) runs fast; 64GB opens 70B-Q4.",
+        "x86_gpu": "Only worth it if GPU VRAM ≥24GB (RTX 3090/4090 → 30B-Q4 on-GPU; 70B needs 2×24GB or 48GB). 64GB RAM + 8GB GPU = CPU-only 30B (too slow).",
+        "avoid": "64GB system RAM with no real GPU — CPU inference of 30B too slow for an always-on floor.",
+        "rule_of_thumb": "VRAM/unified ≥ (model size at Q4) + ~20%. 30B-A3B Q4 ≈18GB → 32GB floor, 64GB comfortable + 70B headroom."
+      },
+      "cost_usd": null
     }
   ],
   "peripherals": [

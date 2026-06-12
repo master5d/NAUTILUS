@@ -1,9 +1,11 @@
 {
   "as_of": "2026-06-11",
-  "goal": "Remove every always-on service from `surface` so the stack survives the laptop being off. Always-on load moves to the local Mac fleet (M4 + 2× M2) and Hetzner; Surface keeps only dev + an optional on-demand 30B power model.",
-  "legend": {
-    "always_on": "must run 24/7 for the system to function",
-    "on_demand": "fine to be up only when the workstation/user is active"
+  "variant": "no-floor",
+  "goal": "Remove every always-on service from `surface` so the stack survives the laptop being off. NO always-on local LLM floor: always-on inference = clouds (free→paid). A capable local floor returns later on a planned 64GB+ unified-memory node (not a weak 8B). Control plane (gateway/labwatch) lives on the M4; edge daemons on the M2s; public on Hetzner.",
+  "decision_log": {
+    "dropped_8_14b_floor": "An 8-14B local model is far weaker than the free clouds (Cerebras 235B, Groq 70B) and only ever served as a mediocre emergency backstop. Removed. Failure backstop is now paid cloud, not free-local.",
+    "accepted_tradeoff": "Weakens SOVRN principle #1 (100% offline) to 'offline only when Surface 30B is up' — until the 64GB node lands and restores a proper always-on local floor.",
+    "future_floor": "Always-on local inference returns on a planned 64GB+ Apple-Silicon node running 30B-A3B / 70B-Q4 — see fleet.json planned-64gb-node."
   },
   "workloads": [
     {
@@ -11,95 +13,95 @@
       "always_on": true,
       "host_now": "surface :4000",
       "host_target": "m4-16gb",
-      "why_move": "Every agent + app routes through it — the single most critical always-on dependency. Keep on local M4 so provider API keys stay on the LAN (not in cloud).",
-      "notes": "Lightweight Python proxy. Port stays dynamic via port_broker → services.json. API keys move to the M4's user env (setup-litellm-keys equivalent for macOS)."
-    },
-    {
-      "service": "Local LLM floor (llama-server)",
-      "always_on": true,
-      "host_now": "surface :8080 — Qwen3-Coder-30B-A3B (RTX 4060 + 64GB)",
-      "host_target": "m4-16gb — SMALLER model (Qwen3-8B or 14B Q4)",
-      "why_move": "30B CANNOT fit the Mac fleet (30B Q4 ≈ 16-18GB > M4 16GB + macOS). Always-on local floor becomes an 8-14B on the M4; the 30B stays on Surface as an OPTIONAL on-demand power tier.",
-      "notes": "LiteLLM `local-fallback` repoints to the M4 llama-server. Add a separate `power-local` alias for Surface's 30B that is only in rotation when Surface is up."
-    },
-    {
-      "service": "30B power model (Qwen3-Coder-30B-A3B)",
-      "always_on": false,
-      "host_now": "surface :8080",
-      "host_target": "surface (on-demand only)",
-      "why_move": "Keep the GPU-class model as a bonus when the laptop is on; nothing depends on it. Falls out of the always-on path entirely.",
-      "notes": "LiteLLM health-checks it; when Surface is off, router skips it and uses M4 floor / free clouds."
+      "why": "Critical control-plane piece — everything routes through it. M4 hosts it with huge headroom (no local model to share RAM with). Keeps provider API keys on the LAN. This is the gateway's permanent home — it does NOT move again when the 64GB node arrives (that box is pure inference).",
+      "notes": "Lightweight Python proxy. Fallback chain must end at HF/paid, NOT local-fallback (no floor in interim). Port dynamic via port_broker → services.json."
     },
     {
       "service": "Labwatch dashboard",
       "always_on": true,
       "host_now": "surface :4002",
       "host_target": "m4-16gb :4002",
-      "why_move": "Reads usage.db (written by LiteLLM callback) — co-locate with the gateway on the M4 so the dashboard is up whenever the gateway is.",
-      "notes": "stdlib Python, binds 127.0.0.1. Expose on LAN only if you want to view from the workstation (bind 0.0.0.0 + firewall, or SSH tunnel)."
+      "why": "Co-locate with the gateway (reads usage.db written by the LiteLLM callback).",
+      "notes": "stdlib Python, 127.0.0.1. LAN-expose or SSH-tunnel to view from the workstation."
+    },
+    {
+      "service": "Always-on local LLM floor",
+      "always_on": false,
+      "host_now": "surface :8080 — Qwen3-Coder-30B-A3B",
+      "host_target": "NONE in interim → planned 64GB node later",
+      "why": "DROPPED as an always-on service. Interim: clouds carry inference (free→paid). The floor returns only when the 64GB node lands — running a capable 30B-A3B/70B, not a weak 8B.",
+      "notes": "litellm-config: remove local-fallback from default_fallbacks; repoint chain tails to hf-llama-70b/paid."
+    },
+    {
+      "service": "30B power model (Qwen3-Coder-30B-A3B)",
+      "always_on": false,
+      "host_now": "surface :8080",
+      "host_target": "surface (on-demand only)",
+      "why": "Stays as the on-demand local/private/offline option WHEN the laptop is on. More important now there's no always-on floor — it's the only local inference until the 64GB box arrives.",
+      "notes": "In LiteLLM rotation only while Surface is up; router skips it when down."
     },
     {
       "service": "Hermes agent",
       "always_on": false,
-      "host_now": "surface (python C:\\agents\\Hermes)",
-      "host_target": "m4-16gb (co-located with gateway) OR on-demand",
-      "why_move": "Telegram-driven pilot — if it must answer 24/7, runs on the M4; if only during work sessions, can stay on-demand. Decision below.",
-      "notes": "Needs LiteLLM up (now on M4). Brain = google/gemini-3-flash-preview via gateway."
-    },
-    {
-      "service": "Vault watcher (Obsidian sync → KG ingest)",
-      "always_on": false,
-      "host_now": "surface (vault_watcher.py, watches C:\\Users\\sasha\\Documents\\Obsidian\\LifeBook)",
-      "host_target": "OPEN QUESTION — vault lives on the laptop",
-      "why_move": "Can't be laptop-independent while the source vault is on the laptop. Options: (a) keep ingest on-demand (only when laptop on); (b) relocate/mirror the canonical vault to SanDisk-on-a-Mac or a synced location an M2 watches; (c) push-on-save from the laptop to a Mac ingest worker.",
-      "notes": "Resolve before claiming full laptop-independence for the KG ingest path."
-    },
-    {
-      "service": "KG Neo4j + knowledge-graph app",
-      "always_on": false,
-      "host_now": "surface docker (neo4j) + Next.js dev",
-      "host_target": "neo4j → m4-16gb OR hetzner (if upgraded); app → on-demand / Hetzner",
-      "why_move": "If the KG should be queryable 24/7, Neo4j must leave the laptop. M4 has RAM headroom now hosting gateway+8B; Hetzner CX22 does not (needs CX32+).",
-      "notes": "Neo4j+APOC ~2GB. Sprint 2 jina-v4 re-embed (768→1024) is a natural moment to relocate."
+      "host_now": "surface",
+      "host_target": "m4-16gb (with gateway) OR on-demand",
+      "why": "If it must answer 24/7 → M4 (co-located with gateway); if only during work sessions → on-demand.",
+      "notes": "Open decision. Brain = gemini-3-flash-preview via gateway."
     },
     {
       "service": "STT (Parakeet / Whisper for Echo)",
       "always_on": true,
       "host_now": "surface / ad-hoc",
       "host_target": "sovern-01 (M2 8GB)",
-      "why_move": "Lightweight, perfect for the always-on M2 edge node; offloads transcription from the laptop.",
-      "notes": "Echo app's transcribe path can call the M2 node."
+      "why": "Genuinely-local workload (audio) → always-on M2 edge node; offloads the laptop.",
+      "notes": "Echo transcription path calls the M2."
     },
     {
-      "service": "Docker stack: langfuse / n8n",
+      "service": "KG ingest worker",
       "always_on": true,
-      "host_now": "surface docker (redundant local copy)",
-      "host_target": "hetzner (ALREADY there in prod)",
-      "why_move": "Hetzner already runs prod n8n + Langfuse v2. The local Surface copies are redundant — decommission them; point LiteLLM tracing at Hetzner Langfuse (logs.synergify.com).",
-      "notes": "Memory says local Langfuse stack was already meant to be decommissioned. Finish that."
+      "host_now": "surface (vault_watcher.py)",
+      "host_target": "sovern-02 (M2) — but blocked on vault location",
+      "why": "Ingest is local-data work → M2. BUT the source vault lives on the laptop (see vault question).",
+      "notes": "See Phase 4 in MIGRATION_PLAN — vault-on-laptop is the blocker for true independence."
     },
     {
-      "service": "Docker stack: karakeep / archivebox",
+      "service": "KG Neo4j + knowledge-graph app",
       "always_on": false,
       "host_now": "surface docker",
-      "host_target": "hetzner (if upgraded) OR m4 OR drop",
-      "why_move": "Decide per actual usage. If web-archive/bookmarks must be 24/7, move to a cloud/M4 node; otherwise keep on-demand or drop.",
-      "notes": "Both are optional-ish; don't move what you don't use."
+      "host_target": "neo4j → m4-16gb OR hetzner(upgraded); app → on-demand",
+      "why": "If the graph must be queryable 24/7, Neo4j leaves the laptop. M4 has RAM headroom (no local model now). CX22 4GB does not.",
+      "notes": "Sprint 2 jina-v4 re-embed (768→1024) is the natural relocation moment."
+    },
+    {
+      "service": "Docker stack: langfuse / n8n (local copies)",
+      "always_on": true,
+      "host_now": "surface docker (redundant)",
+      "host_target": "hetzner (already in prod) → decommission local",
+      "why": "Hetzner already runs prod n8n + Langfuse v2. Remove the redundant local copies; point LiteLLM tracing at logs.synergify.com.",
+      "notes": "Memory already flagged local Langfuse stack for teardown."
+    },
+    {
+      "service": "karakeep / archivebox",
+      "always_on": false,
+      "host_now": "surface docker",
+      "host_target": "hetzner(upgraded) / m4 / drop",
+      "why": "Move only if actually used 24/7; otherwise on-demand or drop.",
+      "notes": "Don't migrate what you don't use."
     },
     {
       "service": "Ollama",
       "always_on": false,
-      "host_now": "surface (auto-lifecycle hooks)",
+      "host_now": "surface",
       "host_target": "DROP",
-      "why_move": "Local floor already moved to llama-server (GGUF). Ollama is legacy convenience — retire to free RAM.",
-      "notes": "Per memory, llama-server is the floor now."
+      "why": "Legacy convenience; no local floor to serve. Retire.",
+      "notes": "—"
     },
     {
       "service": "n8n prod + Dokploy + CF tunnel",
       "always_on": true,
       "host_now": "hetzner",
       "host_target": "hetzner (no change)",
-      "why_move": "Already correctly placed in the cloud tier.",
+      "why": "Already correctly in the cloud tier.",
       "notes": "Public ingress via CF tunnel ENERV-HUB."
     }
   ]

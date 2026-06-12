@@ -1,118 +1,159 @@
-# Migration plan — make NAUTILUS laptop-independent
+# Migration plan — laptop-independence (no-floor variant)
 
 > **Goal:** zero always-on services on the Surface. The lab survives the laptop
-> being off, asleep, or rebooting. **Status:** plan (2026-06-11), not yet executed.
+> being off/asleep/rebooting. **Variant:** no always-on local LLM floor — clouds
+> carry inference now; a capable local floor returns later on a planned 64GB+
+> node. **Status:** plan (2026-06-11), not yet executed.
+
+## Why no floor
+
+An 8-14B local model is far weaker than the free clouds already in rotation
+(Cerebras qwen-3-235b ~1000 TPS, Groq llama-3.3-70b). It only ever served as a
+mediocre emergency backstop. So we drop it and split the architecture cleanly by
+role instead of forcing a weak model onto a 16GB Mac:
+
+- **Control plane** (gateway, dashboard) — light, always-on → **M4 16GB**.
+- **Inference** — clouds now (free→paid); a *capable* local floor later on a
+  **64GB+ node** (30B-A3B / 70B-Q4), never a weak 8B.
+- **Edge** (audio, vault data) — **M2 ×2**.
+- **Public** — **Hetzner**.
+- **Dev + on-demand local power** — **Surface** (30B when it's on).
+
+**Accepted tradeoff:** this weakens SOVRN principle #1 ("100% offline if every
+cloud goes dark") to "offline only when the Surface 30B is up" — *until* the
+64GB node lands and restores a proper always-on local floor. Failure backstop in
+the interim is **paid cloud**, not free-local.
 
 ## Target topology
 
 ```
-┌─ workstation ───────────────┐   ┌─ local always-on (LAN) ──────────────────────┐
-│ Surface Laptop Studio 2     │   │ Mac Mini M4 16GB  →  "always-on local brain"  │
-│  • dev work                 │   │    LiteLLM gateway + 8-14B llama-server floor │
-│  • OPTIONAL 30B power model  │──▶│    + labwatch + (Hermes)                       │
-│    (only when powered on)   │   │ Mac Mini M2 #1 (SOVERN-01) → edge daemons:     │
-│  • NOTHING depends on it    │   │    STT (Parakeet) · KG ingest · cron · health  │
-└─────────────────────────────┘   │ Mac Mini M2 #2 (SOVERN-02) → redundancy/2nd    │
-                                   └────────────────────────────────────────────────┘
-                                            │
-                                   ┌─ cloud (public) ──────────────────────────────┐
-                                   │ Hetzner CX22 (→CX32?) behind Cloudflare Tunnel │
-                                   │   n8n prod · Langfuse v2 · Dokploy · (Neo4j?)  │
-                                   └────────────────────────────────────────────────┘
+┌─ workstation ───────────┐   ┌─ control plane (always-on, LAN) ─┐
+│ Surface Studio 2        │   │ Mac Mini M4 16GB                  │
+│  • dev                  │──▶│   LiteLLM gateway + labwatch      │
+│  • on-demand 30B (local │   │   (+ Hermes?)  — NO local model   │
+│    power, when powered) │   │   permanent home; doesn't move    │
+└─────────────────────────┘   └──────────────────────────────────┘
+                                         │ routes to
+        ┌────────────────────────────────┼─────────────────────────────┐
+        ▼                                 ▼                             ▼
+┌─ inference ─────────┐   ┌─ edge (always-on, LAN) ─┐   ┌─ public (cloud) ────────┐
+│ FREE clouds first   │   │ M2 #1 SOVERN-01: STT    │   │ Hetzner CX22(→32?)      │
+│ (Cerebras/Groq/NIM) │   │ M2 #2 SOVERN-02: ingest │   │  n8n · Langfuse ·       │
+│ → paid cloud backstop│  │  (blocked: FileVault)   │   │  Dokploy · CF tunnel    │
+│ → [later] 64GB node  │  └─────────────────────────┘   └─────────────────────────┘
+│   30B-A3B/70B floor  │
+└──────────────────────┘
 ```
-
-## The one hard constraint
-
-**The 30B local model cannot move to the Mac fleet.** Qwen3-Coder-30B-A3B at Q4
-is ~16-18 GB; the M4 has 16 GB unified shared with macOS, the M2s have 8 GB.
-So:
-- **Always-on local floor → an 8B (comfortable) or 14B (tight) on the M4.**
-- **30B stays on the Surface as an on-demand power tier** — in LiteLLM rotation
-  only while the laptop is up; the router skips it when it's down.
-
-This is the central trade: full laptop-independence costs you the always-on 30B.
-Free clouds (Cerebras qwen-3-235b ~1000 TPS, Groq 70B) remain the high-quality
-path; the M4 8-14B is the offline floor. If an always-on local 30B is
-non-negotiable, that needs new hardware (e.g. a 32-64GB Mac/mini-PC) — out of
-scope here.
 
 ---
 
-## Phase 0 — unblock prerequisites (do first)
+## Phase 0 — prerequisites
 
-1. **Onboard the M4** — it isn't a node yet. Reserve a static IP at the router,
-   install SSH key, run the SOVERN-01 hardening (disable sleep, NOPASSWD sudo for
-   pmset/etc.). Record IP/MAC back into `fleet.json`.
-2. **Unblock SOVERN-02** — it's stuck at the FileVault pre-boot screen. Attach
-   HDMI + USB keyboard (or a ~$15 MS2109 capture card), type the FileVault
-   password once, enable Remote Login, set a DHCP reservation. Until then it's
-   not in the pool.
-3. **Static DHCP reservations** for all three Macs (M4, .123, .154) so addresses
-   don't move under the services that point at them.
+1. **Onboard the M4** (not a node yet): static DHCP reservation, SSH key, harden
+   (disable sleep, NOPASSWD sudo) per the SOVERN-01 pattern. Record IP/MAC in
+   `fleet.json`.
+2. **Unblock SOVERN-02** (FileVault pre-boot): HDMI + USB keyboard (or ~$15
+   MS2109 capture) to type the FileVault password once, enable Remote Login, set
+   a DHCP reservation.
+3. Static reservations for all three Macs.
 
-## Phase 1 — move the gateway + floor to the M4 (the critical lift)
+## Phase 1 — control plane to the M4 (the critical lift)
 
-1. Install on the M4: Python + LiteLLM, `llama-server` (Metal build) with an
-   8B or 14B Q4 GGUF, the labwatch server, the port_broker.
-2. Move provider API keys to the M4's user env (macOS keychain or a gitignored
-   env sourced at launch — mirror `setup-litellm-keys.ps1`).
-3. Repoint `litellm-config.yaml`:
-   - `local-fallback` / `local` → M4 llama-server (8-14B).
-   - add `power-local` → Surface 30B (in fallbacks only, tolerated-down).
-   - `LANGFUSE_HOST` → Hetzner `https://logs.synergify.com` (stop using local).
-4. Update `config/services.json` to the M4's host:port (gateway + labwatch).
-5. **Cutover test:** start everything on the M4, then **power the Surface off**
-   and confirm: an agent call routes through the M4 gateway → free clouds and the
-   M4 floor; labwatch loads; nothing errors on the missing 30B.
+1. Install on the M4: Python + LiteLLM + labwatch + port_broker. **No
+   llama-server, no model.**
+2. Move provider API keys to the M4 user env (macOS keychain / gitignored env).
+3. Repoint `litellm-config.yaml` for **no floor**:
+   - **remove `local-fallback` from `default_fallbacks`**; set it to e.g.
+     `["hf-llama-70b"]` or a paid alias.
+   - chain tails that pointed at `local-fallback` → `hf-llama-70b` / paid.
+   - add `power-local` → Surface 30B, present in fallbacks only (tolerated-down).
+4. Update `config/services.json` to the M4 host:port (gateway + labwatch).
+5. **Cutover test:** start the M4 control plane, **power the Surface off**, and
+   confirm an agent call routes M4 gateway → free clouds (then paid if exhausted);
+   labwatch loads; nothing errors on the absent local floor or 30B.
 
 ## Phase 2 — edge daemons to the M2 fleet
 
-1. **SOVERN-01:** stand up the STT service (Parakeet/Whisper) + KG ingest worker
-   + healthchecks/cron. Point the Echo app's transcription at it.
-2. **SOVERN-02** (once unblocked): redundancy — second STT/ingest, or a backup
-   gateway that can take over if the M4 is down.
-3. Keep these to single-process daemons — the 8 GB M2s can't do more.
+1. **SOVERN-01:** STT (Parakeet/Whisper) + healthchecks/cron. Point Echo's
+   transcription at it.
+2. **SOVERN-02** (once unblocked): KG ingest worker (pending the vault question)
+   / redundancy.
+3. Single-process daemons only — 8GB M2s (SOVERN-01 already idles ~7.4/8GB).
 
-## Phase 3 — consolidate the cloud tier & kill local docker
+## Phase 3 — consolidate cloud, kill local docker
 
 1. **Decommission the Surface local docker stack** — Langfuse + n8n already run
-   in prod on Hetzner; remove the redundant local copies (memory already flagged
-   the local Langfuse stack for teardown). Point all tracing at Hetzner.
-2. **KG Neo4j:** if the graph must be queryable 24/7, move Neo4j off the laptop.
-   M4 has headroom (gateway + 8B + Neo4j ~2GB fits 16GB tightly — measure); or
-   size Hetzner up to CX32/CX42 and host it there. The Sprint 2 jina-v4 re-embed
-   (768→1024) is the natural moment.
-3. **Drop Ollama** on the Surface (legacy; floor is llama-server now).
+   in Hetzner prod; remove the redundant local copies; point tracing at
+   `logs.synergify.com`.
+2. **KG Neo4j:** if queryable 24/7 is required, move off the laptop → M4 (has
+   headroom with no local model) or Hetzner-upgraded. Sprint 2 jina-v4 re-embed
+   is the natural moment.
+3. **Drop Ollama** on the Surface.
 
-## Phase 4 — resolve the vault-watcher question
+## Phase 4 — vault-watcher (independence blocker)
 
-The KG ingest watches the Obsidian vault **on the laptop** — it can't be
-laptop-independent while the source lives there. Pick one:
-- **(a) Accept on-demand ingest** — vault sync only runs when the laptop is up
-  (simplest; the rest of the stack is still independent).
-- **(b) Relocate the canonical vault** to the SanDisk-on-a-Mac or a synced
-  location an M2 watches (true independence; biggest change).
-- **(c) Push-on-save** — a laptop hook pushes changed notes to an M2 ingest
-  worker (laptop still the source, but ingest is decoupled).
-
-Recommendation: ship (a) now, revisit (b)/(c) if 24/7 ingest becomes a need.
+The KG ingest watches the Obsidian vault **on the laptop**. Pick: (a) accept
+on-demand ingest (laptop-up only — simplest; rest of stack still independent);
+(b) relocate the canonical vault to a Mac/SanDisk an M2 watches (true
+independence); (c) push-on-save hook from the laptop to an M2 worker.
+Recommendation: ship (a), revisit if 24/7 ingest becomes a need.
 
 ---
 
-## Definition of done
+## Phase 5 — the 64GB+ node (restores the real local floor)
 
-Power the Surface **off** and verify, from the workstation or phone:
-- [ ] agent/LLM calls succeed (gateway on M4 → free clouds + M4 floor)
+When the new box lands, it becomes the **always-on inference floor** running a
+*capable* model (30B-A3B comfortably, 70B-Q4 feasible) — restoring SOVRN
+principle #1 properly. The M4 keeps the control plane (gateway doesn't move);
+the 64GB box is pure inference behind the gateway.
+
+### Buying criteria — what actually matters for local LLM
+
+**For LLM, system RAM alone is the wrong metric.** What runs a model is either
+**Apple unified memory** or **GPU VRAM** — not a big DDR pool next to a small GPU.
+
+- ✅ **Apple Silicon, 64GB+ unified (recommended)** — Mac Studio M4 Max 64GB,
+  Mac Mini M4 Pro 64GB, or used M1/M2 Max Studio 64GB. Unified memory = usable
+  model memory; Metal is well-supported; idle power is tiny (always-on friendly);
+  fits the existing Mac fleet/ops. 30B-A3B is MoE (3B active) → runs fast on
+  Apple Silicon; 64GB also opens 70B-Q4 and larger MoE.
+- ⚠️ **x86 + GPU** — only worth it if the **GPU has ≥24GB VRAM** (e.g. RTX
+  3090/4090 24GB → 30B-Q4 on-GPU; 70B needs 2×24GB or a 48GB card). A 64GB-RAM
+  PC with an 8GB GPU runs 30B only on CPU (slow) — system RAM doesn't fix that.
+  Higher idle power, more heat, less always-on friendly.
+- ❌ **64GB RAM, no real GPU** — avoid for this purpose; CPU inference of 30B is
+  too slow to be a useful always-on floor.
+
+Rule of thumb: **VRAM/unified ≥ model size at Q4 + ~20% headroom.** 30B-A3B Q4
+≈ 18GB → 32GB unified is the floor, 64GB gives comfort + 70B-Q4 headroom.
+
+### When it arrives
+
+1. Install llama-server (Metal) + a 30B-A3B or 70B-Q4 GGUF on the 64GB node.
+2. Add it to `litellm-config.yaml` as `local-floor` (always-on); restore it to
+   the fallback chain tails / `default_fallbacks` ahead of paid.
+3. Re-evaluate the M4: it can stay the control-plane host (clean separation), or
+   the 64GB box can absorb the gateway too and the M4 frees up for on-demand dev
+   inference or resale (per the labwatch inference-economics verdict).
+4. Surface 30B becomes purely a dev convenience (no longer the only local option).
+
+---
+
+## Definition of done (interim, no-floor)
+
+Power the Surface **off** and verify from the workstation or phone:
+- [ ] agent/LLM calls succeed (M4 gateway → free clouds → paid backstop)
 - [ ] labwatch `:4002` loads
 - [ ] STT works (M2 node)
-- [ ] n8n / Langfuse / public services up (Hetzner — already independent)
-- [ ] only loss is the optional 30B power model (expected)
+- [ ] n8n / Langfuse / public up (Hetzner — already independent)
+- [ ] expected losses only: no always-on local inference, no 30B (until 64GB node)
 
 ## Open decisions for the architect
 
-1. **Hermes 24/7?** If yes → runs on M4; if only during work → leave on-demand.
-2. **KG Neo4j home:** M4 (free, tight) vs Hetzner upgrade (€ cost, clean separation)?
-3. **Vault watcher:** option (a) / (b) / (c) above.
-4. **SOVERN-02:** redundancy node, or sell it (per `labwatch` inference-economics
-   verdict the M2s don't pay off as inference — but as always-on edge daemons
-   they earn their keep)?
+1. **Hermes 24/7?** yes → M4 with the gateway; no → on-demand.
+2. **KG Neo4j home:** M4 (free, has headroom now) vs Hetzner upgrade?
+3. **Vault watcher:** (a)/(b)/(c) above.
+4. **64GB node:** Apple Silicon (recommended) vs x86+big-GPU; new vs used.
+5. **M2 #2 / M4 after the 64GB node:** redundancy, repurpose, or sell (labwatch
+   verdict: Macs don't pay off as pure inference, but earn their keep as
+   always-on edge/control-plane).
