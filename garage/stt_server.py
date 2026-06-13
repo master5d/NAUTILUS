@@ -17,7 +17,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 MODEL_ID = os.environ.get("PARAKEET_MODEL", "mlx-community/parakeet-tdt-0.6b-v3")
 PORT = int(os.environ.get("STT_PORT", "4100"))
@@ -87,7 +87,10 @@ class Handler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     # Bind LAN so Echo on the Surface can reach it; home-LAN trust boundary.
-    srv = ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
+    # Single-threaded HTTPServer on purpose: MLX's Metal GPU stream is bound to
+    # the thread that loaded the model, so handlers must run on that same thread.
+    # Transcriptions are short and serial is fine for a personal node.
+    srv = HTTPServer(("0.0.0.0", PORT), Handler)
     print(f"[stt] serving on 0.0.0.0:{PORT}", flush=True)
     try:
         srv.serve_forever()
