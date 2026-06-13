@@ -60,13 +60,16 @@ model_list:
       rpm: 15
       # Routes to Google AI Studio: free tier 15 RPM, 1500 RPD, 1M context
 
-  # --- Local fallback (llama.cpp server) ---
-  - model_name: local-fallback
-    litellm_params:
-      model: openai/qwen3-coder
-      api_base: http://localhost:8080/v1
-      api_key: dummy
-      # llama-server running Qwen3-Coder-30B-A3B on port 8080
+  # --- Local power tier (Surface 30B, on-demand) ---
+  # no-floor variant (Garage): the M4 gateway runs NO local model. Surface's
+  # llama-server (Qwen3-Coder-30B-A3B) is an OPTIONAL power tier, present only
+  # when the laptop is up. Set api_base to the Surface LAN IP and uncomment to
+  # add it to the chain as tolerated-down. Until then the gateway is cloud-only.
+  # - model_name: power-local
+  #   litellm_params:
+  #     model: openai/qwen3-coder
+  #     api_base: http://<surface-lan-ip>:8080/v1
+  #     api_key: dummy
 
   # --- HF Serverless Inference (5th fallback, free tier, ~5-30s cold start) ---
   # Correct URL: router.huggingface.co/v1 (api-inference.huggingface.co/v1 is wrong/deprecated)
@@ -90,23 +93,19 @@ model_list:
       api_key: os.environ/GROQ_API_KEY
       # Qwen3-32B: hybrid thinking mode, replaces decommissioned deepseek-r1
 
-  - model_name: reasoning-local
-    litellm_params:
-      model: openai/qwen3-coder
-      api_base: http://localhost:8080/v1
-      api_key: dummy
-
 litellm_settings:
   # CRITICAL: explicit fallbacks array (issue #26015)
+  # no-floor (Garage): chains end at cloud, NOT a local server (M4 runs no model).
+  # NB: hf-* tiers need HF_TOKEN (currently unset) — they self-skip if absent.
   fallbacks:
-    - {"google/gemini-3-flash-preview": ["fast-pool", "hf-llama-70b", "local-fallback"]}
-    - {"fast-pool": ["hf-llama-70b", "local-fallback"]}
-    - {"hf-llama-70b": ["hf-qwen-72b", "local-fallback"]}
-    - {"hf-qwen-72b": ["local-fallback"]}
-    - {"reasoning": ["reasoning-local"]}
-  default_fallbacks: ["local-fallback"]
+    - {"google/gemini-3-flash-preview": ["fast-pool", "hf-llama-70b"]}
+    - {"fast-pool": ["hf-llama-70b", "google/gemini-3-flash-preview"]}
+    - {"hf-llama-70b": ["hf-qwen-72b", "fast-pool"]}
+    - {"hf-qwen-72b": ["fast-pool"]}
+    - {"reasoning": ["fast-pool"]}
+  default_fallbacks: ["fast-pool"]
   context_window_fallbacks:
-    - {"fast-pool": ["local-fallback"]}
+    - {"fast-pool": ["google/gemini-3-flash-preview"]}
   request_timeout: 60
   num_retries: 2
   drop_params: true  # drop unsupported params per provider silently
