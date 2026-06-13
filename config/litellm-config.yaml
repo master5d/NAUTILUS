@@ -71,20 +71,13 @@ model_list:
   #     api_base: http://<surface-lan-ip>:8080/v1
   #     api_key: dummy
 
-  # --- HF Serverless Inference (5th fallback, free tier, ~5-30s cold start) ---
-  # Correct URL: router.huggingface.co/v1 (api-inference.huggingface.co/v1 is wrong/deprecated)
-  # openai/ prefix — HF router is OpenAI-compatible; huggingface/ prefix uses wrong URL construction
-  - model_name: hf-llama-70b
-    litellm_params:
-      model: openai/meta-llama/Llama-3.3-70B-Instruct
-      api_key: os.environ/HF_TOKEN
-      api_base: https://router.huggingface.co/v1
-
-  - model_name: hf-qwen-72b
-    litellm_params:
-      model: openai/Qwen/Qwen2.5-72B-Instruct
-      api_key: os.environ/HF_TOKEN
-      api_base: https://router.huggingface.co/v1
+  # --- HF Serverless Inference (DISABLED 2026-06-13) ---
+  # Removed from active config: HF_TOKEN is unset (on the rotation list) and
+  # LiteLLM 1.57.4 crashes at startup creating the OpenAI client with an empty
+  # key (does NOT self-skip). Re-add these two blocks once HF_TOKEN is set:
+  #   - model_name: hf-llama-70b → openai/meta-llama/Llama-3.3-70B-Instruct
+  #   - model_name: hf-qwen-72b  → openai/Qwen/Qwen2.5-72B-Instruct
+  #   api_base: https://router.huggingface.co/v1 · api_key: os.environ/HF_TOKEN
 
   # --- Reasoning models (on-demand, not in rotation) ---
   - model_name: reasoning
@@ -98,10 +91,8 @@ litellm_settings:
   # no-floor (Garage): chains end at cloud, NOT a local server (M4 runs no model).
   # NB: hf-* tiers need HF_TOKEN (currently unset) — they self-skip if absent.
   fallbacks:
-    - {"google/gemini-3-flash-preview": ["fast-pool", "hf-llama-70b"]}
-    - {"fast-pool": ["hf-llama-70b", "google/gemini-3-flash-preview"]}
-    - {"hf-llama-70b": ["hf-qwen-72b", "fast-pool"]}
-    - {"hf-qwen-72b": ["fast-pool"]}
+    - {"google/gemini-3-flash-preview": ["fast-pool"]}
+    - {"fast-pool": ["google/gemini-3-flash-preview"]}
     - {"reasoning": ["fast-pool"]}
   default_fallbacks: ["fast-pool"]
   context_window_fallbacks:
