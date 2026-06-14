@@ -26,7 +26,7 @@
       "label": "Mac Mini M4 16GB",
       "tier": "local_always_on",
       "specs": { "cpu": "Apple M4 (10-core)", "ram_gb": 16, "bandwidth_gbs": 120, "os": "macOS 26.5.1 (25F80)", "model": "Mac16,10" },
-      "net": { "ip": "192.168.1.148", "mac": "6e:0a:c0:96:8a:5c", "static": false, "hostname_mdns": "SOVRNs-Mac-mini.local", "user": "sovrnnode03", "ssh_key": "~/.ssh/id_ed25519_sovern", "ssh_alias": "m4", "note": "FileVault OFF (no pre-boot block); needs router DHCP reservation for .148" },
+      "net": { "ip": "192.168.1.148", "iface": "en1 (Wi-Fi)", "static": "manual IP set on Wi-Fi service 2026-06-14 (mask 255.255.255.0, router .254, DNS .254+1.1.1.1) — survives reboot/room-move on same SSID; no router reservation needed", "mac_wifi_private": "6e:0a:c0:96:8a:5c (router-visible; rotates — moot now IP is manual)", "mac_ethernet_hw": "1c:f6:4c:59:c5:23 (en0, no cable)", "hostname_mdns": "SOVRNs-Mac-mini.local", "user": "sovrnnode03", "ssh_key": "~/.ssh/id_ed25519_sovern", "ssh_alias": "m4", "note": "FileVault OFF. On Wi-Fi (no Ethernet cable). For max stability later: plug Ethernet (en0) + re-apply manual IP to the Ethernet service." },
       "power": { "always_on": true, "load_w": 30, "idle_w": 4, "note": "pmset: sleep 0, autorestart 1, womp 1 (hardened 2026-06-13)" },
       "status": "onboarded-live-2026-06-14",
       "role_now": "ALWAYS-ON NODE LIVE — 3 LaunchDaemons: LiteLLM gateway :4000 (LAN), labwatch :4002 (127.0.0.1), Parakeet STT :4100 (LAN, parakeet-tdt-0.6b-v3). Verified: Windows→M4 gateway→free-cloud completion OK; STT transcribes (1.6s). Scoped sudoers (pmset/launchctl/network), broad removed. PENDING (user): router DHCP reservation for .148; Surface-off cutover test; wire Echo→M4 STT.",
