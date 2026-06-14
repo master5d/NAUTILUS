@@ -138,7 +138,20 @@ Threat model: home LAN is **semi-trusted** (other devices, IoT); the internet is
 - **Bearer token** per host (`Authorization: Bearer <host_token>`) — rejects strangers on the LAN.
 - **HMAC-SHA256** payload signature with a per-host key — tamper/replay protection even if a token is observed. Verified with stdlib `hmac.compare_digest` (constant-time; no custom crypto).
 - **Anti-replay:** `ts` included in the signature + a ±120s window; the collector rejects stale/future timestamps. Optional nonce cache.
-- Keys: gitignored `~/.config/labwatch/reporter.key` per host + a registry on M4 (`ingest_keys.json`, gitignored, mode 600). Same pattern as `.env.gateway`.
+- Keys: per host, drawn from the **unified key store** below.
+
+### Unified key management
+
+All NAUTILUS mesh secrets — the LiteLLM gateway master key, gateway provider keys, and observability reporter/ingest keys — follow **one convention**, so there is a single mental model and a single rotation path across the mesh. This resolves the prior open question (LiteLLM `LITELLM_MASTER_KEY` vs reporter tokens) by making them instances of the same scheme rather than two ad-hoc systems.
+
+**Convention:**
+- **Location:** one gitignored secrets dir per host, `~/.config/nautilus/secrets/`, mode `700`; each secret a single file, mode `600`. Existing `~/nautilus/.env.gateway` is migrated/symlinked under this root so there is exactly one secrets tree per host.
+- **Naming:** `<service>.<purpose>` — e.g. `litellm.master_key`, `observability.ingest_key` (the per-host HMAC+bearer key; the bearer token is derived from it via a labeled HKDF so one stored secret yields both the token and the HMAC key — no second file to rotate).
+- **Registry (collector only, M4):** `~/.config/nautilus/secrets/observability.keyring.json` (mode `600`, gitignored) maps `host → key_id → key_material` plus `created`/`rotated` timestamps. The collector loads it at startup and on `SIGHUP`.
+- **Generation:** keys are 32 bytes from `secrets.token_bytes(32)` (CSPRNG), base64url-encoded. One helper, `nautilus-keys` (a small CLI), does `gen`, `rotate`, `list`, `revoke` — never echoing material to stdout (silent-capture standing principle); it writes files and prints only key IDs/fingerprints.
+- **Rotation:** dual-key overlap — a new `key_id` is added to the keyring and pushed to the host; reporters sign with the newest key but the collector accepts any non-revoked key during an overlap window, then the old `key_id` is revoked. Zero-downtime, and the same procedure covers `litellm.master_key`.
+- **Rotation surfacing:** key `created`/`rotated` ages feed the `deprecation-soon` watcher (a key older than its policy max-age raises a `warning`), so rotation debt is observable in the same dashboard — closing the loop with secops posture.
+- **Boundaries unchanged:** keys never enter payloads, logs, or the web view (see "Secrets never enter observability"). Browser-exposed `NEXT_PUBLIC_*` (KG) is explicitly out of this store — it is non-secret by definition.
 
 **Ingest hardening:**
 - **Body size cap** (~256 KB) → 413 on exceed (mirrors the STT service).
@@ -204,7 +217,7 @@ No big-bang; the current labwatch keeps working throughout.
 
 | Phase | Work | Result |
 |-------|------|--------|
-| **0** | Extract payload schema + `/ingest` (token+HMAC+validation) into the collector; M4 reporter (localhost probes + psutil) pushes to itself | M4 reports through the new path; web-view reads `snapshots`; old localhost probes removed |
+| **0** | Bootstrap the **unified key store** + `nautilus-keys` helper (migrate `.env.gateway` under it); extract payload schema + `/ingest` (token+HMAC+validation) into the collector; M4 reporter (localhost probes + psutil) pushes to itself | Single secrets convention live; M4 reports through the new path; web-view reads `snapshots`; old localhost probes removed |
 | **1** | Surface reporter (evolution of `collect-wallets.ps1` + host metrics) → **wallets panel fixed correctly**; tray launcher (tunnel + indicator) | Surface visible; broken panel alive; tray works |
 | **2** | Watchers + `/api/alerts` + Telegram escape | Proactive alerts |
 | **3** | Hetzner reporter (behind CF tunnel, pinned pull) + advisory tier (deprecation/backup/reachability) | Full fleet coverage |
@@ -241,5 +254,5 @@ We **build** bespoke (contract, collector, watchers, reporter scaffold) and **bo
 
 - Approach C upgrade path (thin OSS for host metrics/charts) if multi-week trend retention is later required.
 - 64GB inference node reporter (Phase 5, drop-in).
-- Whether the LiteLLM `LITELLM_MASTER_KEY` work and the reporter token scheme should share a key-management convention.
+- ~~Whether the LiteLLM `LITELLM_MASTER_KEY` work and the reporter token scheme should share a key-management convention.~~ **Resolved:** unified under one convention — see §5 "Unified key management."
 - Reachability-matrix UX (how to visualize "who can reach whom" compactly).
