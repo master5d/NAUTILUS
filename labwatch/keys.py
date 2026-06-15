@@ -39,8 +39,10 @@ def sign_payload(master: bytes, body: bytes) -> str:
 
 
 def verify_payload(master: bytes, body: bytes, sig: str) -> bool:
+    if not isinstance(sig, str):
+        return False
     expected = sign_payload(master, body)
-    return hmac.compare_digest(expected, sig or "")
+    return hmac.compare_digest(expected, sig)
 
 
 SECRETS_DIR = os.path.join(os.path.expanduser("~"), ".config", "nautilus", "secrets")

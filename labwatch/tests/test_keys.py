@@ -8,7 +8,7 @@ def test_bearer_and_signing_keys_are_distinct_and_deterministic():
     b2 = keys.bearer_token(master)
     assert b1 == b2                      # deterministic
     assert keys.signing_key(master) != master
-    assert keys.bearer_token(master).encode() != keys.signing_key(master)
+    assert keys._derive(master, keys.LABEL_BEARER) != keys._derive(master, keys.LABEL_SIGN)
 
 
 def test_sign_then_verify_roundtrip():
@@ -56,3 +56,11 @@ def test_keyring_material_and_acceptable(tmp_path):
 
 def test_load_keyring_missing_file_returns_empty():
     assert keys.load_keyring("/no/such/keyring.json") == {"hosts": {}}
+
+
+def test_verify_rejects_non_string_sig():
+    master = b"\x05" * 32
+    body = b'{"a":1}'
+    assert keys.verify_payload(master, body, None) is False
+    assert keys.verify_payload(master, body, 12345) is False
+    assert keys.verify_payload(master, body, [1, 2, 3]) is False
