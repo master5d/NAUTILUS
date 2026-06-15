@@ -16,10 +16,12 @@ model_list:
   # --- Cloud rotating pool (all free tiers, OpenAI-compatible) ---
   - model_name: fast-pool
     litellm_params:
-      model: cerebras/qwen-3-235b-a22b-instruct-2507
+      model: cerebras/zai-glm-4.7
       api_key: os.environ/CEREBRAS_API_KEY
       rpm: 30
-      # Qwen3-235B on Cerebras wafer chip: ~1000 TPS, free tier 1M tok/day
+      # GLM-4.7 on Cerebras wafer chip: ~1000 TPS, free tier 1M tok/day.
+      # (Qwen3-235B was pulled from Cerebras free tier ~2026-06; only
+      # zai-glm-4.7 + gpt-oss-120b remain — verified 2026-06-15.)
 
   - model_name: fast-pool
     litellm_params:
@@ -71,13 +73,21 @@ model_list:
   #     api_base: http://<surface-lan-ip>:8080/v1
   #     api_key: dummy
 
-  # --- HF Serverless Inference (DISABLED 2026-06-13) ---
-  # Removed from active config: HF_TOKEN is unset (on the rotation list) and
-  # LiteLLM 1.57.4 crashes at startup creating the OpenAI client with an empty
-  # key (does NOT self-skip). Re-add these two blocks once HF_TOKEN is set:
-  #   - model_name: hf-llama-70b → openai/meta-llama/Llama-3.3-70B-Instruct
-  #   - model_name: hf-qwen-72b  → openai/Qwen/Qwen2.5-72B-Instruct
-  #   api_base: https://router.huggingface.co/v1 · api_key: os.environ/HF_TOKEN
+  # --- HF Serverless Inference (RE-ENABLED 2026-06-15 after HF_TOKEN rotation) ---
+  # Disabled 2026-06-13 while HF_TOKEN was unset (LiteLLM 1.57.4 crashes at
+  # startup building the OpenAI client with an empty key — does NOT self-skip).
+  # Token rotated + re-set in User env, so these are active again.
+  - model_name: hf-llama-70b
+    litellm_params:
+      model: openai/meta-llama/Llama-3.3-70B-Instruct
+      api_base: https://router.huggingface.co/v1
+      api_key: os.environ/HF_TOKEN
+
+  - model_name: hf-qwen-72b
+    litellm_params:
+      model: openai/Qwen/Qwen2.5-72B-Instruct
+      api_base: https://router.huggingface.co/v1
+      api_key: os.environ/HF_TOKEN
 
   # --- Reasoning models (on-demand, not in rotation) ---
   - model_name: reasoning
