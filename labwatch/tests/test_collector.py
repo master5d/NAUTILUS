@@ -145,3 +145,20 @@ def test_oversized_body_rejected_413():
     big = b"x" * (collector.MAX_BODY + 1)
     ok, *_rest, status, err = collector.verify_ingest(auth, big, kr, now=datetime.now(timezone.utc))
     assert ok is False and status == 413
+
+
+def test_tick_fires_service_down_and_assemble_includes_it():
+    conn = store.connect(":memory:")
+    store.init_db(conn)
+    now = datetime.now(timezone.utc)
+    payload = {"services": [{"name": "ollama", "port": 11434, "up": False}],
+               "host_metrics": {"cpu_pct": 5.0}}
+    store.upsert_snapshot(conn, "surface", now.isoformat(), payload)
+    rules = {"service-down": {"enabled": True, "severity": "critical", "channels": ["tray"]}}
+
+    state, fired = collector.tick(conn, rules, now_dt=now)
+    assert any(a["id"] == "service-down:ollama" for a in fired)
+
+    state2 = collector.assemble_state(conn, now_dt=now)
+    ids = {a["id"] for a in state2["alerts"]}
+    assert "service-down:ollama" in ids

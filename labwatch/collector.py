@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 import keys as keymod
 import schema as schemamod
 import store as storemod
+import watchers as watchersmod
 
 MAX_BODY = 256 * 1024          # 256 KB cap
 REPLAY_WINDOW_S = 120          # ±120s
@@ -71,5 +72,14 @@ def assemble_state(conn, now_dt: datetime = None) -> dict:
     return {
         "generated": now_dt.isoformat(),
         "hosts": hosts,
-        "alerts": [],          # populated in Phase 2
+        "alerts": storemod.get_active_alerts(conn, now_dt=now_dt),
     }
+
+
+def tick(conn, rules, now_dt: datetime = None):
+    """One evaluation cycle: assemble state, evaluate rules, reconcile alerts.
+    Returns (state, fired_alerts)."""
+    state = assemble_state(conn, now_dt=now_dt)
+    fired = watchersmod.evaluate(state, rules)
+    storemod.reconcile_alerts(conn, fired, now_dt=now_dt)
+    return state, fired

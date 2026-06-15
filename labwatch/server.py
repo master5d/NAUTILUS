@@ -34,6 +34,9 @@ KEYRING_PATH = keymod.KEYRING_PATH
 DB_PATH_OBS = os.path.join(HERE, "labwatch.db")   # snapshots/history/alerts
 _obs_conn = None
 _obs_lock = threading.Lock()
+WATCHERS_PATH = os.path.join(HERE, "watchers.json")
+WATCH_INTERVAL = 30          # seconds between background watcher ticks
+RULES = {}
 
 HOME = os.path.expanduser("~")
 CLAUDE_HOME = os.environ.get("CLAUDE_HOME", os.path.join(HOME, ".claude"))
@@ -49,9 +52,10 @@ def init_observability():
     check_same_thread=False because ThreadingHTTPServer handles each request on
     its own thread; all reads/writes are serialized by _obs_lock.
     """
-    global _obs_conn
+    global _obs_conn, RULES
     _obs_conn = storemod.connect(DB_PATH_OBS, check_same_thread=False)
     storemod.init_db(_obs_conn)
+    RULES = _read_json(WATCHERS_PATH)
 
 
 
@@ -239,6 +243,16 @@ class Handler(BaseHTTPRequestHandler):
                 self._send(200, build_state())
             except Exception as e:
                 self._send(500, {"error": str(e)})
+        elif self.path == "/api/alerts":
+            with _obs_lock:
+                alerts = storemod.get_active_alerts(_obs_conn)
+            order = {"critical": 2, "warning": 1}
+            active = [a for a in alerts if a.get("state") != "resolved"]
+            max_sev = "none"
+            if active:
+                max_sev = max((a["severity"] for a in active), key=lambda s: order.get(s, 0))
+            self._send(200, {"alerts": alerts, "max_severity": max_sev})
+            return
         elif self.path == "/health":
             self._send(200, {"ok": True})
         else:
@@ -255,6 +269,7 @@ class Handler(BaseHTTPRequestHandler):
                 ts = json.loads(body)["ts"]
                 with _obs_lock:
                     storemod.upsert_snapshot(_obs_conn, host, ts, payload)
+                    collector.tick(_obs_conn, RULES)
                 self._send(200, {"ok": True})
             else:
                 self._send(status, {"ok": False, "error": err})
@@ -274,8 +289,23 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
+def _start_watcher_timer():
+    def _loop():
+        while True:
+            time.sleep(WATCH_INTERVAL)
+            try:
+                with _obs_lock:
+                    collector.tick(_obs_conn, RULES)
+            except Exception:
+                pass
+    t = threading.Thread(target=_loop, daemon=True)
+    t.start()
+    return t
+
+
 def make_server(addr=("127.0.0.1", PORT)):
     init_observability()
+    _start_watcher_timer()
     return ThreadingHTTPServer(addr, Handler)
 
 

@@ -18,7 +18,7 @@ def new_alert_keys(prev: set, state) -> set:
 
 def status_color(state) -> str:
     alerts = state.get("alerts") or []
-    severities = {a.get("severity") for a in alerts}
+    severities = {a.get("severity") for a in alerts if a.get("state") != "resolved"}
     hosts = state.get("hosts") or {}
     freshness = {h.get("freshness") for h in hosts.values()}
     if "critical" in severities or "down" in freshness:

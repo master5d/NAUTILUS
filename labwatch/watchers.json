@@ -1,0 +1,8 @@
+{
+  "service-down":   {"enabled": true, "severity": "critical", "channels": ["tray", "telegram"]},
+  "host-silent":    {"enabled": true, "severity": "critical", "channels": ["tray", "telegram"]},
+  "disk-pressure":  {"enabled": true, "severity": "warning", "threshold": 90, "channels": ["tray"]},
+  "ram-pressure":   {"enabled": true, "severity": "warning", "threshold": 90, "channels": ["tray"]},
+  "secops-pending": {"enabled": true, "severity": "warning", "channels": ["tray"]},
+  "egress-anomaly": {"enabled": true, "severity": "critical", "threshold": 0, "channels": ["tray", "telegram"]}
+}

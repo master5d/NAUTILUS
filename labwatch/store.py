@@ -84,3 +84,44 @@ def get_snapshots(conn, now_dt: datetime = None, interval: int = 30) -> dict:
             "payload": json.loads(row["payload"]),
         }
     return out
+
+
+def reconcile_alerts(conn, fired: list, now_dt: datetime = None):
+    """Upsert currently-fired alerts as 'firing'; mark previously-firing alerts
+    that are no longer fired as 'resolved'. Alert identity is (id, host)."""
+    now = (now_dt or datetime.now(timezone.utc)).isoformat()
+    fired_keys = {(a["id"], a["host"]) for a in fired}
+    for a in fired:
+        conn.execute(
+            "INSERT INTO alerts (id, host, severity, state, first_seen, last_seen, resolved_at) "
+            "VALUES (?, ?, ?, 'firing', ?, ?, NULL) "
+            "ON CONFLICT(id, host) DO UPDATE SET state='firing', severity=excluded.severity, "
+            "last_seen=excluded.last_seen, resolved_at=NULL",
+            (a["id"], a["host"], a.get("severity", "warning"), now, now),
+        )
+    for row in conn.execute("SELECT id, host FROM alerts WHERE state='firing'").fetchall():
+        if (row["id"], row["host"]) not in fired_keys:
+            conn.execute(
+                "UPDATE alerts SET state='resolved', resolved_at=? WHERE id=? AND host=?",
+                (now, row["id"], row["host"]),
+            )
+    conn.commit()
+
+
+def get_active_alerts(conn, now_dt: datetime = None, linger_min: int = 30) -> list:
+    """Firing alerts + recently-resolved ones (within linger_min) so the UI can
+    show what just cleared. Each item is a plain dict of the alert row."""
+    now_dt = now_dt or datetime.now(timezone.utc)
+    out = []
+    for r in conn.execute(
+        "SELECT id, host, severity, state, first_seen, last_seen, resolved_at FROM alerts"
+    ):
+        if r["state"] == "firing":
+            out.append(dict(r))
+        elif r["resolved_at"]:
+            try:
+                if (now_dt - _parse(r["resolved_at"])).total_seconds() <= linger_min * 60:
+                    out.append(dict(r))
+            except Exception:
+                pass
+    return out
