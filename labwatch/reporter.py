@@ -4,9 +4,11 @@ Phase 0 = M4 self-report. Single file (probes + host metrics + M4 domain +
 build/sign/post + loop); split per-host when more hosts arrive.
 """
 
+import glob
 import http.client
 import json
 import os
+import re
 import time
 from datetime import datetime, timezone
 from urllib.parse import urlparse
@@ -78,6 +80,86 @@ def domain_m4() -> dict:
     }
 
 
+# --- Surface domain: agent-CLI usage signals (port of collect-wallets.ps1) --
+# "Wallets" = how much of each delegate agent's free tier was used today.
+# These read the same on-disk signals the PowerShell collector read.
+
+def _codex_tokens(home: str, today) -> int:
+    """Sum the LAST token_count.total_tokens per Codex session file for today."""
+    d = os.path.join(home, ".codex", "sessions",
+                     f"{today.year}", f"{today.month:02d}", f"{today.day:02d}")
+    if not os.path.isdir(d):
+        return 0
+    total = 0
+    for fn in glob.glob(os.path.join(d, "rollout-*.jsonl")):
+        last = None
+        try:
+            with open(fn, encoding="utf-8", errors="ignore") as f:
+                for line in f:
+                    if '"type":"token_count"' in line or '"type": "token_count"' in line:
+                        last = line
+        except OSError:
+            continue
+        if last:
+            m = re.search(r'"total_tokens":\s*(\d+)', last)
+            if m:
+                total += int(m.group(1))
+    return total
+
+
+def _gemini_requests(home: str, today) -> int:
+    """Count '"type":"gemini"' turns in Gemini-CLI session files modified today."""
+    base = os.path.join(home, ".gemini", "tmp")
+    if not os.path.isdir(base):
+        return 0
+    n = 0
+    for root, _dirs, files in os.walk(base):
+        for fn in files:
+            if not fn.endswith(".jsonl"):
+                continue
+            p = os.path.join(root, fn)
+            try:
+                if datetime.fromtimestamp(os.path.getmtime(p)).date() != today:
+                    continue
+                with open(p, encoding="utf-8", errors="ignore") as f:
+                    n += f.read().count('"type":"gemini"')
+            except OSError:
+                continue
+    return n
+
+
+def _agy_runs(home: str, today) -> int:
+    """Count Antigravity brain subdirectories modified today."""
+    base = os.path.join(home, ".gemini", "antigravity-cli", "brain")
+    if not os.path.isdir(base):
+        return 0
+    n = 0
+    for name in os.listdir(base):
+        p = os.path.join(base, name)
+        try:
+            if os.path.isdir(p) and datetime.fromtimestamp(os.path.getmtime(p)).date() == today:
+                n += 1
+        except OSError:
+            continue
+    return n
+
+
+def domain_surface(home: str = None, today=None) -> dict:
+    home = home or os.path.expanduser("~")
+    today = today or datetime.now().date()
+    agents = {
+        "codex":       {"used_today": _codex_tokens(home, today), "unit": "tokens",
+                        "budget": None, "signal": "session logs", "confidence": "medium"},
+        "gemini-cli":  {"used_today": _gemini_requests(home, today), "unit": "requests",
+                        "budget": None, "signal": "session logs", "confidence": "high"},
+        "antigravity": {"used_today": _agy_runs(home, today), "unit": "requests",
+                        "budget": 20, "signal": "brain dirs", "confidence": "medium"},
+        "claude":      {"used_today": None, "unit": "requests",
+                        "budget": None, "signal": "unknown", "confidence": "low"},
+    }
+    return {"wallets": {"as_of": datetime.now(timezone.utc).isoformat(), "agents": agents}}
+
+
 # --- assemble + sign + post ------------------------------------------------
 
 _UNSET = object()
@@ -134,6 +216,9 @@ DEFAULT_SERVICES = {
         ("stt", "http://127.0.0.1:4100/health"),
         ("labwatch", "http://127.0.0.1:4002/health"),
     ],
+    "surface": [
+        ("ollama", "http://127.0.0.1:11434/api/tags"),
+    ],
 }
 
 
@@ -145,10 +230,15 @@ def load_master(host: str, keyring_path: str = None) -> bytes:
 def run_once(host: str, ingest_url: str, services_cfg, keyring_path: str = None,
              spool_path: str = None) -> bool:
     master = load_master(host, keyring_path)
-    # m4 omits the arg so build_payload defaults to domain_m4(); other hosts
-    # pass domain=None (no domain block) until their domain is added in Phase 1.
-    payload = build_payload(services_cfg) if host == "m4" \
-        else build_payload(services_cfg, domain=None)
+    # Resolve the host's domain block by name (looked up at call time so tests
+    # can monkeypatch domain_m4 / domain_surface).
+    if host == "m4":
+        domain = domain_m4()
+    elif host == "surface":
+        domain = domain_surface()
+    else:
+        domain = None
+    payload = build_payload(services_cfg, domain=domain)
     body = sign_envelope(host, payload, master)
     return post_snapshot(ingest_url, host, master, body, spool_path=spool_path)
 
@@ -158,9 +248,13 @@ def main():
     ingest = os.environ.get("INGEST_URL", "http://127.0.0.1:4002/ingest")
     interval = int(os.environ.get("REPORTER_INTERVAL", "30"))
     spool = os.environ.get("REPORTER_SPOOL", os.path.join(os.path.dirname(__file__), "spool.jsonl"))
+    tunnel_remote = os.environ.get("REPORTER_TUNNEL")  # e.g. "m4" -> ensure :4002 forward
     services = DEFAULT_SERVICES.get(host, [])
     while True:
         try:
+            if tunnel_remote:
+                import tunnel
+                tunnel.ensure(local_port=4002, remote=tunnel_remote, remote_port=4002)
             run_once(host, ingest, services, spool_path=spool)
         except Exception as e:  # never let the loop die
             print(f"[reporter] cycle error: {type(e).__name__}", flush=True)

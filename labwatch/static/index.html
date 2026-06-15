@@ -193,8 +193,9 @@ async function refresh() {
     .map(([k, a]) => `<button class="${k === active ? 'active' : ''}" onclick="setOrch('${k}')">
       ${k === active ? '<span class="crown">👑</span>' : ''}${a.label}</button>`).join('');
 
-  // wallets
-  const w = s.wallets || {};
+  // wallets (sourced from the surface host's reported domain, push-model)
+  const surfaceDomain = ((((s.hosts || {}).surface || {}).payload || {}).domain) || {};
+  const w = surfaceDomain.wallets || {};
   const wAsOf = w.as_of ? new Date(w.as_of) : null;
   const now = new Date();
   const isOld = wAsOf && (now - wAsOf > 86400000);
