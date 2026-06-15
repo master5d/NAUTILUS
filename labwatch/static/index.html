@@ -32,6 +32,9 @@
   .meta { font-size: 11px; color: var(--dim); margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 7px; }
   .pill { font-size: 11px; padding: 1px 8px; border-radius: 10px; background: var(--panel2); color: var(--dim); }
   .pill.unlim { color: var(--ok); }
+  .pill.warn { color: var(--warn); }
+  .host-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:4px 0; }
+  .dim { color: var(--dim, #888); }
   section { margin-bottom: 24px; }
   section > h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); margin-bottom: 10px; }
   .strip { display: flex; gap: 14px; flex-wrap: wrap; }
@@ -84,6 +87,12 @@
 <section>
   <h2>Оркестратор <span id="err"></span></h2>
   <div class="orch" id="orch"></div>
+</section>
+
+<section>
+  <h2>Delegate Wallets (live signals) <span id="wallets-as-of" class="sub"></span></h2>
+  <div class="grid" id="wallets"></div>
+  <footer id="wallets-hint" style="display:none; color:var(--warn)">💡 Данные устарели или отсутствуют: <code>run collect-wallets.ps1</code></footer>
 </section>
 
 <section>
@@ -168,17 +177,41 @@ async function refresh() {
     return;
   }
 
-  // services
-  const llPort = (s.services.litellm_url || '').split(':').pop() || '?';
-  const names = { litellm: `LiteLLM :${llPort}`, llama_server: 'llama :8080', langfuse: 'Langfuse :3002', ollama: 'Ollama :11434' };
-  document.getElementById('dots').innerHTML = Object.entries(s.services.up)
-    .map(([k, up]) => `<div class="dot ${up ? 'up' : ''}">${names[k] || k}</div>`).join('');
+  // hosts + services (new push-model shape)
+  const hosts = s.hosts || {};
+  const freshCls = f => f === 'live' ? 'up' : (f === 'stale' ? 'warn' : '');
+  document.getElementById('dots').innerHTML = Object.entries(hosts).map(([host, h]) => {
+    const svc = ((h.payload || {}).services || [])
+      .map(x => `<span class="dot ${x.up ? 'up' : ''}">${x.name}:${x.port || '?'}</span>`).join('');
+    const badge = `<span class="pill ${freshCls(h.freshness)}">${host} · ${h.freshness}</span>`;
+    return `<div class="host-row">${badge} ${svc || '<span class="dim">no services</span>'}</div>`;
+  }).join('') || '<span class="dim">no hosts reporting yet</span>';
 
   // orchestrator
   const active = s.orchestrator.active;
   document.getElementById('orch').innerHTML = Object.entries(s.orchestrator.agents || {})
     .map(([k, a]) => `<button class="${k === active ? 'active' : ''}" onclick="setOrch('${k}')">
       ${k === active ? '<span class="crown">👑</span>' : ''}${a.label}</button>`).join('');
+
+  // wallets
+  const w = s.wallets || {};
+  const wAsOf = w.as_of ? new Date(w.as_of) : null;
+  const now = new Date();
+  const isOld = wAsOf && (now - wAsOf > 86400000);
+  document.getElementById('wallets-as-of').textContent = wAsOf ? `· as of ${wAsOf.toLocaleTimeString('ru-RU')}` : '';
+  document.getElementById('wallets-hint').style.display = (!wAsOf || isOld) ? 'block' : 'none';
+  document.getElementById('wallets').innerHTML = Object.entries(w.agents || {})
+    .map(([k, a]) => {
+      const u = a.used_today;
+      const b = a.budget;
+      const confCls = a.confidence === 'high' ? 'ok' : a.confidence === 'medium' ? 'warn' : 'dim';
+      return `<div class="card">
+        <h3>${k} <span class="pill" style="color:var(--${confCls})">${a.confidence} conf</span></h3>
+        <div class="models">Signal: ${a.signal}</div>
+        ${bar('Used today', u, b, a.unit)}
+        ${!b ? `<div class="bar-label"><span>Today</span><span><b>${fmt(u)}</b> ${a.unit}</span></div>` : ''}
+      </div>`;
+    }).join('');
 
   // budget strip
   const b = s.budget;
