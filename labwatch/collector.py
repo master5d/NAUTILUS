@@ -4,6 +4,7 @@ No network or HTTP here (server.py owns the socket); these are pure functions
 so they test without sockets.
 """
 
+import hmac
 import json
 from datetime import datetime, timezone
 
@@ -41,7 +42,7 @@ def verify_ingest(auth_header: str, body: bytes, keyring: dict, now: datetime = 
     token = (auth_header or "").removeprefix("Bearer ").strip()
     matched = None
     for _kid, master in accept:
-        if keymod.bearer_token(master) == token:
+        if hmac.compare_digest(keymod.bearer_token(master), token):
             matched = master
             break
     if matched is None:

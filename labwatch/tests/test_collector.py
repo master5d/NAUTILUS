@@ -1,6 +1,6 @@
 import base64
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import collector
 import keys
@@ -88,3 +88,60 @@ def test_assemble_state_shape():
     assert state["hosts"]["m4"]["freshness"] == "live"
     assert state["alerts"] == []                 # Phase 2 fills this
     assert "generated" in state
+
+
+def test_missing_authorization_header_rejected_401():
+    master = b"\x11" * 32
+    kr = _keyring(master)
+    for auth in (None, ""):
+        ok, *_rest, status, err = collector.verify_ingest(auth, _body(master), kr,
+                                                          now=datetime.now(timezone.utc))
+        assert ok is False and status == 401
+
+
+def test_revoked_key_rejected_401():
+    master = b"\x11" * 32
+    kr = _keyring(master)
+    kr["hosts"]["m4"]["keys"]["m4-1"]["revoked"] = True
+    auth = "Bearer " + keys.bearer_token(master)
+    ok, *_rest, status, err = collector.verify_ingest(auth, _body(master), kr,
+                                                      now=datetime.now(timezone.utc))
+    assert ok is False and status == 401
+
+
+def test_dual_key_rotation_overlap_accepted():
+    m1 = b"\x11" * 32
+    m2 = b"\x22" * 32
+    kr = {"hosts": {"m4": {"active": "m4-2", "keys": {
+        "m4-1": {"material": _b64(m1), "created": "t", "revoked": False},
+        "m4-2": {"material": _b64(m2), "created": "t", "revoked": False},
+    }}}}
+    auth = "Bearer " + keys.bearer_token(m1)   # old key still valid during overlap
+    ok, host, payload, status, err = collector.verify_ingest(auth, _body(m1), kr,
+                                                            now=datetime.now(timezone.utc))
+    assert ok is True and status == 200
+
+
+def test_replay_window_boundaries():
+    master = b"\x11" * 32
+    kr = _keyring(master)
+    auth = "Bearer " + keys.bearer_token(master)
+    now = datetime.now(timezone.utc)
+    ts_edge = (now - timedelta(seconds=120)).isoformat()      # exactly 120s → accepted
+    ok, *_r, status, _e = collector.verify_ingest(auth, _body(master, ts=ts_edge), kr, now=now)
+    assert ok is True
+    ts_over = (now - timedelta(seconds=121)).isoformat()      # 121s old → rejected
+    ok, *_r, status, _e = collector.verify_ingest(auth, _body(master, ts=ts_over), kr, now=now)
+    assert ok is False and status == 401
+    ts_future = (now + timedelta(seconds=121)).isoformat()    # 121s future → rejected
+    ok, *_r, status, _e = collector.verify_ingest(auth, _body(master, ts=ts_future), kr, now=now)
+    assert ok is False and status == 401
+
+
+def test_oversized_body_rejected_413():
+    master = b"\x11" * 32
+    kr = _keyring(master)
+    auth = "Bearer " + keys.bearer_token(master)
+    big = b"x" * (collector.MAX_BODY + 1)
+    ok, *_rest, status, err = collector.verify_ingest(auth, big, kr, now=datetime.now(timezone.utc))
+    assert ok is False and status == 413
