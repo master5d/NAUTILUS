@@ -257,7 +257,13 @@ def main():
                 tunnel.ensure(local_port=4002, remote=tunnel_remote, remote_port=4002)
             run_once(host, ingest, services, spool_path=spool)
         except Exception as e:  # never let the loop die
-            print(f"[reporter] cycle error: {type(e).__name__}", flush=True)
+            # Logging must never kill the loop. Under pythonw.exe (no console)
+            # sys.stdout is None and print() itself raises — swallow that so a
+            # transient cycle error can't terminate a windowless reporter.
+            try:
+                print(f"[reporter] cycle error: {type(e).__name__}", flush=True)
+            except Exception:
+                pass
         time.sleep(interval)
 
 
