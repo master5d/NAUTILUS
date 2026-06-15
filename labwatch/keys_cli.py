@@ -108,12 +108,41 @@ def cmd_list(args):
     return 0
 
 
+def cmd_export_host(args):
+    kr = _load(args.keyring)
+    h = (kr.get("hosts") or {}).get(args.host)
+    if not h:
+        print(f"unknown host: {args.host}")
+        return 1
+    _save(args.out, {"hosts": {args.host: h}})
+    for kid in (h.get("keys") or {}):
+        print(f"exported {args.host} {kid} -> {args.out} (transfer securely, then delete)")
+    return 0
+
+
+def cmd_import_host(args):
+    incoming = _load(args.infile)
+    hosts = incoming.get("hosts") or {}
+    if not hosts:
+        print("no hosts in import file")
+        return 1
+    kr = _load(args.keyring)
+    kr.setdefault("hosts", {})
+    for host, h in hosts.items():
+        kr["hosts"][host] = h
+    _save(args.keyring, kr)
+    print(f"imported hosts: {list(hosts)}")
+    return 0
+
+
 def build_parser():
     p = argparse.ArgumentParser(prog="nautilus-keys")
     sub = p.add_subparsers(dest="cmd", required=True)
     g = sub.add_parser("gen"); g.add_argument("--host", required=True); g.add_argument("--keyring", default=keymod.KEYRING_PATH); g.set_defaults(fn=cmd_gen)
     r = sub.add_parser("rotate"); r.add_argument("--host", required=True); r.add_argument("--keyring", default=keymod.KEYRING_PATH); r.set_defaults(fn=cmd_rotate)
     v = sub.add_parser("revoke"); v.add_argument("--host", required=True); v.add_argument("--key-id", required=True); v.add_argument("--keyring", default=keymod.KEYRING_PATH); v.set_defaults(fn=cmd_revoke)
+    e = sub.add_parser("export-host"); e.add_argument("--host", required=True); e.add_argument("--out", required=True); e.add_argument("--keyring", default=keymod.KEYRING_PATH); e.set_defaults(fn=cmd_export_host)
+    i = sub.add_parser("import-host"); i.add_argument("--in", dest="infile", required=True); i.add_argument("--keyring", default=keymod.KEYRING_PATH); i.set_defaults(fn=cmd_import_host)
     l = sub.add_parser("list"); l.add_argument("--keyring", default=keymod.KEYRING_PATH); l.set_defaults(fn=cmd_list)
     return p
 

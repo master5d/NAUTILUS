@@ -38,3 +38,29 @@ def test_rotate_adds_new_active_keeps_old_then_revoke(tmp_path):
     keys_cli.main(["revoke", "--host", "m4", "--key-id", first, "--keyring", str(krp)])
     kr = _read(krp)
     assert set(dict(keys.acceptable(kr, "m4"))) == {second}       # old revoked
+
+
+def test_export_then_import_roundtrip(tmp_path):
+    src = tmp_path / "m4_keyring.json"
+    keys_cli.main(["gen", "--host", "surface", "--keyring", str(src)])
+    transfer = tmp_path / "surface_key.json"
+    rc = keys_cli.main(["export-host", "--host", "surface",
+                        "--out", str(transfer), "--keyring", str(src)])
+    assert rc == 0
+    assert transfer.exists()
+
+    dst = tmp_path / "surface_keyring.json"
+    rc = keys_cli.main(["import-host", "--in", str(transfer), "--keyring", str(dst)])
+    assert rc == 0
+
+    src_kr = _read(src)
+    dst_kr = _read(dst)
+    assert dict(keys.acceptable(src_kr, "surface")) == dict(keys.acceptable(dst_kr, "surface"))
+
+
+def test_export_unknown_host_returns_1(tmp_path):
+    src = tmp_path / "kr.json"
+    keys_cli.main(["gen", "--host", "m4", "--keyring", str(src)])
+    rc = keys_cli.main(["export-host", "--host", "surface",
+                        "--out", str(tmp_path / "x.json"), "--keyring", str(src)])
+    assert rc == 1
