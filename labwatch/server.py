@@ -247,9 +247,10 @@ class Handler(BaseHTTPRequestHandler):
             with _obs_lock:
                 alerts = storemod.get_active_alerts(_obs_conn)
             order = {"critical": 2, "warning": 1}
+            active = [a for a in alerts if a.get("state") != "resolved"]
             max_sev = "none"
-            if alerts:
-                max_sev = max((a["severity"] for a in alerts), key=lambda s: order.get(s, 0))
+            if active:
+                max_sev = max((a["severity"] for a in active), key=lambda s: order.get(s, 0))
             self._send(200, {"alerts": alerts, "max_severity": max_sev})
             return
         elif self.path == "/health":

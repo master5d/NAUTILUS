@@ -41,3 +41,16 @@ def test_alert_keys_and_new_alert_keys_diff():
 
 def test_alert_keys_empty_state():
     assert tray_logic.alert_keys(_st()) == set()
+
+
+def test_resolved_alert_does_not_drive_color():
+    # a resolved critical lingering in the list must NOT redden the indicator
+    state = _st({"m4": {"freshness": "live"}},
+               [{"id": "x", "host": "m4", "severity": "critical", "state": "resolved"}])
+    assert tray_logic.status_color(state) == "green"
+
+
+def test_firing_alert_with_state_still_red():
+    state = _st({"m4": {"freshness": "live"}},
+               [{"id": "x", "host": "m4", "severity": "critical", "state": "firing"}])
+    assert tray_logic.status_color(state) == "red"
