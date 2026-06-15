@@ -216,6 +216,9 @@ DEFAULT_SERVICES = {
         ("stt", "http://127.0.0.1:4100/health"),
         ("labwatch", "http://127.0.0.1:4002/health"),
     ],
+    "surface": [
+        ("ollama", "http://127.0.0.1:11434/api/tags"),
+    ],
 }
 
 
@@ -227,10 +230,15 @@ def load_master(host: str, keyring_path: str = None) -> bytes:
 def run_once(host: str, ingest_url: str, services_cfg, keyring_path: str = None,
              spool_path: str = None) -> bool:
     master = load_master(host, keyring_path)
-    # m4 omits the arg so build_payload defaults to domain_m4(); other hosts
-    # pass domain=None (no domain block) until their domain is added in Phase 1.
-    payload = build_payload(services_cfg) if host == "m4" \
-        else build_payload(services_cfg, domain=None)
+    # Resolve the host's domain block by name (looked up at call time so tests
+    # can monkeypatch domain_m4 / domain_surface).
+    if host == "m4":
+        domain = domain_m4()
+    elif host == "surface":
+        domain = domain_surface()
+    else:
+        domain = None
+    payload = build_payload(services_cfg, domain=domain)
     body = sign_envelope(host, payload, master)
     return post_snapshot(ingest_url, host, master, body, spool_path=spool_path)
 

@@ -47,6 +47,7 @@ def test_load_master_reads_active_key(tmp_path):
 
 def test_run_once_posts_and_returns_bool(monkeypatch):
     captured = {}
+    monkeypatch.setattr(reporter, "domain_m4", lambda: None)
     monkeypatch.setattr(reporter, "build_payload", lambda cfg, domain=None: {"services": [], "host_metrics": {"cpu_pct": 1.0}})
     monkeypatch.setattr(reporter, "load_master", lambda host, keyring_path=None: b"\x44" * 32)
 
@@ -60,3 +61,20 @@ def test_run_once_posts_and_returns_bool(monkeypatch):
                            services_cfg=[], keyring_path="x")
     assert ok is True
     assert captured["host"] == "m4"
+
+
+def test_run_once_surface_uses_domain_surface(monkeypatch):
+    seen = {}
+    monkeypatch.setattr(reporter, "load_master", lambda host, keyring_path=None: b"\x44" * 32)
+    monkeypatch.setattr(reporter, "domain_surface", lambda: {"wallets": {"agents": {}}})
+
+    def fake_build(cfg, domain=None):
+        seen["domain"] = domain
+        return {"services": [], "host_metrics": {"cpu_pct": 1.0}}
+
+    monkeypatch.setattr(reporter, "build_payload", fake_build)
+    monkeypatch.setattr(reporter, "post_snapshot", lambda *a, **k: True)
+    ok = reporter.run_once(host="surface", ingest_url="http://127.0.0.1:4002/ingest",
+                           services_cfg=[], keyring_path="x")
+    assert ok is True
+    assert seen["domain"] == {"wallets": {"agents": {}}}
