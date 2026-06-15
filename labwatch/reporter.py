@@ -248,9 +248,13 @@ def main():
     ingest = os.environ.get("INGEST_URL", "http://127.0.0.1:4002/ingest")
     interval = int(os.environ.get("REPORTER_INTERVAL", "30"))
     spool = os.environ.get("REPORTER_SPOOL", os.path.join(os.path.dirname(__file__), "spool.jsonl"))
+    tunnel_remote = os.environ.get("REPORTER_TUNNEL")  # e.g. "m4" -> ensure :4002 forward
     services = DEFAULT_SERVICES.get(host, [])
     while True:
         try:
+            if tunnel_remote:
+                import tunnel
+                tunnel.ensure(local_port=4002, remote=tunnel_remote, remote_port=4002)
             run_once(host, ingest, services, spool_path=spool)
         except Exception as e:  # never let the loop die
             print(f"[reporter] cycle error: {type(e).__name__}", flush=True)
