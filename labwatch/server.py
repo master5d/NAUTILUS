@@ -7,16 +7,18 @@ Data: usage.db (written by config/usage_logger.py LiteLLM callback)
       quotas.json (free-tier registry), ../config/orchestrator.json
 """
 
-import http.client
 import json
 import os
 import shutil
 import sqlite3
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+import collector
+import keys as keymod
+import store as storemod
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 NAUTILUS = os.path.dirname(HERE)
@@ -28,74 +30,29 @@ SERVICES_PATH = os.path.join(NAUTILUS, "config", "services.json")
 POSTURE_PATH = os.path.join(NAUTILUS, "secops", "posture.json")
 STATIC_DIR = os.path.join(HERE, "static")
 PORT = 4002
+KEYRING_PATH = keymod.KEYRING_PATH
+DB_PATH_OBS = os.path.join(HERE, "labwatch.db")   # snapshots/history/alerts
+_obs_conn = None
+_obs_lock = threading.Lock()
+
 HOME = os.path.expanduser("~")
 CLAUDE_HOME = os.environ.get("CLAUDE_HOME", os.path.join(HOME, ".claude"))
 EGRESS_LOG = os.path.join(CLAUDE_HOME, "semantic-logger", "egress.jsonl")
 
-_health_cache = {"ts": 0.0, "data": {}}
-_health_lock = threading.Lock()
 _secops_cache = {"ts": 0.0, "data": {}}
 _secops_lock = threading.Lock()
 
 
-def _local_port_path(url: str):
-    """Parse a localhost-only http URL into (port, path). None if not local http."""
-    try:
-        from urllib.parse import urlparse
-        p = urlparse(url)
-        if p.scheme == "http" and p.hostname in ("localhost", "127.0.0.1"):
-            return p.port or 80, p.path or "/"
-    except Exception:
-        pass
-    return None
+def init_observability():
+    """Open the observability DB and ensure tables exist (idempotent).
 
+    check_same_thread=False because ThreadingHTTPServer handles each request on
+    its own thread; all reads/writes are serialized by _obs_lock.
+    """
+    global _obs_conn
+    _obs_conn = storemod.connect(DB_PATH_OBS, check_same_thread=False)
+    storemod.init_db(_obs_conn)
 
-def _litellm_url():
-    try:
-        with open(SERVICES_PATH, encoding="utf-8") as f:
-            url = json.load(f)["litellm"]["url"]
-            if _local_port_path(url):
-                return url
-    except Exception:
-        pass
-    return "http://localhost:4001"
-
-
-def _probe(name, url):
-    """Probe a local service. http.client pinned to 127.0.0.1 — no scheme handlers."""
-    parsed = _local_port_path(url)
-    if not parsed:
-        return name, False
-    port, path = parsed
-    try:
-        conn = http.client.HTTPConnection("127.0.0.1", port, timeout=2)
-        try:
-            conn.request("GET", path, headers={"User-Agent": "labwatch"})
-            status = conn.getresponse().status
-            return name, (200 <= status < 500)
-        finally:
-            conn.close()
-    except Exception:
-        return name, False
-
-
-def services_health():
-    with _health_lock:
-        if time.time() - _health_cache["ts"] < 5:
-            return _health_cache["data"]
-    litellm = _litellm_url()
-    targets = {
-        "litellm": f"{litellm}/health/liveliness",
-        "llama_server": "http://localhost:8080/health",
-        "langfuse": "http://localhost:3002/api/public/health",
-        "ollama": "http://localhost:11434/api/tags",
-    }
-    with ThreadPoolExecutor(max_workers=4) as ex:
-        results = dict(ex.map(lambda kv: _probe(*kv), targets.items()))
-    data = {"endpoints": targets, "up": results, "litellm_url": litellm}
-    with _health_lock:
-        _health_cache.update(ts=time.time(), data=data)
-    return data
 
 
 def _today_utc_bounds():
@@ -232,15 +189,19 @@ def set_orchestrator(agent: str):
 
 
 def build_state():
+    """Legacy aggregate retained for /api/state fallback fields (econ/quotas/budget)
+    that are not yet host-scoped. Host/service data now comes from snapshots."""
     quotas = _read_json(QUOTAS_PATH)
     usage = usage_stats()
     providers_today = usage["today"]["providers"]
-    # Daily free token budget across providers with explicit TPD
     budget_tpd = sum(p["tpd"] for p in quotas.get("providers", {}).values() if p.get("tpd"))
     used_tokens = sum(v["tokens"] for v in providers_today.values())
+    with _obs_lock:
+        obs = collector.assemble_state(_obs_conn)
     return {
-        "generated": datetime.now(timezone.utc).isoformat(),
-        "services": services_health(),
+        "generated": obs["generated"],
+        "hosts": obs["hosts"],
+        "alerts": obs["alerts"],
         "secops": secops_state(),
         "orchestrator": _read_json(ORCH_PATH),
         "quotas": quotas,
@@ -258,6 +219,8 @@ class Handler(BaseHTTPRequestHandler):
     def _send(self, code, body, ctype="application/json; charset=utf-8"):
         data = body if isinstance(body, bytes) else json.dumps(body, ensure_ascii=False).encode()
         self.send_response(code)
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Content-Security-Policy", "default-src 'self'; img-src 'self' data:")
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(data)))
         self.send_header("Cache-Control", "no-store")
@@ -282,6 +245,20 @@ class Handler(BaseHTTPRequestHandler):
             self._send(404, {"error": "not found"})
 
     def do_POST(self):
+        if self.path == "/ingest":
+            length = int(self.headers.get("Content-Length", 0) or 0)
+            body = self.rfile.read(length) if 0 < length <= collector.MAX_BODY else None
+            kr = keymod.load_keyring(KEYRING_PATH)
+            ok, host, payload, status, err = collector.verify_ingest(
+                self.headers.get("Authorization"), body, kr)
+            if ok:
+                ts = json.loads(body)["ts"]
+                with _obs_lock:
+                    storemod.upsert_snapshot(_obs_conn, host, ts, payload)
+                self._send(200, {"ok": True})
+            else:
+                self._send(status, {"ok": False, "error": err})
+            return
         if self.path == "/api/orchestrator":
             try:
                 length = int(self.headers.get("Content-Length", 0))
@@ -297,7 +274,12 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
+def make_server(addr=("127.0.0.1", PORT)):
+    init_observability()
+    return ThreadingHTTPServer(addr, Handler)
+
+
 if __name__ == "__main__":
-    server = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
+    srv = make_server(("127.0.0.1", PORT))
     print(f"SOVERN Labwatch on http://localhost:{PORT}")
-    server.serve_forever()
+    srv.serve_forever()
