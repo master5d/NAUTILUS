@@ -35,3 +35,28 @@ def test_sign_envelope_roundtrips(monkeypatch):
     assert body["host"] == "m4"
     canon = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
     assert keys.verify_payload(master, canon, body["sig"]) is True
+
+
+def test_load_master_reads_active_key(tmp_path):
+    import keys_cli
+    krp = tmp_path / "kr.json"
+    keys_cli.main(["gen", "--host", "m4", "--keyring", str(krp)])
+    master = reporter.load_master("m4", keyring_path=str(krp))
+    assert isinstance(master, bytes) and len(master) == 32
+
+
+def test_run_once_posts_and_returns_bool(monkeypatch):
+    captured = {}
+    monkeypatch.setattr(reporter, "build_payload", lambda cfg, domain=None: {"services": [], "host_metrics": {"cpu_pct": 1.0}})
+    monkeypatch.setattr(reporter, "load_master", lambda host, keyring_path=None: b"\x44" * 32)
+
+    def fake_post(url, host, master, body, spool_path=None):
+        captured["host"] = host
+        captured["url"] = url
+        return True
+
+    monkeypatch.setattr(reporter, "post_snapshot", fake_post)
+    ok = reporter.run_once(host="m4", ingest_url="http://127.0.0.1:4002/ingest",
+                           services_cfg=[], keyring_path="x")
+    assert ok is True
+    assert captured["host"] == "m4"

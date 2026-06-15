@@ -124,3 +124,48 @@ def post_snapshot(ingest_url: str, host: str, master: bytes, body: bytes,
         except OSError:
             pass
     return ok
+
+
+# --- config + main loop -------------------------------------------------------
+
+DEFAULT_SERVICES = {
+    "m4": [
+        ("litellm", "http://127.0.0.1:4000/health/liveliness"),
+        ("stt", "http://127.0.0.1:4100/health"),
+        ("labwatch", "http://127.0.0.1:4002/health"),
+    ],
+}
+
+
+def load_master(host: str, keyring_path: str = None) -> bytes:
+    kr = keymod.load_keyring(keyring_path or keymod.KEYRING_PATH)
+    return keymod.material(kr, host, keymod.active_key_id(kr, host))
+
+
+def run_once(host: str, ingest_url: str, services_cfg, keyring_path: str = None,
+             spool_path: str = None) -> bool:
+    master = load_master(host, keyring_path)
+    # m4 omits the arg so build_payload defaults to domain_m4(); other hosts
+    # pass domain=None (no domain block) until their domain is added in Phase 1.
+    payload = build_payload(services_cfg) if host == "m4" \
+        else build_payload(services_cfg, domain=None)
+    body = sign_envelope(host, payload, master)
+    return post_snapshot(ingest_url, host, master, body, spool_path=spool_path)
+
+
+def main():
+    host = os.environ.get("REPORTER_HOST", "m4")
+    ingest = os.environ.get("INGEST_URL", "http://127.0.0.1:4002/ingest")
+    interval = int(os.environ.get("REPORTER_INTERVAL", "30"))
+    spool = os.environ.get("REPORTER_SPOOL", os.path.join(os.path.dirname(__file__), "spool.jsonl"))
+    services = DEFAULT_SERVICES.get(host, [])
+    while True:
+        try:
+            run_once(host, ingest, services, spool_path=spool)
+        except Exception as e:  # never let the loop die
+            print(f"[reporter] cycle error: {type(e).__name__}", flush=True)
+        time.sleep(interval)
+
+
+if __name__ == "__main__":
+    main()
