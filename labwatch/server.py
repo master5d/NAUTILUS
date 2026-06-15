@@ -18,6 +18,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import collector
 import keys as keymod
+import notify
 import store as storemod
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -37,6 +38,9 @@ _obs_lock = threading.Lock()
 WATCHERS_PATH = os.path.join(HERE, "watchers.json")
 WATCH_INTERVAL = 30          # seconds between background watcher ticks
 RULES = {}
+_tg_token = None
+_tg_chat = None
+_tg_notified = set()   # {(id, host)} critical alerts already messaged this episode
 
 HOME = os.path.expanduser("~")
 CLAUDE_HOME = os.environ.get("CLAUDE_HOME", os.path.join(HOME, ".claude"))
@@ -52,10 +56,11 @@ def init_observability():
     check_same_thread=False because ThreadingHTTPServer handles each request on
     its own thread; all reads/writes are serialized by _obs_lock.
     """
-    global _obs_conn, RULES
+    global _obs_conn, RULES, _tg_token, _tg_chat
     _obs_conn = storemod.connect(DB_PATH_OBS, check_same_thread=False)
     storemod.init_db(_obs_conn)
     RULES = _read_json(WATCHERS_PATH)
+    _tg_token, _tg_chat = notify.load_config()
 
 
 
@@ -269,7 +274,7 @@ class Handler(BaseHTTPRequestHandler):
                 ts = json.loads(body)["ts"]
                 with _obs_lock:
                     storemod.upsert_snapshot(_obs_conn, host, ts, payload)
-                    collector.tick(_obs_conn, RULES)
+                _tick_and_notify()
                 self._send(200, {"ok": True})
             else:
                 self._send(status, {"ok": False, "error": err})
@@ -289,13 +294,33 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
+def _notify_telegram(fired):
+    """Fire/clear Telegram messages for critical+telegram alerts. Episode dedup
+    via _tg_notified. Best-effort; runs OUTSIDE the DB lock."""
+    if not _tg_token:
+        return
+    current = notify.critical_telegram(fired)   # {(id,host): alert}
+    for key in set(current) - _tg_notified:
+        if notify.send_message(_tg_token, _tg_chat, notify.format_fire(current[key])):
+            _tg_notified.add(key)
+    for key in list(_tg_notified - set(current)):
+        notify.send_message(_tg_token, _tg_chat, notify.format_clear(key))
+        _tg_notified.discard(key)
+
+
+def _tick_and_notify():
+    """One collector tick under the DB lock, then notify outside the lock."""
+    with _obs_lock:
+        _state, fired = collector.tick(_obs_conn, RULES)
+    _notify_telegram(fired)
+
+
 def _start_watcher_timer():
     def _loop():
         while True:
             time.sleep(WATCH_INTERVAL)
             try:
-                with _obs_lock:
-                    collector.tick(_obs_conn, RULES)
+                _tick_and_notify()
             except Exception:
                 pass
     t = threading.Thread(target=_loop, daemon=True)
