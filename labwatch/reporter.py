@@ -4,9 +4,11 @@ Phase 0 = M4 self-report. Single file (probes + host metrics + M4 domain +
 build/sign/post + loop); split per-host when more hosts arrive.
 """
 
+import glob
 import http.client
 import json
 import os
+import re
 import time
 from datetime import datetime, timezone
 from urllib.parse import urlparse
@@ -76,6 +78,86 @@ def domain_m4() -> dict:
         "quotas": server._read_json(server.QUOTAS_PATH),
         "econ": server._read_json(server.ECON_PATH),
     }
+
+
+# --- Surface domain: agent-CLI usage signals (port of collect-wallets.ps1) --
+# "Wallets" = how much of each delegate agent's free tier was used today.
+# These read the same on-disk signals the PowerShell collector read.
+
+def _codex_tokens(home: str, today) -> int:
+    """Sum the LAST token_count.total_tokens per Codex session file for today."""
+    d = os.path.join(home, ".codex", "sessions",
+                     f"{today.year}", f"{today.month:02d}", f"{today.day:02d}")
+    if not os.path.isdir(d):
+        return 0
+    total = 0
+    for fn in glob.glob(os.path.join(d, "rollout-*.jsonl")):
+        last = None
+        try:
+            with open(fn, encoding="utf-8", errors="ignore") as f:
+                for line in f:
+                    if '"type":"token_count"' in line or '"type": "token_count"' in line:
+                        last = line
+        except OSError:
+            continue
+        if last:
+            m = re.search(r'"total_tokens":\s*(\d+)', last)
+            if m:
+                total += int(m.group(1))
+    return total
+
+
+def _gemini_requests(home: str, today) -> int:
+    """Count '"type":"gemini"' turns in Gemini-CLI session files modified today."""
+    base = os.path.join(home, ".gemini", "tmp")
+    if not os.path.isdir(base):
+        return 0
+    n = 0
+    for root, _dirs, files in os.walk(base):
+        for fn in files:
+            if not fn.endswith(".jsonl"):
+                continue
+            p = os.path.join(root, fn)
+            try:
+                if datetime.fromtimestamp(os.path.getmtime(p)).date() != today:
+                    continue
+                with open(p, encoding="utf-8", errors="ignore") as f:
+                    n += f.read().count('"type":"gemini"')
+            except OSError:
+                continue
+    return n
+
+
+def _agy_runs(home: str, today) -> int:
+    """Count Antigravity brain subdirectories modified today."""
+    base = os.path.join(home, ".gemini", "antigravity-cli", "brain")
+    if not os.path.isdir(base):
+        return 0
+    n = 0
+    for name in os.listdir(base):
+        p = os.path.join(base, name)
+        try:
+            if os.path.isdir(p) and datetime.fromtimestamp(os.path.getmtime(p)).date() == today:
+                n += 1
+        except OSError:
+            continue
+    return n
+
+
+def domain_surface(home: str = None, today=None) -> dict:
+    home = home or os.path.expanduser("~")
+    today = today or datetime.now().date()
+    agents = {
+        "codex":       {"used_today": _codex_tokens(home, today), "unit": "tokens",
+                        "budget": None, "signal": "session logs", "confidence": "medium"},
+        "gemini-cli":  {"used_today": _gemini_requests(home, today), "unit": "requests",
+                        "budget": None, "signal": "session logs", "confidence": "high"},
+        "antigravity": {"used_today": _agy_runs(home, today), "unit": "requests",
+                        "budget": 20, "signal": "brain dirs", "confidence": "medium"},
+        "claude":      {"used_today": None, "unit": "requests",
+                        "budget": None, "signal": "unknown", "confidence": "low"},
+    }
+    return {"wallets": {"as_of": datetime.now(timezone.utc).isoformat(), "agents": agents}}
 
 
 # --- assemble + sign + post ------------------------------------------------
