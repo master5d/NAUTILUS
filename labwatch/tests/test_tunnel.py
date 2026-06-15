@@ -34,3 +34,25 @@ def test_is_up_false_on_closed_port():
     port = srv.getsockname()[1]
     srv.close()
     assert tunnel.is_up(port, timeout=0.3) is False
+
+
+def test_build_ssh_cmd_has_keepalive():
+    cmd = tunnel.build_ssh_cmd(4002, "m4")
+    assert "ServerAliveInterval=30" in cmd
+
+
+def test_popen_kwargs_windows(monkeypatch):
+    monkeypatch.setattr(tunnel.sys, "platform", "win32")
+    kw = tunnel._popen_kwargs()
+    assert "creationflags" in kw
+
+
+def test_popen_kwargs_non_windows(monkeypatch):
+    monkeypatch.setattr(tunnel.sys, "platform", "linux")
+    assert tunnel._popen_kwargs() == {}
+
+
+def test_stop_is_noop_when_no_proc():
+    tunnel._proc = None
+    tunnel.stop()  # must not raise
+    assert tunnel._proc is None
