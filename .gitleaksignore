@@ -1,0 +1,8 @@
+# gitleaks false-positive allowlist (fingerprint = commit:file:rule:line)
+#
+# curl-auth-header is a generic rule that flags ANY "Authorization: Bearer <x>"
+# in a curl command. Here it matched the documentation PLACEHOLDER
+# `hf_YOUR_TOKEN_HERE`, not a real secret. Verified 2026-06-15: no real HF token
+# exists anywhere in history (full gitleaks detect + manual hf_[A-Za-z0-9]{30,}
+# sweep). The live HF token was rotated/revoked separately; nothing to purge.
+e237004121dc0f53023dd7679bbf91fb1ad0717c:docs/superpowers/plans/2026-05-08-huggingface-ab-integration.md:curl-auth-header:26

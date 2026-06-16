@@ -9,7 +9,7 @@
       "action": "huggingface.co/settings/tokens → Revoke + create new → setup-litellm-keys.ps1 (HF_TOKEN). Optionally git filter-repo to purge history.",
       "severity": "urgent",
       "status": "done",
-      "resolved": "2026-06-15: old token REVOKED on HF (leaked token now dead) + new token set in User env + HF tier re-enabled in litellm-config + verified live (HF_OK). Leaked string remains in public git history but is inert. Deferred: git filter-repo history purge (cosmetic — token is revoked)."
+      "resolved": "2026-06-15: old token REVOKED on HF (live token now dead) + new token set in User env + HF tier re-enabled in litellm-config + verified live (HF_OK). CORRECTION: the 'public git history' concern was a gitleaks FALSE POSITIVE — curl-auth-header rule matched the doc placeholder `hf_YOUR_TOKEN_HERE` in commit e237004, not a real token. Full-history sweep (gitleaks detect + hf_[A-Za-z0-9]{30,} regex) confirms NO real HF token ever in history. No filter-repo needed; FP suppressed via .gitleaksignore."
     },
     {
       "id": "github-pat-finegrained-remote",
