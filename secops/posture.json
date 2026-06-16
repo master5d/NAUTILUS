@@ -35,7 +35,8 @@
       "why": "Was plaintext in embedding-agent .env.local",
       "action": "aistudio.google.com/app/apikey — regenerate",
       "severity": "high",
-      "status": "pending"
+      "status": "done",
+      "resolved": "2026-06-15: old key deleted on AI Studio (expired/dead), new key generated + set in Windows User env (GEMINI_API_KEY), gateway restarted on it; key verified valid directly against Google API (50 models). NB: gemini-3-flash-preview model currently falls back to fast-pool via gateway routing — separate model-availability nuance, not a credential issue."
     },
     {
       "id": "neo4j-aura",
@@ -70,7 +71,8 @@
       "why": "Was hardcoded in cloudflare-bouncer.yaml until 2026-06-11 (never in git)",
       "action": "`cscli bouncers add` on (re)deploy of the stack",
       "severity": "low",
-      "status": "pending"
+      "status": "done",
+      "resolved": "2026-06-15: plaintext exposure already remediated — secops/infra/crowdsec/cloudflare-bouncer.yaml uses ${CROWDSEC_LAPI_KEY}/${CF_API_TOKEN} env refs, no hardcoded secret. CrowdSec stack not deployed, so no live LAPI key exists to rotate; a fresh bouncer key is minted by `cscli bouncers add` at deploy time (tracked in deploy checklist)."
     },
     {
       "id": "docker-local-passwords",
@@ -78,7 +80,8 @@
       "why": "Volumes initialized with weak defaults (changeme-local, sovrn-local-pass); now required via docker/.env but values unchanged. Ports rebound to 127.0.0.1 as mitigation.",
       "action": "docker compose up → ALTER USER/cypher password change in each DB → update docker/.env",
       "severity": "low",
-      "status": "pending"
+      "status": "done",
+      "resolved": "2026-06-15: stack brought up; all 5 weak secrets rotated to strong 40-char random — DB passwords changed LIVE (langfuse/karakeep via ALTER USER, neo4j via ALTER CURRENT USER) + LANGFUSE_NEXTAUTH_SECRET/LANGFUSE_SALT regenerated in docker/.env; app containers recreated, all healthy (langfuse :3002 back up on new DB password = verified end-to-end). Backup: docker/.env.bak-20260615. FOLLOW-UP (SALT cascade): langfuse-issued API keys now invalid → regenerate in langfuse UI + update LiteLLM LANGFUSE_PUBLIC_KEY/SECRET_KEY (tracing only; gateway completions unaffected)."
     }
   ],
   "infra_stack": {
