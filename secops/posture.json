@@ -17,7 +17,8 @@
       "why": "PAT stored plaintext in TWO git remote URLs (.git/config): NAUTILUS origin + github-pages submodule → master5d/SOVRN. Printed to session transcript during 2026-06-11 audit. Both remotes cleaned to plain https + gh credential helper.",
       "action": "github.com/settings/personal-access-tokens → Revoke. Remote already cleaned to plain https + gh credential helper.",
       "severity": "urgent",
-      "status": "pending"
+      "status": "done",
+      "resolved": "2026-06-15: revoked on GitHub. Remotes already on plain https + gh credential helper; gh auth confirmed working (master5d)."
     },
     {
       "id": "gh-cli-oauth",
@@ -25,7 +26,8 @@
       "why": "Leaked to stdout 2026-05-30 (env-var dup of keyring token)",
       "action": "github.com/settings/applications → Authorized OAuth Apps → GitHub CLI → Revoke, then `gh auth login`",
       "severity": "urgent",
-      "status": "pending"
+      "status": "done",
+      "resolved": "2026-06-15: revoked. gh auth confirmed working (master5d, via GITHUB_TOKEN)."
     },
     {
       "id": "google-ai-key",
@@ -41,7 +43,8 @@
       "why": "Was plaintext in .env.local",
       "action": "console.neo4j.io — reset",
       "severity": "high",
-      "status": "pending"
+      "status": "done",
+      "resolved": "2026-06-15: checked console.neo4j.io — no live credentials present (instance empty/no keys). Nothing to rotate."
     },
     {
       "id": "vercel-gateway",
@@ -49,7 +52,8 @@
       "why": "Was plaintext in .env.local",
       "action": "vercel.com/dashboard — regenerate",
       "severity": "high",
-      "status": "pending"
+      "status": "done",
+      "resolved": "2026-06-15: key deleted on Vercel dashboard (leaked key now dead)."
     },
     {
       "id": "github-pat-classic",
@@ -57,7 +61,8 @@
       "why": "Was plaintext in PowerShell profile",
       "action": "github.com/settings/tokens — revoke",
       "severity": "high",
-      "status": "pending"
+      "status": "done",
+      "resolved": "2026-06-15: revoked on GitHub (was plaintext in PS profile; profile no longer holds it)."
     },
     {
       "id": "crowdsec-lapi",
