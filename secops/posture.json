@@ -100,7 +100,8 @@
       "version": "v4.9.2 server (single-node all-in-one)",
       "incident_2026-06-16": "Vulnerability Detector working dir /var/ossec/queue/vd_updater ballooned to 19G (+vd 5.9G) → / 100% full → docker daemon failed → ALL containers down (enerv-n8n) → n8n.synergify.com 502. Remediation: stopped wazuh-manager, cleared vd_updater+vd (rebuildable CVE-feed cache, NOT alert/forensic logs; 25G freed → 37%), started docker (restart-policy containers auto-recovered), n8n back to 200.",
       "remediation_durable": "Disabled Vulnerability Detector in /var/ossec/etc/ossec.conf (<vulnerability-detection><enabled>no</enabled>) 2026-06-16, restarted wazuh-manager (active). Backup: /var/ossec/etc/ossec.conf.bak-20260616. Prevents recurrence of the known Wazuh VD disk-runaway on this 38G box.",
-      "open": "Wazuh FIM (syscheck on /root/sovern + /etc) still NOT configured (see deploy_targets.wazuh-fim). No disk>85% alert in place yet."
+      "monitoring_2026-06-16": "CLOSED two follow-ups: (1) disk>85% alert — /usr/local/bin/disk-alert.sh (cron */15), emails via Resend (key parsed from enerv-logs.env SMTP_CONNECTION_URL; Telegram token in secops/.env was dead/404 → switched to Resend, send verified HTTP 200); fires once per crossing, re-arms below threshold. (2) Wazuh FIM — added <directories realtime=yes check_all=yes>/root/sovern</directories> to ossec.conf syscheck (/etc already covered), wazuh-manager restarted active. Backups: ossec.conf.bak-fim-20260616.",
+      "open": "None blocking. (CrowdSec/Falco still designed-only; separate deploy.)"
     }
   },
   "agent_attack_classes": {
