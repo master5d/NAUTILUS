@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-06-11",
+  "as_of": "2026-06-17",
   "module": "garage",
   "purpose": "Canonical hardware fleet registry (CMDB) for NAUTILUS — every compute unit, its specs, role, network, power, and onboarding status. Superset of labwatch/hardware.json (which is the inference-cost subset: the 3 Mac Minis only).",
   "variant": "no-floor + Variant-A consolidation (no always-on local LLM until the planned 64GB node; clouds carry inference; ALL always-on local work consolidated on the M4; both M2s sold) — see workloads.json + MIGRATION_PLAN.md",

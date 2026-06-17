@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-06-11",
+  "as_of": "2026-06-17",
   "variant": "no-floor + Variant-A consolidation",
   "goal": "Remove every always-on service from `surface` so the stack survives the laptop being off. NO always-on local LLM floor: always-on inference = clouds (free→paid). A capable local floor returns later on a planned 64GB+ unified-memory node. ALL always-on local work (gateway, labwatch, STT, ingest) consolidates on the single M4 — with no local model it fits 16GB easily; both M2s are SOLD. Public on Hetzner.",
   "decision_log": {
@@ -12,16 +12,18 @@
     {
       "service": "LiteLLM gateway",
       "always_on": true,
-      "host_now": "surface :4000",
+      "host_now": "m4-16gb :4000 (LIVE 2026-06-14, LaunchDaemon com.sovern.litellm)",
       "host_target": "m4-16gb",
+      "status": "migrated",
       "why": "Critical control-plane piece — everything routes through it. M4 hosts it with huge headroom (no local model to share RAM with). Keeps provider API keys on the LAN. This is the gateway's permanent home — it does NOT move again when the 64GB node arrives (that box is pure inference).",
       "notes": "Lightweight Python proxy. Fallback chain must end at HF/paid, NOT local-fallback (no floor in interim). Port dynamic via port_broker → services.json."
     },
     {
       "service": "Labwatch dashboard",
       "always_on": true,
-      "host_now": "surface :4002",
+      "host_now": "m4-16gb :4002 (LIVE 2026-06-14, com.sovern.labwatch, 127.0.0.1)",
       "host_target": "m4-16gb :4002",
+      "status": "migrated",
       "why": "Co-locate with the gateway (reads usage.db written by the LiteLLM callback).",
       "notes": "stdlib Python, 127.0.0.1. LAN-expose or SSH-tunnel to view from the workstation."
     },
@@ -52,8 +54,9 @@
     {
       "service": "STT (Parakeet / Whisper for Echo)",
       "always_on": true,
-      "host_now": "surface / ad-hoc",
+      "host_now": "m4-16gb :4100 (LIVE 2026-06-14, com.sovern.stt, parakeet-tdt-0.6b-v3; 1.6s transcribe verified)",
       "host_target": "m4-16gb",
+      "status": "migrated (server up) — PENDING: wire Echo transcription path → M4 :4100",
       "why": "Genuinely-local workload (audio). Parakeet is tiny (~0.6B); with no local LLM on the M4 it fits alongside the gateway easily (~1-2GB during transcription).",
       "notes": "Echo transcription path calls the M4. (Consolidated — was M2 in the distributed variant.)"
     },

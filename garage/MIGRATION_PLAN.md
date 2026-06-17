@@ -4,7 +4,9 @@
 > being off/asleep/rebooting. **Variant:** no always-on local LLM floor (clouds
 > carry inference; capable floor returns later on a 64GB+ node) **+ Variant-A
 > consolidation:** all always-on local work runs on the single M4; both M2s are
-> sold. **Status:** plan (2026-06-11), not yet executed.
+> sold. **Status:** in progress (updated 2026-06-17). Phase 0 ✅ done · Phase 1
+> 🟡 mostly done (M4 control plane LIVE; Echo→STT wiring + Surface-off cutover
+> test outstanding) · Phases 2–5 ⬜ not started. Per-phase detail below.
 
 ## Why no floor
 
@@ -54,34 +56,39 @@ the interim is **paid cloud**, not free-local.
 
 ---
 
-## Phase 0 — prerequisites
+## Phase 0 — prerequisites ✅ DONE (2026-06-14)
 
-1. **Onboard the M4** (not a node yet): static DHCP reservation, SSH key, harden
-   (disable sleep, NOPASSWD sudo) per the SOVERN-01 pattern. Record IP/MAC in
-   `fleet.json`. This is now the *only* always-on local box.
-2. **Do NOT unblock SOVERN-02 for service** — it's being sold. Just wipe it
-   (boot to Recovery: power+hold → Disk Utility erase, or DFU-restore via Apple
-   Configurator on another Mac) before resale.
-3. Static DHCP reservation for the M4 only.
+1. [x] **Onboard the M4** — SSH key (`id_ed25519_sovern`, alias `m4`), hardened
+   (`pmset` sleep 0 / autorestart 1 / womp 1; scoped NOPASSWD sudoers), IP/MAC
+   recorded in `fleet.json`. Status `onboarded-live-2026-06-14`. The *only*
+   always-on local box. **Note:** addressed via **manual static IP on Wi-Fi**
+   (192.168.1.148), not a router DHCP reservation — survives reboot/room-move on
+   the same SSID. Router reservation still listed as optional belt-and-suspenders.
+2. [ ] **Wipe SOVERN-02 for resale** — still stuck at FileVault pre-boot; not yet
+   wiped (deferred to Phase 2, no service role so not blocking).
+3. [~] **Static address for the M4** — done via manual Wi-Fi IP (above); router
+   DHCP reservation for `.148` still PENDING (user) but non-blocking.
 
-## Phase 1 — stand up the M4 as the single local node (the critical lift)
+## Phase 1 — stand up the M4 as the single local node (the critical lift) 🟡 MOSTLY DONE
 
-1. Install on the M4: Python + LiteLLM + labwatch + port_broker + STT (Parakeet)
-   + KG ingest worker. **No llama-server, no LLM model.** Budget check:
-   ~6.5GB steady / ~9GB peak of 16GB — comfortable.
-2. Move provider API keys to the M4 user env (macOS keychain / gitignored env).
-3. Repoint `litellm-config.yaml` for **no floor**:
-   - **remove `local-fallback` from `default_fallbacks`**; set it to e.g.
-     `["hf-llama-70b"]` or a paid alias.
-   - chain tails that pointed at `local-fallback` → `hf-llama-70b` / paid.
-   - add `power-local` → Surface 30B, present in fallbacks only (tolerated-down).
-4. Update `config/services.json` to the M4 host:port (gateway + labwatch).
-5. Point Echo's transcription path at the M4 STT endpoint.
-6. **Cutover test:** start the M4, **power the Surface off**, and confirm: an
-   agent call routes M4 gateway → free clouds (then paid if exhausted); labwatch
-   loads; STT transcribes; nothing errors on the absent local floor or 30B.
+1. [x] Install on the M4: LiteLLM `:4000` + labwatch `:4002` + STT (Parakeet)
+   `:4100`, all as LaunchDaemons (`com.sovern.litellm` / `.labwatch` / `.stt`),
+   **no llama-server / no LLM model**. KG ingest worker **not yet** moved (blocked
+   on vault location — see Phase 4).
+2. [x] Provider API keys on the M4 (`.env.gateway` sourced by the LiteLLM daemon,
+   gitignored). ⚠ Gateway has **no `LITELLM_MASTER_KEY`** yet — LAN-trust only;
+   harden by adding one.
+3. [~] Repoint `litellm-config.yaml` for **no floor** — Windows→M4 gateway→free-cloud
+   completion verified OK, so routing works; confirm `default_fallbacks` /
+   chain-tails no longer point at `local-fallback` and `power-local`→Surface 30B
+   is fallback-only.
+4. [x] `config/services.json` points at the M4 gateway + labwatch.
+5. [ ] Point Echo's transcription path at the M4 STT endpoint (`:4100`) — PENDING.
+6. [ ] **Cutover test:** start the M4, **power the Surface off**, confirm agent
+   call routes M4 gateway → free clouds (→ paid); labwatch loads; STT transcribes;
+   no errors on the absent local floor / 30B — PENDING (user).
 
-## Phase 2 — decommission and sell the M2s
+## Phase 2 — decommission and sell the M2s ⬜ NOT STARTED
 
 1. Confirm nothing points at SOVERN-01 (192.168.1.123) anymore — remove its
    `~/.ssh/config` alias + DHCP reservation; migrate any edge job to the M4.
@@ -89,7 +96,7 @@ the interim is **paid cloud**, not free-local.
    iCloud/Find My first so they're sellable (Activation Lock off).
 3. **Sell** (~$280 each, ~$560 total). Update `fleet.json` status → sold.
 
-## Phase 3 — consolidate cloud, kill local docker
+## Phase 3 — consolidate cloud, kill local docker ⬜ NOT STARTED
 
 1. **Decommission the Surface local docker stack** — Langfuse + n8n already run
    in Hetzner prod; remove the redundant local copies; point tracing at
@@ -99,7 +106,7 @@ the interim is **paid cloud**, not free-local.
    is the natural moment.
 3. **Drop Ollama** on the Surface.
 
-## Phase 4 — vault-watcher (independence blocker)
+## Phase 4 — vault-watcher (independence blocker) ⬜ NOT STARTED
 
 The KG ingest watches the Obsidian vault **on the laptop**. Pick: (a) accept
 on-demand ingest (laptop-up only — simplest; rest of stack still independent);
@@ -109,7 +116,7 @@ Recommendation: ship (a), revisit if 24/7 ingest becomes a need.
 
 ---
 
-## Phase 5 — the 64GB+ node (restores the real local floor)
+## Phase 5 — the 64GB+ node (restores the real local floor) ⬜ NOT STARTED
 
 When the new box lands, it becomes the **always-on inference floor** running a
 *capable* model (30B-A3B comfortably, 70B-Q4 feasible) — restoring SOVRN
