@@ -6,7 +6,8 @@
   "tiers": {
     "workstation": "dev-only, MUST host zero always-on services",
     "local_always_on": "the single M4 node (gateway+labwatch+STT+ingest) now; inference floor (64GB node) later",
-    "cloud": "public-facing production (Hetzner + Cloudflare)"
+    "cloud": "public-facing production (Hetzner + Cloudflare)",
+    "iot": "room/edge devices + power & WAN resilience infrastructure (mic, UPS, cellular router, satellite fallback, displays, sensors) — not compute nodes; mostly pending onboarding or shopping"
   },
   "units": [
     {
@@ -104,6 +105,73 @@
     { "id": "sandisk-4tb", "label": "SanDisk 4TB Extreme portable SSD", "role": "mirrored vault / graphiti dumps / model weights" },
     { "id": "yubikey", "label": "2× YubiKey 5C NFC", "role": "FIDO2/identity" },
     { "id": "pixel", "label": "Pixel 10 Pro XL + 6 Pro XL", "role": "mobile" }
+  ],
+  "iot": [
+    {
+      "id": "omni-mic",
+      "label": "Omnidirectional room microphone",
+      "tier": "iot",
+      "category": "audio-input",
+      "role": "whole-room far-field voice capture → feeds the M4 STT service (Parakeet :4100, garage/stt_server.py) for ambient dictation / meeting capture without a headset",
+      "integrates": "m4-16gb STT :4100; Echo",
+      "status": "shopping",
+      "cost_usd": null,
+      "note": "want true omni / far-field pickup for the whole room; USB or networked input that the M4 can read."
+    },
+    {
+      "id": "ups",
+      "label": "UPS (battery backup)",
+      "tier": "iot",
+      "category": "power",
+      "role": "ride-through power for the always-on local tier (M4 ~30W) + network gear (router/modem) so the lab survives brownouts/short outages; clean-shutdown signal",
+      "protects": ["m4-16gb", "LAN/router", "nighthawk-m6pro"],
+      "status": "shopping",
+      "cost_usd": null,
+      "note": "size for M4 + networking load; pure sine-wave preferred. Directly supports the laptop-independence goal (always-on node stays up through outages)."
+    },
+    {
+      "id": "nighthawk-m6pro",
+      "label": "NETGEAR Nighthawk M6 Pro (5G mobile hotspot) — unlocked",
+      "tier": "iot",
+      "category": "network-wan",
+      "role": "SIM travel router / cellular WAN: portable hotspot for travel AND backup uplink for the LAN if home broadband drops",
+      "status": "pending-onboarding",
+      "cost_usd": null,
+      "note": "unlocked (carrier-agnostic SIM). Primary WAN-failover candidate ahead of Starlink. Onboard: SIM/plan, set as failover WAN behind the router."
+    },
+    {
+      "id": "starlink-fallback",
+      "label": "Starlink (satellite WAN fallback)",
+      "tier": "iot",
+      "category": "network-wan",
+      "priority": "wishlist",
+      "role": "satellite WAN fallback for full-internet redundancy when both home broadband and cellular (M6 Pro) are down",
+      "status": "shopping",
+      "cost_usd": null,
+      "note": "redundancy tier-3 / wishlist — only if cellular failover proves insufficient. Highest-cost, lowest-priority of the WAN options."
+    },
+    {
+      "id": "display-banner",
+      "label": "Digital display banner",
+      "tier": "iot",
+      "category": "display-output",
+      "role": "wall/desk signage surface — status dashboards (labwatch), now-playing, alerts/notifications",
+      "status": "shopping",
+      "cost_usd": null,
+      "note": "form factor TBD (LED banner vs e-ink vs small panel)."
+    },
+    {
+      "id": "supplements-scale",
+      "label": "Smart supplements scale",
+      "tier": "iot",
+      "category": "sensor",
+      "role": "precision scale for supplement dosing; readings feed the Wellbeing EMR supplements system",
+      "integrates": "Wellbeing EMR (supplements)",
+      "cross_ref": "memory project_wellbeing_emr",
+      "status": "shopping",
+      "cost_usd": null,
+      "note": "want connected/exportable readings, not a dumb scale."
+    }
   ],
   "cross_refs": {
     "inference_cost": "labwatch/hardware.json (Mac Mini subset, $/Mtok calculator)",

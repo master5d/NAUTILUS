@@ -13,12 +13,15 @@ estate and the source of truth for *what runs where*. It answers two questions:
 | `fleet.json` | Every unit: Surface workstation, Mac Mini M4, 2× Mac Mini M2 (SOVERN-01/02), Hetzner CX22, peripherals. Superset of `labwatch/hardware.json`. |
 | `workloads.json` | Each service with `host_now`, `host_target`, and `always_on` flag. |
 | `MIGRATION_PLAN.md` | Phased plan to make the stack laptop-independent. |
+| `build_dashboard.py` | Generator: reads the 3 files above → renders `dashboard.html` (data inlined). Re-run after editing the JSON. |
+| `dashboard.html` | Self-contained dark/light dashboard (fleet by tier, IoT layer, workload topology, migration phases, cost rollups). Open by double-click — no server needed. |
 
 ## Tiers
 
 - **workstation** (`surface`) — dev only; **hosts zero always-on services** (target state).
 - **local_always_on** (`m4-16gb`, `sovern-01`, `sovern-02`) — headless nodes that never sleep; the sovereign floor.
 - **cloud** (`hetzner-sovern-hub`) — public-facing production behind Cloudflare Tunnel.
+- **iot** — room/edge devices + power & WAN-resilience infra (omni mic, UPS, cellular router, Starlink fallback, display banner, supplements scale). Not compute nodes; tracked in `fleet.json` → `iot[]`, mostly `shopping` / `pending-onboarding`.
 
 ## The core objective
 
